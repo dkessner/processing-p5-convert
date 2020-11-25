@@ -1,0 +1,19 @@
+/*
+ * style.css
+ */
+
+
+#processing-p5-convert-input {
+    width: 45%;
+    height: 20em;
+    font-family: "Courier New", Courier, monospace;
+}
+
+
+#processing-p5-convert-output {
+    width: 45%;
+    height: 20em;
+    font-family: "Courier New", Courier, monospace;
+}
+
+
