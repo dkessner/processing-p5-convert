@@ -266,8 +266,13 @@ function transformCodeFromCST(cst)
 }
 
 const transformJava = code => transformCodeFromCST(parse(code));
-const transformProcessing = code => 
-    beautify(transformJava("public class Dummy {" + code + "}"));
+
+function transformProcessing(code)
+{
+    const js = transformJava("public class Dummy {" + code + "}").trim();
+    const unbraced = js.slice(1, js.length-1);
+    return beautify(unbraced);
+}
 
 
 if (typeof(module) !== 'undefined')

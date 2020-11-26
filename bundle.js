@@ -39530,9 +39530,12 @@ function transformCodeFromCST(cst) {
 var transformJava = function transformJava(code) {
     return transformCodeFromCST((0, _javaParser.parse)(code));
 };
-var transformProcessing = function transformProcessing(code) {
-    return beautify(transformJava("public class Dummy {" + code + "}"));
-};
+
+function transformProcessing(code) {
+    var js = transformJava("public class Dummy {" + code + "}").trim();
+    var unbraced = js.slice(1, js.length - 1);
+    return beautify(unbraced);
+}
 
 if (typeof module !== 'undefined') {
     module.exports = {
