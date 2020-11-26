@@ -35,6 +35,18 @@ function initialize()
 
     document.getElementById("processing-p5-convert-button").
         addEventListener("click", handleConvert);
+
+    /*
+
+    // attempt to add class="dark" to editor <body>
+
+    let editorBody = document.getElementById("editor").
+        contentWindow.document.getElementsByTagName("body")[0];
+
+    editorBody.classList.add("dark");
+
+    console.log("hello");
+    */
 }
 
 
