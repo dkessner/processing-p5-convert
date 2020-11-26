@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "java-parser": "^1.0.0"
+    "java-parser": "^1.0.0",
+    "js-beautify": "^1.13.0"
   },
   "type": "module",
   "devDependencies": {

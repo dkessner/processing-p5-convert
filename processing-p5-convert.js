@@ -17,6 +17,10 @@ import {
     BaseJavaCstVisitorWithDefaults } from 'java-parser';
 
 
+import js from 'js-beautify';
+const beautify = js['js'];
+
+
 // extract raw code from nodes with "image" keys
 
 function extractCodeRecursive(object, text)
@@ -262,7 +266,8 @@ function transformCodeFromCST(cst)
 }
 
 const transformJava = code => transformCodeFromCST(parse(code));
-const transformProcessing = code => transformJava("public class Dummy {" + code + "}");
+const transformProcessing = code => 
+    beautify(transformJava("public class Dummy {" + code + "}"));
 
 
 if (typeof(module) !== 'undefined')
