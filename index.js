@@ -22,10 +22,16 @@ void draw()
 
 function handleConvert()
 {
-    let codeInput = document.getElementById("processing-p5-convert-input").value;
+    const codeInput = document.getElementById("processing-p5-convert-input").value;
+    const codeOutput = transformProcessing(codeInput);
 
-    document.getElementById("processing-p5-convert-output").value = 
-        transformProcessing(codeInput);
+    document.getElementById("processing-p5-convert-output").value = codeOutput;
+        
+    /*
+    // TODO: restart p5 loop
+    let f = new Function(codeOutput);
+    f();
+    */
 }
 
 
@@ -35,18 +41,6 @@ function initialize()
 
     document.getElementById("processing-p5-convert-button").
         addEventListener("click", handleConvert);
-
-    /*
-
-    // attempt to add class="dark" to editor <body>
-
-    let editorBody = document.getElementById("editor").
-        contentWindow.document.getElementsByTagName("body")[0];
-
-    editorBody.classList.add("dark");
-
-    console.log("hello");
-    */
 }
 
 
