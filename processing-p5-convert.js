@@ -7,7 +7,8 @@ export {
     printCST, 
     reconstructJava, 
     transformJava, 
-    transformProcessing
+    transformProcessing,
+    transformProcessingFile
 };
 
 
@@ -19,6 +20,8 @@ import {
 
 import js from 'js-beautify';
 const beautify = js['js'];
+
+import { readFileSync } from 'fs';
 
 
 // extract raw code from nodes with "image" keys
@@ -274,6 +277,20 @@ function transformProcessing(code)
     return beautify(unbraced);
 }
 
+function transformProcessingFile(filename)
+{
+    try 
+    {
+        const input = readFileSync(filename, 'utf8')
+        const output = transformProcessing(input);
+        return output;
+    } 
+    catch (err) 
+    {
+        console.error("[convertProcessingFile] " + err.message)
+    }
+}
+
 
 if (typeof(module) !== 'undefined')
 {
@@ -282,7 +299,8 @@ if (typeof(module) !== 'undefined')
         printCST, 
         reconstructJava, 
         transformJava, 
-        transformProcessing
+        transformProcessing,
+        transformProcessingFile
     };
 
     console.log("processing-p5js-convert");

@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "fs": "^0.0.1-security",
     "java-parser": "^1.2.0",
     "js-beautify": "^1.14.0"
   },
