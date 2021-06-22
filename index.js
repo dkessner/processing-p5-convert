@@ -20,17 +20,24 @@ void draw()
 `;
 
 
-function handleConvert()
+function handleConvertButton()
 {
     const codeInput = document.getElementById("processing-p5-convert-input").value;
     const codeOutput = transformProcessing(codeInput);
 
     document.getElementById("processing-p5-convert-output").value = codeOutput;
         
-    /*
     // TODO: restart p5 loop
+
+    /*
     let f = new Function(codeOutput);
     f();
+    */
+
+    /*
+    // window.eval() works
+    window.eval(codeOutput);
+    setup();
     */
 }
 
@@ -40,7 +47,7 @@ function initialize()
     document.getElementById("processing-p5-convert-input").value = helloProcessing;
 
     document.getElementById("processing-p5-convert-button").
-        addEventListener("click", handleConvert);
+        addEventListener("click", handleConvertButton);
 }
 
 

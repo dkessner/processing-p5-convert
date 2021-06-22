@@ -1,5 +1,8 @@
 
 <script src="p5/p5.min.js"></script>
+<script src="hello/hello.js"></script>
+
+<main></main>
 
 <textarea id="processing-p5-convert-input"
           style="width: 80%; height: 20em;"></textarea>
@@ -11,7 +14,6 @@
 
 <br/>
 
-<main></main>
 
 <!--
 <iframe id="editor"
