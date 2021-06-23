@@ -3,10 +3,10 @@
 #
 
 
-all: bundle.js tests 
+all: processing-p5-convert-bundle.js tests 
 
-bundle.js: index.js processing-p5-convert.js
-	browserify index.js processing-p5-convert.js -o bundle.js
+processing-p5-convert-bundle.js: index.js processing-p5-convert.js
+	browserify index.js processing-p5-convert.js -o processing-p5-convert-bundle.js
 
 tests: hello.test variables.test
 
@@ -14,7 +14,7 @@ tests: hello.test variables.test
 	node ppconvert $*/*.pde | diff - $*/$*.js
 
 clean:
-	rm -f bundle.js*
+	rm -f processing-p5-convert-bundle.js*
 
 .PHONY: %.test test clean
 

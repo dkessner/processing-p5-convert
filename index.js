@@ -36,10 +36,10 @@ function handleConvertButton()
 
 
     // window.eval() works
-    /*
+
     window.eval(codeOutput);
     setup();
-    */
+
 }
 
 
