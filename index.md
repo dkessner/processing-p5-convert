@@ -1,5 +1,7 @@
 <!-- index.md -->
 
+<script type="module" src="processing-p5-convert-bundle.js"></script>
+
 <!-- codemirror -->
 <link rel="stylesheet" href="codemirror/lib/codemirror.css">
 <link rel="stylesheet" href="codemirror/theme/blackboard.css">
@@ -7,23 +9,33 @@
 <script src="codemirror/mode/javascript/javascript.js"></script>
 <script src="codemirror/mode/clike/clike.js"></script>
 
-
+<!-- p5 -->
 <script src="p5/p5.min.js"></script>
+
+<script>
+function setup(){}
+function draw(){}
+</script>
+
+<!--
 <script src="hello/hello.js"></script>
+-->
 
 
-<textarea id="processing-p5-convert-input"
-          style="width: 80%; height: 20em;"></textarea>
+<!-- content -->
+
+# Processing input
+
+<textarea id="processing-p5-convert-input"></textarea>
 
 <button class="btn" id="processing-p5-convert-button">Convert and run!</button>
 
 <main></main>
-
-<textarea id="processing-p5-convert-output"
-          style="width: 80%; height: 20em;"></textarea>
-
 <br/>
 
+# p5.js output
+
+<textarea id="processing-p5-convert-output"></textarea>
 
 <!--
 <iframe id="editor"
@@ -34,7 +46,8 @@
 </iframe>
 -->
 
-<script type="module" src="processing-p5-convert-bundle.js"></script>
+<!-- initialization -->
+
 <script src="index.js"></script>
 
 <script>
@@ -50,15 +63,14 @@
     inputCodeMirrorEditor.setSize("100%", 400);
 
     let output = document.getElementById("processing-p5-convert-output");
-    output.value = helloProcessing;
+    output.value = "";
 
     outputCodeMirrorEditor = CodeMirror.fromTextArea(output, {
       lineNumbers: true,
       theme: "blackboard",
       mode: "javascript",
-      readonly: true
+      readOnly: true
     });
-
 
 </script>
 
