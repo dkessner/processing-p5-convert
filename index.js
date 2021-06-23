@@ -27,24 +27,19 @@ void draw()
 
 function handleConvertButton()
 {
-    const codeInput = document.getElementById("processing-p5-convert-input").value;
+    //const codeInput = document.getElementById("processing-p5-convert-input").value;
+    //document.getElementById("processing-p5-convert-output").value = codeOutput;
+
+    // convert Processing code
+
+    const codeInput = inputCodeMirrorEditor.getValue();
     const codeOutput = ppconvert.transformProcessing(codeInput);
+    outputCodeMirrorEditor.setValue(codeOutput);
 
-    document.getElementById("processing-p5-convert-output").value = codeOutput;
-        
-    // TODO: restart p5 loop
-
-    /*
-    let f = new Function(codeOutput);
-    f();
-    */
-
-
-    // window.eval() works
+    // run the p5.js code
 
     window.eval(codeOutput);
     setup();
-
 }
 
 
