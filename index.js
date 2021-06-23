@@ -3,7 +3,12 @@
 //
 
 
-import {transformProcessing} from './processing-p5-convert.js';
+//
+// Note: we're using browserify with the option
+//   --standalone ppconvert
+// which exposes exports like:
+//   ppconvert.transformProcessing
+//
 
 
 const helloProcessing =
@@ -23,7 +28,7 @@ void draw()
 function handleConvertButton()
 {
     const codeInput = document.getElementById("processing-p5-convert-input").value;
-    const codeOutput = transformProcessing(codeInput);
+    const codeOutput = ppconvert.transformProcessing(codeInput);
 
     document.getElementById("processing-p5-convert-output").value = codeOutput;
         

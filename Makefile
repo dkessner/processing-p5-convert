@@ -5,8 +5,8 @@
 
 all: processing-p5-convert-bundle.js tests 
 
-processing-p5-convert-bundle.js: index.js processing-p5-convert.js
-	browserify index.js processing-p5-convert.js -o processing-p5-convert-bundle.js
+processing-p5-convert-bundle.js: processing-p5-convert.js
+	browserify processing-p5-convert.js --standalone ppconvert -o processing-p5-convert-bundle.js
 
 tests: hello.test variables.test
 

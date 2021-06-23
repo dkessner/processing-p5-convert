@@ -25,6 +25,6 @@
 -->
 
 <script type="module" src="processing-p5-convert-bundle.js"></script>
-
+<script src="index.js"></script>
 
 
