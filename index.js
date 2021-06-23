@@ -34,8 +34,9 @@ function handleConvertButton()
     f();
     */
 
-    /*
+
     // window.eval() works
+    /*
     window.eval(codeOutput);
     setup();
     */

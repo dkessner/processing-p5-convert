@@ -215,6 +215,21 @@ function reconstructCodeFromCST(cst)
 
 const reconstructJava = code => reconstructCodeFromCST(parse(code));
 
+
+function appendAndTransformCode_fieldDeclaration(node, level, data) {
+    if (node.name === "unannType")
+    {
+        data.code += "let ";
+        return false;
+    }
+    else if ("image" in node)
+    {
+        data.code += node.image + " ";
+    }
+    return true;
+}
+
+
 function appendAndTransformCode(node, level, data) {
     if ("name" in node && node.name == "fqnOrRefType")
     {
@@ -235,6 +250,11 @@ function appendAndTransformCode(node, level, data) {
     else if ("name" in node && node.name == "result")
     {
         data.code +=  "function "; // transform: void/int/... -> function
+        return false;
+    }
+    else if ("name" in node && node.name == "fieldDeclaration")
+    {
+        visitNodesRecursive(node, level, appendAndTransformCode_fieldDeclaration, data);   
         return false;
     }
     else if ("image" in node)
