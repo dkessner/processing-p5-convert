@@ -15,7 +15,7 @@
 <textarea id="processing-p5-convert-input"
           style="width: 80%; height: 20em;"></textarea>
 
-<button id="processing-p5-convert-button">Convert and run!</button>
+<button class="btn" id="processing-p5-convert-button">Convert and run!</button>
 
 <main></main>
 
