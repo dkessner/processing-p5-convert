@@ -3,7 +3,7 @@
 <script src="../p5/p5.min.js"></script>
 <script src="variables.js"></script>
 
-# Variables
+# variables
 
 <main></main>
 
