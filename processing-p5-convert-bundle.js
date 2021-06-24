@@ -25187,12 +25187,45 @@ function appendCode_argumentList(node, level, data) {
     data.code += temp.code;
 }
 
+function appendCode_binaryOperator(node, level, data) {
+    //
+    // binaryExpression stores binary operator and arguments in separate arrays
+    //
+    // binaryExpression x<width
+    //  BinaryOperator: [<]
+    //  unaryExpression: [x, width]
+    //
+
+    // sanity check
+
+    var ok = "BinaryOperator" in node.children && "unaryExpression" in node.children && node.children.BinaryOperator.length === 1 && node.children.unaryExpression.length === 2;
+
+    if (!ok) {
+        console.log("[appendCode_binaryOperator] I am insane!");
+        return;
+    }
+
+    var binaryOperatorArray = node.children.BinaryOperator;
+    var unaryExpressionArray = node.children.unaryExpression;
+
+    var temp = { code: "" };
+
+    visitNodesRecursive(unaryExpressionArray[0], level + 1, appendCode, temp);
+    visitNodesRecursive(binaryOperatorArray[0], level + 1, appendCode, temp);
+    visitNodesRecursive(unaryExpressionArray[1], level + 1, appendCode, temp);
+
+    data.code += temp.code;
+}
+
 function appendCode(node, level, data) {
     if ("name" in node && node.name == "fqnOrRefType") {
         appendCode_fqnOrRefType(node, level, data);
         return false; // treat special nodes as terminal
     } else if ("name" in node && node.name == "argumentList") {
         appendCode_argumentList(node, level, data);
+        return false;
+    } else if ("name" in node && node.name === "binaryExpression" && "BinaryOperator" in node.children) {
+        appendCode_binaryOperator(node, level, data);
         return false;
     } else if ("image" in node) // actual code is stored as node["image"]
         {
@@ -25212,10 +25245,11 @@ var reconstructJava = function reconstructJava(code) {
 };
 
 function appendAndTransformCode_fieldDeclaration(node, level, data) {
-    if (node.name === "unannType") {
-        data.code += "let ";
-        return false;
-    } else if ("image" in node) {
+    if (node.name === "unannType") // transform: int/float/... -> let
+        {
+            data.code += "let ";
+            return false;
+        } else if ("image" in node) {
         data.code += node.image + " ";
     }
     return true;
@@ -25238,6 +25272,9 @@ function appendAndTransformCode(node, level, data) {
         return false;
     } else if ("name" in node && node.name == "fieldDeclaration") {
         visitNodesRecursive(node, level, appendAndTransformCode_fieldDeclaration, data);
+        return false;
+    } else if ("name" in node && node.name === "binaryExpression" && "BinaryOperator" in node.children) {
+        appendCode_binaryOperator(node, level, data);
         return false;
     } else if ("image" in node) {
         data.code += node.image + " ";

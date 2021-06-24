@@ -188,6 +188,40 @@ function appendCode_argumentList(node, level, data) {
     data.code += temp.code;
 }
 
+function appendCode_binaryOperator(node, level, data) {
+    //
+    // binaryExpression stores binary operator and arguments in separate arrays
+    //
+    // binaryExpression x<width
+    //  BinaryOperator: [<]
+    //  unaryExpression: [x, width]
+    //
+
+    // sanity check
+
+    const ok = "BinaryOperator" in node.children && 
+               "unaryExpression" in node.children && 
+                node.children.BinaryOperator.length === 1 &&
+                node.children.unaryExpression.length === 2;
+
+    if (!ok)
+    {
+        console.log("[appendCode_binaryOperator] I am insane!");
+        return;
+    }
+
+    const binaryOperatorArray = node.children.BinaryOperator;
+    const unaryExpressionArray = node.children.unaryExpression;
+
+    let temp = {code:""};
+
+    visitNodesRecursive(unaryExpressionArray[0], level+1, appendCode, temp);
+    visitNodesRecursive(binaryOperatorArray[0], level+1, appendCode, temp);
+    visitNodesRecursive(unaryExpressionArray[1], level+1, appendCode, temp);
+
+    data.code += temp.code;
+}
+
 function appendCode(node, level, data) {
     if ("name" in node && node.name == "fqnOrRefType")
     {
@@ -197,6 +231,13 @@ function appendCode(node, level, data) {
     else if ("name" in node && node.name == "argumentList")
     {
         appendCode_argumentList(node, level, data);
+        return false;
+    }
+    else if ("name" in node && 
+             node.name === "binaryExpression" &&
+             "BinaryOperator" in node.children)
+    {
+        appendCode_binaryOperator(node, level, data);
         return false;
     }
     else if ("image" in node) // actual code is stored as node["image"]
@@ -218,7 +259,7 @@ const reconstructJava = code => reconstructCodeFromCST(parse(code));
 
 
 function appendAndTransformCode_fieldDeclaration(node, level, data) {
-    if (node.name === "unannType")
+    if (node.name === "unannType") // transform: int/float/... -> let
     {
         data.code += "let ";
         return false;
@@ -256,6 +297,13 @@ function appendAndTransformCode(node, level, data) {
     else if ("name" in node && node.name == "fieldDeclaration")
     {
         visitNodesRecursive(node, level, appendAndTransformCode_fieldDeclaration, data);   
+        return false;
+    }
+    else if ("name" in node && 
+             node.name === "binaryExpression" &&
+             "BinaryOperator" in node.children)
+    {
+        appendCode_binaryOperator(node, level, data);
         return false;
     }
     else if ("image" in node)
