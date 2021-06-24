@@ -246,8 +246,15 @@ hr {
 */
 
 a {
-  color: #63c0f5;
+  /*color: #63c0f5;*/
+  color: $header;
   text-shadow: 0 0 5px rgba(104, 182, 255, 0.5);
+  text-decoration: none;
+  font-size: 24px;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 /* Clearfix */
