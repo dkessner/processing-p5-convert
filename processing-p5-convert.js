@@ -8,7 +8,8 @@ export {
     reconstructJava, 
     transformJava, 
     transformProcessing,
-    transformProcessingFile
+    transformProcessingFile,
+    reconstructProcessingFile
 };
 
 
@@ -297,6 +298,12 @@ function transformProcessing(code)
     return beautify(unbraced);
 }
 
+function reconstructProcessing(code)
+{
+    const java = reconstructJava("public class Dummy {" + code + "}").trim();
+    return beautify(java);
+}
+
 function transformProcessingFile(filename)
 {
     try 
@@ -307,7 +314,22 @@ function transformProcessingFile(filename)
     } 
     catch (err) 
     {
-        console.error("[convertProcessingFile] " + err.message)
+        console.error("[transformProcessingFile] " + err.message)
+    }
+}
+
+
+function reconstructProcessingFile(filename)
+{
+    try 
+    {
+        const input = readFileSync(filename, 'utf8')
+        const output = reconstructProcessing(input);
+        return output;
+    } 
+    catch (err) 
+    {
+        console.error("[transformProcessingFile] " + err.message)
     }
 }
 
@@ -320,7 +342,8 @@ if (typeof(module) !== 'undefined')
         reconstructJava, 
         transformJava, 
         transformProcessing,
-        transformProcessingFile
+        transformProcessingFile,
+        reconstructProcessingFile,
     };
 
     console.log("processing-p5js-convert");

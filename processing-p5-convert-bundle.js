@@ -25011,7 +25011,7 @@ module.exports.line_starters = line_starters.slice();
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.transformProcessingFile = exports.transformProcessing = exports.transformJava = exports.reconstructJava = exports.printCST = undefined;
+exports.reconstructProcessingFile = exports.transformProcessingFile = exports.transformProcessing = exports.transformJava = exports.reconstructJava = exports.printCST = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -25035,6 +25035,7 @@ exports.reconstructJava = reconstructJava;
 exports.transformJava = transformJava;
 exports.transformProcessing = transformProcessing;
 exports.transformProcessingFile = transformProcessingFile;
+exports.reconstructProcessingFile = reconstructProcessingFile;
 
 var beautify = _jsBeautify2.default['js'];
 
@@ -25275,13 +25276,28 @@ function transformProcessing(code) {
     return beautify(unbraced);
 }
 
+function reconstructProcessing(code) {
+    var java = reconstructJava("public class Dummy {" + code + "}").trim();
+    return beautify(java);
+}
+
 function transformProcessingFile(filename) {
     try {
         var input = (0, _fs.readFileSync)(filename, 'utf8');
         var output = transformProcessing(input);
         return output;
     } catch (err) {
-        console.error("[convertProcessingFile] " + err.message);
+        console.error("[transformProcessingFile] " + err.message);
+    }
+}
+
+function reconstructProcessingFile(filename) {
+    try {
+        var input = (0, _fs.readFileSync)(filename, 'utf8');
+        var output = reconstructProcessing(input);
+        return output;
+    } catch (err) {
+        console.error("[transformProcessingFile] " + err.message);
     }
 }
 
@@ -25291,7 +25307,8 @@ if (typeof module !== 'undefined') {
         reconstructJava: reconstructJava,
         transformJava: transformJava,
         transformProcessing: transformProcessing,
-        transformProcessingFile: transformProcessingFile
+        transformProcessingFile: transformProcessingFile,
+        reconstructProcessingFile: reconstructProcessingFile
     };
 
     console.log("processing-p5js-convert");
