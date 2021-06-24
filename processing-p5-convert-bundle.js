@@ -25277,8 +25277,8 @@ function visitNodesRecursive(node, level, doSomething, options, data) {
     }
 }
 
-function printName(node, level, data) {
-    if ("name" in node) console.log(" ".repeat(level) + node.name);
+function printName(node, level, options, data) {
+    if ("name" in node) console.log(" ".repeat(level) + node.name);else if ("image" in node) console.log(" ".repeat(level) + node.image);
 
     return true;
 }
@@ -25430,8 +25430,9 @@ function reconstructCodeFromCST(cst) {
     return reconstructedCode.code;
 }
 
+//const reconstructJava = code => reconstructCodeFromCST(parse(code));
 var reconstructJava = function reconstructJava(code) {
-    return reconstructCodeFromCST((0, _javaParser.parse)(code));
+    return extractCodeFromCST((0, _javaParser.parse)(code), { transform: false });
 };
 
 function appendAndTransformCode_fieldDeclaration(node, level, options, data) {
@@ -25493,12 +25494,29 @@ function transformCodeFromCST(cst) {
     return transformedCode.code;
 }
 
-function extractCodeVisitor(node, level, options, data) {}
+function extractCodeVisitor(node, level, options, result) {
+    if ("name" in node && node.name == "fqnOrRefType") {
+        appendCode_fqnOrRefType(node, level, options, result);
+        return false; // treat special nodes as terminal
+    } else if ("name" in node && node.name == "argumentList") {
+        appendCode_argumentList(node, level, options, result);
+        return false;
+    } else if ("name" in node && node.name === "binaryExpression" && "BinaryOperator" in node.children) {
+        appendCode_binaryOperator(node, level, options, result);
+        return false;
+    } else if ("image" in node) // actual code is stored as node["image"]
+        {
+            result.code += node.image + " ";
+        }
+    return true;
+}
 
 function extractCodeFromCST(cst, options) {
-    var extractedCode = { code: "" };
-    visitNodesRecursive(options.root, 0, appendAndTransformCode, null, transformedCode);
-    return transformedCode.code;
+    console.log("hello!!!");
+    var result = { code: "" };
+    var root = options && "root" in options ? options.root : cst;
+    visitNodesRecursive(root, 0, extractCodeVisitor, options, result);
+    return result.code;
 }
 
 var transformJava = function transformJava(code) {

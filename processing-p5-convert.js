@@ -85,9 +85,11 @@ function visitNodesRecursive(node, level, doSomething, options, data)
     }
 }
 
-function printName(node, level, data) {
+function printName(node, level, options, data) {
     if ("name" in node)
         console.log(" ".repeat(level) + node.name);
+    else if ("image" in node)
+        console.log(" ".repeat(level) + node.image);
 
     return true;
 }
@@ -258,8 +260,8 @@ function reconstructCodeFromCST(cst)
     return reconstructedCode.code;
 }
 
-const reconstructJava = code => reconstructCodeFromCST(parse(code));
-
+//const reconstructJava = code => reconstructCodeFromCST(parse(code));
+const reconstructJava = code => extractCodeFromCST(parse(code), {transform: false});
 
 function appendAndTransformCode_fieldDeclaration(node, level, options, data) {
     if (node.name === "unannType") // transform: int/float/... -> let
@@ -341,17 +343,39 @@ function transformCodeFromCST(cst)
 }
 
 
-function extractCodeVisitor(node, level, options, data) 
+function extractCodeVisitor(node, level, options, result) 
 {
-
+    if ("name" in node && node.name == "fqnOrRefType")
+    {
+        appendCode_fqnOrRefType(node, level, options, result);
+        return false; // treat special nodes as terminal
+    }
+    else if ("name" in node && node.name == "argumentList")
+    {
+        appendCode_argumentList(node, level, options, result);
+        return false;
+    }
+    else if ("name" in node && 
+             node.name === "binaryExpression" &&
+             "BinaryOperator" in node.children)
+    {
+        appendCode_binaryOperator(node, level, options, result);
+        return false;
+    }
+    else if ("image" in node) // actual code is stored as node["image"]
+    {
+        result.code += node.image + " ";
+    }
+    return true;
 }
 
 
 function extractCodeFromCST(cst, options)
 {
-    let extractedCode = {code: ""};
-    visitNodesRecursive(options.root, 0, appendAndTransformCode, null, transformedCode);
-    return transformedCode.code;
+    let result = {code: ""};
+    const root = (options && "root" in options) ? options.root : cst;
+    visitNodesRecursive(root, 0, extractCodeVisitor, options, result);
+    return result.code;
 }
 
 const transformJava = code => transformCodeFromCST(parse(code));
