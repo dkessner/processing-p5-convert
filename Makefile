@@ -16,6 +16,17 @@ tests: hello.test variables.test variables.langtest
 %.langtest:
 	node ppconvert --reconstruct $*/*.pde | diff - $*/$*.reconstruct
 
+serve:
+	bundle exec jekyll serve --baseurl=''
+
+update:
+	npm update
+	bundle update
+
+install:
+	npm install
+	bundle install
+
 clean:
 	rm -f processing-p5-convert-bundle.js*
 
