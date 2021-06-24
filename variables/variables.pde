@@ -3,7 +3,10 @@
 //
 
 
-int x = 100;
+float x = 100;
+float y = 100;
+float vx = 5;
+float vy = 3;
 
 
 void setup()
@@ -15,12 +18,16 @@ void setup()
 void draw()
 {
     background(0);
-    ellipse(x, 200, 100, 100);
+    ellipse(x, y, 100, 100);
 
-    x += 5;
+    x += vx;
+    y += vy;
 
-    if (x > width + 50)
-        x = -50;
+    if (x < 50 || x > width-50)
+        vx *= -1;
+
+    if (y < 50 || y > height-50)
+        vy *= -1;
 }
 
 

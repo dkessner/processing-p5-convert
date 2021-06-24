@@ -14,12 +14,12 @@ tests: hello.test variables.test variables.langtest
 	node ppconvert $*/*.pde | diff - $*/$*.js
 
 %.langtest:
-	node ppconvert --reconstruct $*/*.pde | diff - $*/$*.java
+	node ppconvert --reconstruct $*/*.pde | diff - $*/$*.reconstruct
 
 clean:
 	rm -f processing-p5-convert-bundle.js*
 
-.PHONY: %.test test clean
+.PHONY: tests %.test %.langtest clean
 
 
 # $* stem of implicit rule match 
