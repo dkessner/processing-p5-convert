@@ -192,17 +192,17 @@ function appendCode_binaryOperator(node, level, data) {
     //
     // binaryExpression stores binary operator and arguments in separate arrays
     //
-    // binaryExpression x<width
-    //  BinaryOperator: [<]
-    //  unaryExpression: [x, width]
+    // binaryExpression x < width + 10
+    //  BinaryOperator: [<, +]
+    //  unaryExpression: [x, width, 10]
     //
 
     // sanity check
 
     const ok = "BinaryOperator" in node.children && 
                "unaryExpression" in node.children && 
-                node.children.BinaryOperator.length === 1 &&
-                node.children.unaryExpression.length === 2;
+                node.children.BinaryOperator.length >= 1 &&
+                node.children.unaryExpression.length === node.children.BinaryOperator.length + 1;
 
     if (!ok)
     {
@@ -215,9 +215,12 @@ function appendCode_binaryOperator(node, level, data) {
 
     let temp = {code:""};
 
-    visitNodesRecursive(unaryExpressionArray[0], level+1, appendCode, temp);
-    visitNodesRecursive(binaryOperatorArray[0], level+1, appendCode, temp);
-    visitNodesRecursive(unaryExpressionArray[1], level+1, appendCode, temp);
+    for (const index in binaryOperatorArray)
+    {
+        visitNodesRecursive(unaryExpressionArray[index], level+1, appendCode, temp);
+        visitNodesRecursive(binaryOperatorArray[index], level+1, appendCode, temp);
+    }
+    visitNodesRecursive(unaryExpressionArray[unaryExpressionArray.length-1], level+1, appendCode, temp);
 
     data.code += temp.code;
 }
