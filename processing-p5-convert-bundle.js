@@ -25263,15 +25263,15 @@ var printCst = function printCst(cst) {
     return printCstNode(cst, 0);
 };
 
-function visitNodesRecursive(node, level, doSomething, data) {
-    var shouldRecurse = doSomething(node, level, data);
+function visitNodesRecursive(node, level, doSomething, options, data) {
+    var shouldRecurse = doSomething(node, level, options, data);
 
     if (shouldRecurse) {
         for (var nodeName in node.children) {
             var childArray = node.children[nodeName];
 
             for (var index in childArray) {
-                visitNodesRecursive(childArray[index], level + 1, doSomething, data);
+                visitNodesRecursive(childArray[index], level + 1, doSomething, options, data);
             }
         }
     }
@@ -25284,14 +25284,14 @@ function printName(node, level, data) {
 }
 
 var printCstNodeTree = function printCstNodeTree(cst) {
-    return visitNodesRecursive(cst, 0, printName, null);
+    return visitNodesRecursive(cst, 0, printName, null, null);
 };
 
 var printCST = function printCST(code) {
     return printCstNodeTree((0, _javaParser.parse)(code));
 };
 
-function appendCode_fqnOrRefType(node, level, data) {
+function appendCode_fqnOrRefType(node, level, options, data) {
 
     // fqnOrRefType nodes store stuff in arrays, so we need to reconstruct:
     //
@@ -25315,7 +25315,7 @@ function appendCode_fqnOrRefType(node, level, data) {
     // extract the first part
 
     var temp = { code: "" };
-    visitNodesRecursive(node.children.fqnOrRefTypePartFirst["0"], level + 1, appendCode, temp);
+    visitNodesRecursive(node.children.fqnOrRefTypePartFirst["0"], level + 1, appendCode, options, temp);
 
     // extract the rest, iterating through the dot and rest arrays in parallel
 
@@ -25329,8 +25329,8 @@ function appendCode_fqnOrRefType(node, level, data) {
         }
 
         for (var index in dotArray) {
-            visitNodesRecursive(dotArray[index], level + 1, appendCode, temp);
-            visitNodesRecursive(restArray[index], level + 1, appendCode, temp);
+            visitNodesRecursive(dotArray[index], level + 1, appendCode, options, temp);
+            visitNodesRecursive(restArray[index], level + 1, appendCode, options, temp);
         }
     }
 
@@ -25339,7 +25339,7 @@ function appendCode_fqnOrRefType(node, level, data) {
     data.code += temp.code;
 }
 
-function appendCode_argumentList(node, level, data) {
+function appendCode_argumentList(node, level, options, data) {
     //
     // argumentList stores arguments and commas in separate arrays
     //
@@ -25366,8 +25366,8 @@ function appendCode_argumentList(node, level, data) {
     var temp = { code: "" };
 
     for (var index in expressionArray) {
-        visitNodesRecursive(expressionArray[index], level + 1, appendCode, temp);
-        if (commaArray !== null && index in commaArray) visitNodesRecursive(commaArray[index], level + 1, appendCode, temp);
+        visitNodesRecursive(expressionArray[index], level + 1, appendCode, options, temp);
+        if (commaArray !== null && index in commaArray) visitNodesRecursive(commaArray[index], level + 1, appendCode, options, temp);
     }
 
     // save extracted code
@@ -25375,7 +25375,7 @@ function appendCode_argumentList(node, level, data) {
     data.code += temp.code;
 }
 
-function appendCode_binaryOperator(node, level, data) {
+function appendCode_binaryOperator(node, level, options, data) {
     //
     // binaryExpression stores binary operator and arguments in separate arrays
     //
@@ -25399,23 +25399,23 @@ function appendCode_binaryOperator(node, level, data) {
     var temp = { code: "" };
 
     for (var index in binaryOperatorArray) {
-        visitNodesRecursive(unaryExpressionArray[index], level + 1, appendCode, temp);
-        visitNodesRecursive(binaryOperatorArray[index], level + 1, appendCode, temp);
+        visitNodesRecursive(unaryExpressionArray[index], level + 1, appendCode, options, temp);
+        visitNodesRecursive(binaryOperatorArray[index], level + 1, appendCode, options, temp);
     }
-    visitNodesRecursive(unaryExpressionArray[unaryExpressionArray.length - 1], level + 1, appendCode, temp);
+    visitNodesRecursive(unaryExpressionArray[unaryExpressionArray.length - 1], level + 1, appendCode, options, temp);
 
     data.code += temp.code;
 }
 
-function appendCode(node, level, data) {
+function appendCode(node, level, options, data) {
     if ("name" in node && node.name == "fqnOrRefType") {
-        appendCode_fqnOrRefType(node, level, data);
+        appendCode_fqnOrRefType(node, level, options, data);
         return false; // treat special nodes as terminal
     } else if ("name" in node && node.name == "argumentList") {
-        appendCode_argumentList(node, level, data);
+        appendCode_argumentList(node, level, options, data);
         return false;
     } else if ("name" in node && node.name === "binaryExpression" && "BinaryOperator" in node.children) {
-        appendCode_binaryOperator(node, level, data);
+        appendCode_binaryOperator(node, level, options, data);
         return false;
     } else if ("image" in node) // actual code is stored as node["image"]
         {
@@ -25426,7 +25426,7 @@ function appendCode(node, level, data) {
 
 function reconstructCodeFromCST(cst) {
     var reconstructedCode = { code: "" };
-    visitNodesRecursive(cst, 0, appendCode, reconstructedCode);
+    visitNodesRecursive(cst, 0, appendCode, null, reconstructedCode);
     return reconstructedCode.code;
 }
 
@@ -25434,7 +25434,7 @@ var reconstructJava = function reconstructJava(code) {
     return reconstructCodeFromCST((0, _javaParser.parse)(code));
 };
 
-function appendAndTransformCode_fieldDeclaration(node, level, data) {
+function appendAndTransformCode_fieldDeclaration(node, level, options, data) {
     if (node.name === "unannType") // transform: int/float/... -> let
         {
             data.code += "let ";
@@ -25445,26 +25445,26 @@ function appendAndTransformCode_fieldDeclaration(node, level, data) {
     return true;
 }
 
-function appendAndTransformCode(node, level, data) {
+function appendAndTransformCode(node, level, options, data) {
     if ("name" in node && node.name == "fqnOrRefType") {
         var temp = { code: "" };
-        appendCode_fqnOrRefType(node, level, temp);
+        appendCode_fqnOrRefType(node, level, options, temp);
 
         if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
 
         data.code += temp.code;
         return false;
     } else if ("name" in node && node.name == "argumentList") {
-        appendCode_argumentList(node, level, data);
+        appendCode_argumentList(node, level, options, data);
         return false;
     } else if ("name" in node && node.name == "result") {
         data.code += "function "; // transform: void/int/... -> function
         return false;
     } else if ("name" in node && node.name == "fieldDeclaration") {
-        visitNodesRecursive(node, level, appendAndTransformCode_fieldDeclaration, data);
+        visitNodesRecursive(node, level, appendAndTransformCode_fieldDeclaration, options, data);
         return false;
     } else if ("name" in node && node.name === "binaryExpression" && "BinaryOperator" in node.children) {
-        appendCode_binaryOperator(node, level, data);
+        appendCode_binaryOperator(node, level, options, data);
         return false;
     } else if ("image" in node) {
         data.code += node.image + " ";
@@ -25472,7 +25472,7 @@ function appendAndTransformCode(node, level, data) {
     return true;
 }
 
-function getClassBody(node, level, data) {
+function getClassBody(node, level, options, data) {
     if ("name" in node && node.name == "classBody") {
         data["node"] = node;
         return false;
@@ -25482,14 +25482,22 @@ function getClassBody(node, level, data) {
 
 function getClassBodyNode(cst) {
     var classBody = {};
-    visitNodesRecursive(cst, 0, getClassBody, classBody);
+    visitNodesRecursive(cst, 0, getClassBody, null, classBody);
     return classBody.node;
 }
 
 function transformCodeFromCST(cst) {
     var classBodyNode = getClassBodyNode(cst);
     var transformedCode = { code: "" };
-    visitNodesRecursive(classBodyNode, 0, appendAndTransformCode, transformedCode);
+    visitNodesRecursive(classBodyNode, 0, appendAndTransformCode, null, transformedCode);
+    return transformedCode.code;
+}
+
+function extractCodeVisitor(node, level, options, data) {}
+
+function extractCodeFromCST(cst, options) {
+    var extractedCode = { code: "" };
+    visitNodesRecursive(options.root, 0, appendAndTransformCode, null, transformedCode);
     return transformedCode.code;
 }
 
