@@ -5,6 +5,7 @@
 <!-- codemirror -->
 <link rel="stylesheet" href="codemirror/lib/codemirror.css">
 <link rel="stylesheet" href="codemirror/theme/blackboard.css">
+<link rel="stylesheet" href="codemirror/theme/cobalt.css">
 <script src="codemirror/lib/codemirror.js"></script>
 <script src="codemirror/mode/javascript/javascript.js"></script>
 <script src="codemirror/mode/clike/clike.js"></script>
@@ -56,7 +57,7 @@ function draw(){}
 
     inputCodeMirrorEditor = CodeMirror.fromTextArea(input, {
       lineNumbers: true,
-      theme: "blackboard",
+      theme: "cobalt",
       mode: "clike"
     });
 
@@ -67,7 +68,7 @@ function draw(){}
 
     outputCodeMirrorEditor = CodeMirror.fromTextArea(output, {
       lineNumbers: true,
-      theme: "blackboard",
+      theme: "cobalt",
       mode: "javascript",
       readOnly: true
     });
