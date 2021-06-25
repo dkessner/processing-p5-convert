@@ -25491,20 +25491,42 @@ function transformCodeFromCST(cst) {
     return transformedCode.code;
 }
 
-function extractCodeVisitor(node, level, options, result) {
-    if ("name" in node && node.name == "fqnOrRefType") {
-        appendCode_fqnOrRefType(node, level, options, result);
-        return false; // treat special nodes as terminal
-    } else if ("name" in node && node.name == "argumentList") {
-        appendCode_argumentList(node, level, options, result);
-        return false;
-    } else if ("name" in node && node.name === "binaryExpression" && "BinaryOperator" in node.children) {
-        appendCode_binaryOperator(node, level, options, result);
-        return false;
-    } else if ("image" in node) // actual code is stored as node["image"]
+function extractCodeVisitor(node, level, options, result) // TODO new code here
+{
+    if ("image" in node) // actual code is stored as node["image"]
         {
             result.code += node.image + " ";
+            return true;
         }
+
+    if (!("name" in node)) return true;
+
+    if (node.name == "fqnOrRefType") {
+        var temp = { code: "" };
+        appendCode_fqnOrRefType(node, level, options, temp);
+
+        if (options.transform) {
+            if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
+        }
+
+        result.code += temp.code;
+        return false; // treat special nodes as terminal
+    } else if (node.name == "argumentList") {
+        appendCode_argumentList(node, level, options, result);
+        return false;
+    } else if (node.name == "result") {
+        if (options.transform) {
+            result.code += "function "; // transform: void/int/... -> function
+            return false;
+        }
+    } else if (node.name === "binaryExpression" && "BinaryOperator" in node.children) {
+        appendCode_binaryOperator(node, level, options, result);
+        return false;
+    } else if (node.name == "unannType" && options.transform) {
+        result.code += "let ";
+        return false;
+    }
+
     return true;
 }
 
@@ -25521,7 +25543,8 @@ function extractCodeFromCST(cst, options) {
     return beautify(result.code);
 }
 
-function reconstructJava(code) {
+function reconstructJava(code) // TODO: test
+{
     var options = {
         transform: false,
         ignoreOuterClass: false
@@ -25536,10 +25559,17 @@ var transformJava = function transformJava(code) {
 //const transformJava = code => extractCodeFromCST(parse(code), {transform: true});
 // TODO
 
+
 function transformProcessing(code) {
-    var js = transformJava("public class Dummy {" + code + "}").trim();
-    var unbraced = js.slice(1, js.length - 1);
-    return beautify(unbraced);
+    var wrapped = "public class Dummy {" + code + "}";
+    var cst = (0, _javaParser.parse)(wrapped);
+
+    var options = {
+        transform: true,
+        ignoreOuterClass: true
+    };
+
+    return extractCodeFromCST(cst, options);
 }
 
 function reconstructProcessing(code) {
