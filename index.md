@@ -61,7 +61,7 @@ function draw(){}
       mode: "clike"
     });
 
-    inputCodeMirrorEditor.setSize("100%", 400);
+    inputCodeMirrorEditor.setSize("100%", 600);
 
     let output = document.getElementById("processing-p5-convert-output");
     output.value = "";
@@ -72,6 +72,8 @@ function draw(){}
       mode: "javascript",
       readOnly: true
     });
+
+    outputCodeMirrorEditor.setSize("100%", 600);
 
 </script>
 

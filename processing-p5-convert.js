@@ -261,7 +261,6 @@ function reconstructCodeFromCST(cst)
 }
 
 //const reconstructJava = code => reconstructCodeFromCST(parse(code));
-const reconstructJava = code => extractCodeFromCST(parse(code), {transform: false});
 
 function appendAndTransformCode_fieldDeclaration(node, level, options, data) {
     if (node.name === "unannType") // transform: int/float/... -> let
@@ -373,12 +372,34 @@ function extractCodeVisitor(node, level, options, result)
 function extractCodeFromCST(cst, options)
 {
     let result = {code: ""};
-    const root = (options && "root" in options) ? options.root : cst;
+    let root = cst;
+
+    if (options.ignoreOuterClass) 
+        root = getClassBodyNode(cst);
+
     visitNodesRecursive(root, 0, extractCodeVisitor, options, result);
-    return result.code;
+
+    if (options.ignoreOuterClass) 
+        result.code = result.code.trim().slice(1,-1); // remove braces
+
+    return beautify(result.code);
 }
 
+
+function reconstructJava(code) 
+{
+    const options = {
+        transform: false,
+        ignoreOuterClass: false
+    };
+
+    return extractCodeFromCST(parse(code), options);
+}
+
+
 const transformJava = code => transformCodeFromCST(parse(code));
+//const transformJava = code => extractCodeFromCST(parse(code), {transform: true});
+// TODO
 
 function transformProcessing(code)
 {
@@ -389,8 +410,15 @@ function transformProcessing(code)
 
 function reconstructProcessing(code)
 {
-    const java = reconstructJava("public class Dummy {" + code + "}").trim();
-    return beautify(java);
+    const wrapped = "public class Dummy {" + code + "}";
+    const cst = parse(wrapped);
+
+    const options = {
+        transform: false,
+        ignoreOuterClass: true
+    };
+
+    return extractCodeFromCST(cst, options);
 }
 
 function transformProcessingFile(filename)
@@ -418,7 +446,7 @@ function reconstructProcessingFile(filename)
     } 
     catch (err) 
     {
-        console.error("[transformProcessingFile] " + err.message)
+        console.error("[reconstructProcessingFile] " + err.message)
     }
 }
 

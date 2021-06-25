@@ -25431,9 +25431,6 @@ function reconstructCodeFromCST(cst) {
 }
 
 //const reconstructJava = code => reconstructCodeFromCST(parse(code));
-var reconstructJava = function reconstructJava(code) {
-    return extractCodeFromCST((0, _javaParser.parse)(code), { transform: false });
-};
 
 function appendAndTransformCode_fieldDeclaration(node, level, options, data) {
     if (node.name === "unannType") // transform: int/float/... -> let
@@ -25512,16 +25509,32 @@ function extractCodeVisitor(node, level, options, result) {
 }
 
 function extractCodeFromCST(cst, options) {
-    console.log("hello!!!");
     var result = { code: "" };
-    var root = options && "root" in options ? options.root : cst;
+    var root = cst;
+
+    if (options.ignoreOuterClass) root = getClassBodyNode(cst);
+
     visitNodesRecursive(root, 0, extractCodeVisitor, options, result);
-    return result.code;
+
+    if (options.ignoreOuterClass) result.code = result.code.trim().slice(1, -1); // remove braces
+
+    return beautify(result.code);
+}
+
+function reconstructJava(code) {
+    var options = {
+        transform: false,
+        ignoreOuterClass: false
+    };
+
+    return extractCodeFromCST((0, _javaParser.parse)(code), options);
 }
 
 var transformJava = function transformJava(code) {
     return transformCodeFromCST((0, _javaParser.parse)(code));
 };
+//const transformJava = code => extractCodeFromCST(parse(code), {transform: true});
+// TODO
 
 function transformProcessing(code) {
     var js = transformJava("public class Dummy {" + code + "}").trim();
@@ -25530,8 +25543,15 @@ function transformProcessing(code) {
 }
 
 function reconstructProcessing(code) {
-    var java = reconstructJava("public class Dummy {" + code + "}").trim();
-    return beautify(java);
+    var wrapped = "public class Dummy {" + code + "}";
+    var cst = (0, _javaParser.parse)(wrapped);
+
+    var options = {
+        transform: false,
+        ignoreOuterClass: true
+    };
+
+    return extractCodeFromCST(cst, options);
 }
 
 function transformProcessingFile(filename) {
@@ -25550,7 +25570,7 @@ function reconstructProcessingFile(filename) {
         var output = reconstructProcessing(input);
         return output;
     } catch (err) {
-        console.error("[transformProcessingFile] " + err.message);
+        console.error("[reconstructProcessingFile] " + err.message);
     }
 }
 
