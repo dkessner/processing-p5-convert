@@ -12,12 +12,7 @@ export {
     reconstructProcessingFile
 };
 
-
-import { 
-    parse, 
-    BaseJavaCstVisitor, 
-    BaseJavaCstVisitorWithDefaults } from 'java-parser';
-
+import { parse } from 'java-parser';
 
 import js from 'js-beautify';
 const beautify = js['js'];
