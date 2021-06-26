@@ -25407,6 +25407,26 @@ function handle_binaryOperator(node, level, options, data) {
     data.code += temp.code;
 }
 
+function handle_basicForStatement(node, level, options, data) {
+
+    var ok = "For" in node.children && "LBrace" in node.children && "RBrace" in node.children && "Semicolon" in node.children && node.children.Semicolon.length === 2 && "expression" in node.children && "forInit" in node.children && "forUpdate" in node.children && "statement" in node.children;
+
+    if (!ok) {
+        console.log("[handle_basicForStatement] I am insane!");
+        return;
+    }
+
+    visitNodesRecursive(node.children.For[0], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.LBrace[0], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.forInit[0], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.Semicolon[0], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.expression[0], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.Semicolon[1], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.forUpdate[0], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.RBrace[0], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.statement[0], level + 1, extractCodeVisitor, options, data);
+}
+
 function getClassBody(node, level, options, data) {
     if ("name" in node && node.name == "classBody") {
         data["node"] = node;
@@ -25459,8 +25479,11 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     } else if (node.name === "binaryExpression" && "BinaryOperator" in node.children) {
         handle_binaryOperator(node, level, options, result);
         return false;
+    } else if (node.name == "basicForStatement") {
+        handle_basicForStatement(node, level, options, result);
+        return false;
     } else if (node.name == "unannType" && options.transform) {
-        result.code += "let ";
+        result.code += "let "; // transform: int/float/... -> let
         return false;
     }
 
