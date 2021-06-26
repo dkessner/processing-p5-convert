@@ -11,7 +11,6 @@ Converted p5.js:
 ```javascript
 {% include_relative variables.js %}```
 
-
 Original Processing:
 ```java
 {% include_relative variables.pde %}```

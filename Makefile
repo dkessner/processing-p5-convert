@@ -8,7 +8,10 @@ all: processing-p5-convert-bundle.js tests
 processing-p5-convert-bundle.js: processing-p5-convert.js
 	browserify processing-p5-convert.js --standalone ppconvert -o processing-p5-convert-bundle.js
 
-tests: hello.test variables.test variables.langtest
+tests: \
+    hello.test hello.langtest \
+    variables.test variables.langtest \
+    grid.test grid.langtest
 
 %.test:
 	node ppconvert $*/*.pde | diff - $*/$*.js

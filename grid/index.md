@@ -1,17 +1,17 @@
 
 
 <script src="../p5/p5.min.js"></script>
-<script src="hello.js"></script>
+<script src="grid.js"></script>
 
-# hello
+# grid
 
 <main></main>
 
 Converted p5.js:
 ```javascript
-{% include_relative hello.js %}```
+{% include_relative grid.js %}```
 
 Original Processing:
 ```java
-{% include_relative hello.pde %}```
+{% include_relative grid.pde %}```
 
