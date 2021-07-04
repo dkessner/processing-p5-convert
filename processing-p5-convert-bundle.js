@@ -25460,7 +25460,7 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
 
     if (!("name" in node)) return true;
 
-    if (node.name == "fqnOrRefType") {
+    if (node.name === "fqnOrRefType") {
         var temp = { code: "" };
         handle_fqnOrRefType(node, level, options, temp);
 
@@ -25470,10 +25470,10 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
 
         result.code += temp.code;
         return false; // treat special nodes as terminal
-    } else if (node.name == "argumentList") {
+    } else if (node.name === "argumentList") {
         handle_argumentList(node, level, options, result);
         return false;
-    } else if (node.name == "result") {
+    } else if (node.name === "result") {
         if (options.transform) {
             result.code += "function "; // transform: void/int/... -> function
             return false;
@@ -25481,10 +25481,10 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     } else if (node.name === "binaryExpression" && "BinaryOperator" in node.children) {
         handle_binaryOperator(node, level, options, result);
         return false;
-    } else if (node.name == "basicForStatement") {
+    } else if (node.name === "basicForStatement") {
         handle_basicForStatement(node, level, options, result);
         return false;
-    } else if (node.name == "unannType" && options.transform) {
+    } else if (node.name === "unannType" && options.transform) {
         // transform field declarations depending on context:
         // - global: int/float/... -> let
         // - inner class:  int/float/... -> ""
@@ -25492,13 +25492,22 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
         if (options.innerClass !== true) result.code += "let ";
 
         return false;
-    } else if (node.name == "classDeclaration") {
+    } else if (node.name === "classDeclaration") {
         // set innerClass option for descendants of this node, and recurse
 
         var newOptions = { innerClass: true };
         Object.assign(newOptions, options);
         visitChildren(node, level + 1, extractCodeVisitor, newOptions, result);
 
+        return false;
+    } else if (node.name === "constructorDeclarator") {
+        var _newOptions = { constructorDeclarator: true };
+        Object.assign(_newOptions, options);
+        visitChildren(node, level + 1, extractCodeVisitor, _newOptions, result);
+
+        return false;
+    } else if (node.name === "simpleTypeName" && options.constructorDeclarator === true) {
+        result.code += "constructor";
         return false;
     }
 

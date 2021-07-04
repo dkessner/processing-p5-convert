@@ -290,7 +290,7 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
 
     if (!("name" in node)) return true;
 
-    if (node.name == "fqnOrRefType")
+    if (node.name === "fqnOrRefType")
     {
         let temp = {code:""};
         handle_fqnOrRefType(node, level, options, temp);
@@ -303,12 +303,12 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
         result.code += temp.code;
         return false; // treat special nodes as terminal
     }
-    else if (node.name == "argumentList")
+    else if (node.name === "argumentList")
     {
         handle_argumentList(node, level, options, result);
         return false;
     }
-    else if (node.name == "result")
+    else if (node.name === "result")
     {
         if (options.transform) {
             result.code +=  "function "; // transform: void/int/... -> function
@@ -320,12 +320,12 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
         handle_binaryOperator(node, level, options, result);
         return false;
     }
-    else if (node.name == "basicForStatement")
+    else if (node.name === "basicForStatement")
     {
         handle_basicForStatement(node, level, options, result);
         return false;
     }
-    else if (node.name == "unannType" && options.transform)
+    else if (node.name === "unannType" && options.transform)
     {
         // transform field declarations depending on context:
         // - global: int/float/... -> let
@@ -336,7 +336,7 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
 
         return false;
     }
-    else if (node.name == "classDeclaration")
+    else if (node.name === "classDeclaration")
     {
         // set innerClass option for descendants of this node, and recurse
 
@@ -344,6 +344,19 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
         Object.assign(newOptions, options);
         visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
 
+        return false;
+    }
+    else if (node.name === "constructorDeclarator")
+    {
+        let newOptions = {constructorDeclarator: true};
+        Object.assign(newOptions, options);
+        visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
+
+        return false;
+    }
+    else if (node.name === "simpleTypeName" && options.constructorDeclarator === true)
+    {
+        result.code += "constructor";
         return false;
     }
 
