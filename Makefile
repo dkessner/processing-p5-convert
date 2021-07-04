@@ -10,7 +10,7 @@ processing-p5-convert-bundle.js: processing-p5-convert.js
 
 tests: \
     hello.test hello.langtest \
-    variables.test variables.langtest \
+    bounce.test bounce.langtest \
     grid.test grid.langtest
 
 %.test:
