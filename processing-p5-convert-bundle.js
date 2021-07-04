@@ -25263,18 +25263,20 @@ var printCst = function printCst(cst) {
     return printCstNode(cst, 0);
 };
 
+function visitChildren(node, level, doSomething, options, data) {
+    for (var nodeName in node.children) {
+        var childArray = node.children[nodeName];
+
+        for (var index in childArray) {
+            visitNodesRecursive(childArray[index], level, doSomething, options, data);
+        }
+    }
+}
+
 function visitNodesRecursive(node, level, doSomething, options, data) {
     var shouldRecurse = doSomething(node, level, options, data);
 
-    if (shouldRecurse) {
-        for (var nodeName in node.children) {
-            var childArray = node.children[nodeName];
-
-            for (var index in childArray) {
-                visitNodesRecursive(childArray[index], level + 1, doSomething, options, data);
-            }
-        }
-    }
+    if (shouldRecurse) visitChildren(node, level + 1, doSomething, options, data);
 }
 
 function printName(node, level, options, data) {
@@ -25495,16 +25497,7 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
 
         var newOptions = { innerClass: true };
         Object.assign(newOptions, options);
-
-        // TODO: clean up child recursion
-
-        for (var nodeName in node.children) {
-            var childArray = node.children[nodeName];
-
-            for (var index in childArray) {
-                visitNodesRecursive(childArray[index], level + 1, extractCodeVisitor, newOptions, result);
-            }
-        }
+        visitChildren(node, level + 1, extractCodeVisitor, newOptions, result);
 
         return false;
     }

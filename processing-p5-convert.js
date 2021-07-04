@@ -62,22 +62,25 @@ function printCstNode(node, level)
 const printCst = cst => printCstNode(cst, 0);
 
 
+function visitChildren(node, level, doSomething, options, data)
+{
+    for (const nodeName in node.children)
+    {
+        const childArray = node.children[nodeName];
+
+        for (const index in childArray)
+        {
+            visitNodesRecursive(childArray[index], level, doSomething, options, data);
+        }
+    }
+}
+
 function visitNodesRecursive(node, level, doSomething, options, data)
 {
     const shouldRecurse = doSomething(node, level, options, data);
 
     if (shouldRecurse)
-    {
-        for (const nodeName in node.children)
-        {
-            const childArray = node.children[nodeName];
-
-            for (const index in childArray)
-            {
-                visitNodesRecursive(childArray[index], level+1, doSomething, options, data);
-            }
-        }
-    }
+        visitChildren(node, level+1, doSomething, options, data);
 }
 
 function printName(node, level, options, data) {
@@ -339,18 +342,7 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
 
         let newOptions = {innerClass: true};
         Object.assign(newOptions, options);
-
-        // TODO: clean up child recursion
-
-        for (const nodeName in node.children)
-        {
-            const childArray = node.children[nodeName];
-
-            for (const index in childArray)
-            {
-                visitNodesRecursive(childArray[index], level+1, extractCodeVisitor, newOptions, result);
-            }
-        }
+        visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
 
         return false;
     }
