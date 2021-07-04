@@ -310,8 +310,14 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     }
     else if (node.name === "result")
     {
-        if (options.transform) {
-            result.code +=  "function "; // transform: void/int/... -> function
+        // transform function result type depending on context
+        // - global:  void/int/... -> function
+        // - class: void/int/... -> ""
+
+        if (options.transform === true) {
+            if (options.classDeclaration !== true) {
+                result.code +=  "function "; 
+            }
             return false;
         }
     }
@@ -329,18 +335,16 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     {
         // transform field declarations depending on context:
         // - global: int/float/... -> let
-        // - inner class:  int/float/... -> ""
+        // - class:  int/float/... -> ""
 
-        if (options.innerClass !== true)
+        if (options.classDeclaration !== true)
             result.code += "let ";
 
         return false;
     }
     else if (node.name === "classDeclaration")
     {
-        // set innerClass option for descendants of this node, and recurse
-
-        let newOptions = {innerClass: true};
+        let newOptions = {classDeclaration: true};
         Object.assign(newOptions, options);
         visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
 

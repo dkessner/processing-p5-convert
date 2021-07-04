@@ -25474,8 +25474,14 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
         handle_argumentList(node, level, options, result);
         return false;
     } else if (node.name === "result") {
-        if (options.transform) {
-            result.code += "function "; // transform: void/int/... -> function
+        // transform function result type depending on context
+        // - global:  void/int/... -> function
+        // - class: void/int/... -> ""
+
+        if (options.transform === true) {
+            if (options.classDeclaration !== true) {
+                result.code += "function ";
+            }
             return false;
         }
     } else if (node.name === "binaryExpression" && "BinaryOperator" in node.children) {
@@ -25487,15 +25493,13 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     } else if (node.name === "unannType" && options.transform) {
         // transform field declarations depending on context:
         // - global: int/float/... -> let
-        // - inner class:  int/float/... -> ""
+        // - class:  int/float/... -> ""
 
-        if (options.innerClass !== true) result.code += "let ";
+        if (options.classDeclaration !== true) result.code += "let ";
 
         return false;
     } else if (node.name === "classDeclaration") {
-        // set innerClass option for descendants of this node, and recurse
-
-        var newOptions = { innerClass: true };
+        var newOptions = { classDeclaration: true };
         Object.assign(newOptions, options);
         visitChildren(node, level + 1, extractCodeVisitor, newOptions, result);
 
