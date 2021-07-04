@@ -252,6 +252,15 @@ function handle_basicForStatement(node, level, options, data) {
 }
 
 
+function handle_classMemberDeclaration(node, level, options, data) {
+
+    if (options.innerClass === true && "fieldDeclaration" in node.children)
+        return false;
+
+    return true;
+}
+
+
 function getClassBody(node, level, options, data) {
     if ("name" in node && node.name == "classBody")
     {
@@ -326,6 +335,32 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     {
         result.code += "let "; // transform: int/float/... -> let
         return false;
+    }
+    else if (node.name == "classDeclaration")
+    {
+        // set innerClass option for descendants of this node, and recurse
+
+        let newOptions = {innerClass: true};
+        Object.assign(newOptions, options);
+
+        // TODO: clean up
+
+        for (const nodeName in node.children)
+        {
+            const childArray = node.children[nodeName];
+
+            for (const index in childArray)
+            {
+                visitNodesRecursive(childArray[index], level+1, extractCodeVisitor, newOptions, result);
+            }
+        }
+
+        return false;
+    }
+    else if (node.name == "classMemberDeclaration")
+    {
+        // transform: ignore field declarations inside class
+        return handle_classMemberDeclaration(node, level, options, result);
     }
 
     return true;
