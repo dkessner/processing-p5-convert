@@ -1,6 +1,11 @@
 
 class Ball {
 
+  x;
+  y;
+  vx;
+  vy;
+
   constructor() {
     this.x = 200;
     this.y = 200;

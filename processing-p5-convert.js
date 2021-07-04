@@ -252,15 +252,6 @@ function handle_basicForStatement(node, level, options, data) {
 }
 
 
-function handle_classMemberDeclaration(node, level, options, data) {
-
-    if (options.innerClass === true && "fieldDeclaration" in node.children)
-        return false;
-
-    return true;
-}
-
-
 function getClassBody(node, level, options, data) {
     if ("name" in node && node.name == "classBody")
     {
@@ -333,7 +324,13 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     }
     else if (node.name == "unannType" && options.transform)
     {
-        result.code += "let "; // transform: int/float/... -> let
+        // transform field declarations depending on context:
+        // - global: int/float/... -> let
+        // - inner class:  int/float/... -> ""
+
+        if (options.innerClass !== true)
+            result.code += "let ";
+
         return false;
     }
     else if (node.name == "classDeclaration")
@@ -343,7 +340,7 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
         let newOptions = {innerClass: true};
         Object.assign(newOptions, options);
 
-        // TODO: clean up
+        // TODO: clean up child recursion
 
         for (const nodeName in node.children)
         {
@@ -356,11 +353,6 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
         }
 
         return false;
-    }
-    else if (node.name == "classMemberDeclaration")
-    {
-        // transform: ignore field declarations inside class
-        return handle_classMemberDeclaration(node, level, options, result);
     }
 
     return true;
