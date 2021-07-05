@@ -233,7 +233,7 @@ function extractCodeVisitor(node, level, options, result)
 {
     if ("image" in node) // actual code is stored as node["image"]
     {
-        // TODO: move this?
+        // if we're in a class method body, check the member variable list
         if (options.methodBody === true && 
             "memberVariables" in options && 
             options.memberVariables.includes(node.image))
@@ -340,7 +340,7 @@ function extractCodeVisitor(node, level, options, result)
     }
     else if (node.name === "simpleTypeName" && options.constructorDeclarator === true)
     {
-        result.code += "constructor";
+        result.code += "constructor"; // transform: ClassName() -> constructor()
         return false;
     }
 

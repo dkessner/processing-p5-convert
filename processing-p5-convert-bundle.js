@@ -25409,7 +25409,7 @@ function transformCodeFromCST(cst) {
 function extractCodeVisitor(node, level, options, result) {
     if ("image" in node) // actual code is stored as node["image"]
         {
-            // TODO: move this?
+            // if we're in a class method body, check the member variable list
             if (options.methodBody === true && "memberVariables" in options && options.memberVariables.includes(node.image)) result.code += "this.";
 
             result.code += node.image + " ";
@@ -25485,7 +25485,7 @@ function extractCodeVisitor(node, level, options, result) {
         visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { methodBody: true }), result);
         return false;
     } else if (node.name === "simpleTypeName" && options.constructorDeclarator === true) {
-        result.code += "constructor";
+        result.code += "constructor"; // transform: ClassName() -> constructor()
         return false;
     }
 
