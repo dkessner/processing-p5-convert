@@ -3,13 +3,16 @@
      y;
      vx;
      vy;
+     c;
      constructor() {
          this.x = 200;
          this.y = 200;
          this.vx = 3;
          this.vy = 2;
+         this.c = color(random(255), random(255), random(255));
      }
      display() {
+         fill(this.c);
          ellipse(this.x, this.y, 100, 100);
          this.x += this.vx;
          this.y += this.vy;
