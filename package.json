@@ -16,7 +16,9 @@
   "type": "module",
   "devDependencies": {
     "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
     "babelify": "^8.0.0"
   },
   "browserify": {
@@ -25,7 +27,8 @@
         "babelify",
         {
           "presets": [
-            "es2015"
+            "es2015",
+            "stage-3"
           ]
         }
       ]

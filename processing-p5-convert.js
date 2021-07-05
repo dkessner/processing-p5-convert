@@ -290,9 +290,7 @@ function extractCodeVisitor(node, level, options, result)
     {
         if (options.classDeclaration === true)
         {
-            let newOptions = {fieldDeclaration: true};
-            Object.assign(newOptions, options);
-            visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
+            visitChildren(node, level+1, extractCodeVisitor, {...options, fieldDeclaration:true}, result);
             return false;
         }
         
@@ -311,6 +309,8 @@ function extractCodeVisitor(node, level, options, result)
     }
     else if (node.name === "variableDeclarator")
     {
+        // if we're declaring a variable in a class, save it to the memberVariables list
+
         if (options.classDeclaration === true && options.fieldDeclaration === true)
         { 
             let variableName = {code: ""};
@@ -322,28 +322,20 @@ function extractCodeVisitor(node, level, options, result)
     }
     else if (node.name === "classDeclaration")
     {
-        let newOptions = {classDeclaration: true, memberVariables: []};
-        Object.assign(newOptions, options);
+        let newOptions = {...options, classDeclaration: true, memberVariables: []};
         visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
-
         return false;
     }
     else if (node.name === "constructorDeclarator")
     {
-        let newOptions = {constructorDeclarator: true};
-        Object.assign(newOptions, options);
-        visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
-
+        visitChildren(node, level+1, extractCodeVisitor, {...options, constructorDeclarator:true}, result);
         return false;
     }
-    else if (node.name === "constructorBody" || node.name === "methodBody")
+    else if (options.classDeclaration === true && 
+            (node.name === "constructorBody" || 
+             node.name === "methodBody"))
     {
-        if (options.classDeclaration !== true) return true;
-
-        let newOptions = {methodBody: true};
-        Object.assign(newOptions, options);
-        visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
-
+        visitChildren(node, level+1, extractCodeVisitor, {...options, methodBody:true}, result);
         return false;
     }
     else if (node.name === "simpleTypeName" && options.constructorDeclarator === true)
