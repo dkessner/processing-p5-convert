@@ -38,12 +38,13 @@ class Ball
 
 
 Ball ball;
-
+ArrayList<Ball> balls;
 
 void setup()
 {
     size(400, 400);
     ball = new Ball();
+    balls = new ArrayList<Ball>();
 }
 
 

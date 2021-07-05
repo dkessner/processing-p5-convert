@@ -4,7 +4,7 @@
      float vx;
      float vy;
      int c;
-     constructor() {
+     Ball() {
          this.x = 200;
          this.y = 200;
          this.vx = 3;
@@ -21,9 +21,11 @@
      }
  }
  Ball ball;
+ ArrayList < Ball > balls;
  void setup() {
      size(400, 400);
      ball = new Ball();
+     balls = new ArrayList < Ball > ();
  }
  void draw() {
      background(0);

@@ -338,10 +338,29 @@ function extractCodeVisitor(node, level, options, result)
         visitChildren(node, level+1, extractCodeVisitor, {...options, methodBody:true}, result);
         return false;
     }
-    else if (node.name === "simpleTypeName" && options.constructorDeclarator === true)
+    else if (node.name === "simpleTypeName" && 
+        options.constructorDeclarator === true &&
+        options.transform)
     {
         result.code += "constructor"; // transform: ClassName() -> constructor()
         return false;
+    }
+    else if (node.name === "newExpression" && options.transform === true)
+    {
+        let ok = "unqualifiedClassInstanceCreationExpression" in node.children &&
+            "classOrInterfaceTypeToInstantiate" in node.children.unqualifiedClassInstanceCreationExpression[0].children;
+
+        let className = {code:""};
+        let start = node.children.unqualifiedClassInstanceCreationExpression[0].children.classOrInterfaceTypeToInstantiate[0];
+        visitNodesRecursive(start, level+1, extractCodeVisitor, options, className);
+
+        if (className.code.startsWith("ArrayList"))
+        {
+            result.code += "[]";
+            return false;
+        }
+
+        return true;
     }
 
     return true;

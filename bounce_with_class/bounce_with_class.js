@@ -21,10 +21,12 @@
      }
  }
  let ball;
+ let balls;
 
  function setup() {
      createCanvas(400, 400);
      ball = new Ball();
+     balls = [];
  }
 
  function draw() {
