@@ -9,6 +9,7 @@ class Ball
     float y;
     float vx;
     float vy;
+    int c;
 
     Ball()
     {
@@ -16,10 +17,12 @@ class Ball
         y = 200;
         vx = 3;
         vy = 2;
+        c = color(random(255), random(255), random(255));
     }
 
     void display()
     {
+        fill(c);
         ellipse(x, y, 100, 100);
 
         x += vx;
