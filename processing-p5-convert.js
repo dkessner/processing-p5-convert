@@ -233,6 +233,12 @@ function extractCodeVisitor(node, level, options, result)
 {
     if ("image" in node) // actual code is stored as node["image"]
     {
+        // TODO: move this?
+        if (options.methodBody === true && 
+            "memberVariables" in options && 
+            options.memberVariables.includes(node.image))
+            result.code += "this.";
+
         result.code += node.image + " ";
         return true;
     }
@@ -325,6 +331,16 @@ function extractCodeVisitor(node, level, options, result)
     else if (node.name === "constructorDeclarator")
     {
         let newOptions = {constructorDeclarator: true};
+        Object.assign(newOptions, options);
+        visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
+
+        return false;
+    }
+    else if (node.name === "constructorBody" || node.name === "methodBody")
+    {
+        if (options.classDeclaration !== true) return true;
+
+        let newOptions = {methodBody: true};
         Object.assign(newOptions, options);
         visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
 

@@ -25407,6 +25407,9 @@ function transformCodeFromCST(cst) {
 function extractCodeVisitor(node, level, options, result) {
     if ("image" in node) // actual code is stored as node["image"]
         {
+            // TODO: move this?
+            if (options.methodBody === true && "memberVariables" in options && options.memberVariables.includes(node.image)) result.code += "this.";
+
             result.code += node.image + " ";
             return true;
         }
@@ -25479,6 +25482,14 @@ function extractCodeVisitor(node, level, options, result) {
         var _newOptions2 = { constructorDeclarator: true };
         Object.assign(_newOptions2, options);
         visitChildren(node, level + 1, extractCodeVisitor, _newOptions2, result);
+
+        return false;
+    } else if (node.name === "constructorBody" || node.name === "methodBody") {
+        if (options.classDeclaration !== true) return true;
+
+        var _newOptions3 = { methodBody: true };
+        Object.assign(_newOptions3, options);
+        visitChildren(node, level + 1, extractCodeVisitor, _newOptions3, result);
 
         return false;
     } else if (node.name === "simpleTypeName" && options.constructorDeclarator === true) {
