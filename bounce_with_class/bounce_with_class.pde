@@ -52,6 +52,9 @@ void draw()
 {
     background(0);
     ball.display();
+
+    for (Ball b : balls)
+      b.display();
 }
 
 

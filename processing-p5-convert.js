@@ -233,11 +233,24 @@ function extractCodeVisitor(node, level, options, result)
 {
     if ("image" in node) // actual code is stored as node["image"]
     {
-        // if we're in a class method body, check the member variable list
-        if (options.methodBody === true && 
-            "memberVariables" in options && 
-            options.memberVariables.includes(node.image))
-            result.code += "this.";
+        if (options.transform === true)
+        {
+            // if we're in a class method body, check the member variable list
+            if (options.methodBody === true && 
+                "memberVariables" in options && 
+                options.memberVariables.includes(node.image))
+            {
+                result.code += "this." + node.image + " ";
+                return true;
+            }
+
+            if (options.enhancedForStatement === true)
+            {
+                if (node.image === ":")
+                    result.code += "of"; 
+                //return true;
+            }
+        }
 
         result.code += node.image + " ";
         return true;
@@ -284,6 +297,11 @@ function extractCodeVisitor(node, level, options, result)
     else if (node.name === "basicForStatement")
     {
         handle_basicForStatement(node, level, options, result);
+        return false;
+    }
+    else if (node.name === "enhancedForStatement")
+    {
+        visitChildren(node, level+1, extractCodeVisitor, {...options, enhancedForStatement:true}, result);
         return false;
     }
     else if (node.name === "fieldDeclaration")
