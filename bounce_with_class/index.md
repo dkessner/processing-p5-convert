@@ -7,7 +7,7 @@
 
 <main></main>
 
-Target p5.js:
+Converted p5.js:
 ```javascript
 {% include_relative bounce_with_class.js %}```
 

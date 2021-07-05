@@ -11,7 +11,8 @@ processing-p5-convert-bundle.js: processing-p5-convert.js
 tests: \
     hello.test hello.langtest \
     bounce.test bounce.langtest \
-    grid.test grid.langtest
+    grid.test grid.langtest \
+    bounce_with_class.test bounce_with_class.langtest 
 
 %.test:
 	node ppconvert $*/*.pde | diff - $*/$*.js
