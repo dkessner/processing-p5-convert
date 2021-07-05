@@ -229,7 +229,7 @@ function transformCodeFromCST(cst)
 
 // primary node visitor for code reconstruction/transformation
 
-function extractCodeVisitor(node, level, options, result) // TODO new code here
+function extractCodeVisitor(node, level, options, result)
 {
     if ("image" in node) // actual code is stored as node["image"]
     {
@@ -280,7 +280,19 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
         handle_basicForStatement(node, level, options, result);
         return false;
     }
-    else if (node.name === "unannType" && options.transform)
+    else if (node.name === "fieldDeclaration")
+    {
+        if (options.classDeclaration === true)
+        {
+            let newOptions = {fieldDeclaration: true};
+            Object.assign(newOptions, options);
+            visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
+            return false;
+        }
+        
+        return true;
+    }
+    else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
     {
         // transform field declarations depending on context:
         // - global: int/float/... -> let
@@ -291,9 +303,20 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
 
         return false;
     }
+    else if (node.name === "variableDeclarator")
+    {
+        if (options.classDeclaration === true && options.fieldDeclaration === true)
+        { 
+            let variableName = {code: ""};
+            visitChildren(node, level, extractCodeVisitor, options, variableName);
+            options.memberVariables.push(variableName.code.trim());
+        }
+        
+        return true;        
+    }
     else if (node.name === "classDeclaration")
     {
-        let newOptions = {classDeclaration: true};
+        let newOptions = {classDeclaration: true, memberVariables: []};
         Object.assign(newOptions, options);
         visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
 

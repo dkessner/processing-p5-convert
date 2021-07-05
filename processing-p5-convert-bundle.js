@@ -25404,8 +25404,7 @@ function transformCodeFromCST(cst) {
 
 // primary node visitor for code reconstruction/transformation
 
-function extractCodeVisitor(node, level, options, result) // TODO new code here
-{
+function extractCodeVisitor(node, level, options, result) {
     if ("image" in node) // actual code is stored as node["image"]
         {
             result.code += node.image + " ";
@@ -25444,24 +25443,42 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     } else if (node.name === "basicForStatement") {
         handle_basicForStatement(node, level, options, result);
         return false;
-    } else if (node.name === "unannType" && options.transform) {
-        // transform field declarations depending on context:
-        // - global: int/float/... -> let
-        // - class:  int/float/... -> ""
+    } else if (node.name === "fieldDeclaration") {
+        if (options.classDeclaration === true) {
+            var newOptions = { fieldDeclaration: true };
+            Object.assign(newOptions, options);
+            visitChildren(node, level + 1, extractCodeVisitor, newOptions, result);
+            return false;
+        }
 
-        if (options.classDeclaration !== true) result.code += "let ";
+        return true;
+    } else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
+        {
+            // transform field declarations depending on context:
+            // - global: int/float/... -> let
+            // - class:  int/float/... -> ""
 
-        return false;
+            if (options.classDeclaration !== true) result.code += "let ";
+
+            return false;
+        } else if (node.name === "variableDeclarator") {
+        if (options.classDeclaration === true && options.fieldDeclaration === true) {
+            var variableName = { code: "" };
+            visitChildren(node, level, extractCodeVisitor, options, variableName);
+            options.memberVariables.push(variableName.code.trim());
+        }
+
+        return true;
     } else if (node.name === "classDeclaration") {
-        var newOptions = { classDeclaration: true };
-        Object.assign(newOptions, options);
-        visitChildren(node, level + 1, extractCodeVisitor, newOptions, result);
+        var _newOptions = { classDeclaration: true, memberVariables: [] };
+        Object.assign(_newOptions, options);
+        visitChildren(node, level + 1, extractCodeVisitor, _newOptions, result);
 
         return false;
     } else if (node.name === "constructorDeclarator") {
-        var _newOptions = { constructorDeclarator: true };
-        Object.assign(_newOptions, options);
-        visitChildren(node, level + 1, extractCodeVisitor, _newOptions, result);
+        var _newOptions2 = { constructorDeclarator: true };
+        Object.assign(_newOptions2, options);
+        visitChildren(node, level + 1, extractCodeVisitor, _newOptions2, result);
 
         return false;
     } else if (node.name === "simpleTypeName" && options.constructorDeclarator === true) {
