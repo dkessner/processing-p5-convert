@@ -25199,9 +25199,7 @@ module.exports.line_starters = line_starters.slice();
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.reconstructProcessingFile = exports.transformProcessingFile = exports.transformProcessing = exports.transformJava = exports.reconstructJava = exports.printCST = undefined;
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+exports.reconstructProcessingFile = exports.transformProcessingFile = exports.printRawProcessingFile = exports.transformProcessing = exports.transformJava = exports.reconstructJava = undefined;
 
 var _javaParser = require('java-parser');
 
@@ -25218,50 +25216,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 
 
-exports.printCST = printCST;
 exports.reconstructJava = reconstructJava;
 exports.transformJava = transformJava;
 exports.transformProcessing = transformProcessing;
+exports.printRawProcessingFile = printRawProcessingFile;
 exports.transformProcessingFile = transformProcessingFile;
 exports.reconstructProcessingFile = reconstructProcessingFile;
 
 var beautify = _jsBeautify2.default['js'];
 
-// extract raw code from nodes with "image" keys
-
-function extractCodeRecursive(object, text) {
-    for (var thing in object) {
-        if (thing === "image") {
-            text = text + object[thing] + " ";
-        } else if (_typeof(object[thing]) === "object") {
-            text = extractCodeRecursive(object[thing], text);
-        }
-    }
-
-    return text;
-}
-
-var extractCode = function extractCode(cst) {
-    return extractCodeRecursive(cst, "");
-};
-
-function printCstNode(node, level) {
-    if (!('name' in node)) return;
-
-    console.log(" ".repeat(level) + node.name + " " + extractCode(node)); // doubly recursive
-
-    for (var nodeName in node.children) {
-        var childArray = node.children[nodeName];
-
-        for (var index in childArray) {
-            printCstNode(childArray[index], level + 1);
-        }
-    }
-}
-
-var printCst = function printCst(cst) {
-    return printCstNode(cst, 0);
-};
+// recursion implementation
 
 function visitChildren(node, level, doSomething, options, data) {
     for (var nodeName in node.children) {
@@ -25279,6 +25243,8 @@ function visitNodesRecursive(node, level, doSomething, options, data) {
     if (shouldRecurse) visitChildren(node, level + 1, doSomething, options, data);
 }
 
+// raw code extraction
+
 function printName(node, level, options, data) {
     if ("name" in node) console.log(" ".repeat(level) + node.name);else if ("image" in node) console.log(" ".repeat(level) + node.image);
 
@@ -25289,9 +25255,7 @@ var printCstNodeTree = function printCstNodeTree(cst) {
     return visitNodesRecursive(cst, 0, printName, null, null);
 };
 
-var printCST = function printCST(code) {
-    return printCstNodeTree((0, _javaParser.parse)(code));
-};
+// special node handlers for extractCodeVisitor()
 
 function handle_fqnOrRefType(node, level, options, data) {
 
@@ -25429,19 +25393,7 @@ function handle_basicForStatement(node, level, options, data) {
     visitNodesRecursive(node.children.statement[0], level + 1, extractCodeVisitor, options, data);
 }
 
-function getClassBody(node, level, options, data) {
-    if ("name" in node && node.name == "classBody") {
-        data["node"] = node;
-        return false;
-    }
-    return true;
-}
-
-function getClassBodyNode(cst) {
-    var classBody = {};
-    visitNodesRecursive(cst, 0, getClassBody, null, classBody);
-    return classBody.node;
-}
+// TODO: deprecated
 
 function transformCodeFromCST(cst) {
     var classBodyNode = getClassBodyNode(cst);
@@ -25449,6 +25401,8 @@ function transformCodeFromCST(cst) {
     visitNodesRecursive(classBodyNode, 0, appendAndTransformCode, null, transformedCode);
     return transformedCode.code;
 }
+
+// primary node visitor for code reconstruction/transformation
 
 function extractCodeVisitor(node, level, options, result) // TODO new code here
 {
@@ -25518,6 +25472,24 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     return true;
 }
 
+// helper functions
+
+function getClassBody(node, level, options, data) {
+    if ("name" in node && node.name == "classBody") {
+        data["node"] = node;
+        return false;
+    }
+    return true;
+}
+
+function getClassBodyNode(cst) {
+    var classBody = {};
+    visitNodesRecursive(cst, 0, getClassBody, null, classBody);
+    return classBody.node;
+}
+
+// main entry function to visit cst
+
 function extractCodeFromCST(cst, options) {
     var result = { code: "" };
     var root = cst;
@@ -25530,6 +25502,9 @@ function extractCodeFromCST(cst, options) {
 
     return beautify(result.code);
 }
+
+// top-level functions
+
 
 function reconstructJava(code) // TODO: test
 {
@@ -25547,6 +25522,12 @@ var transformJava = function transformJava(code) {
 //const transformJava = code => extractCodeFromCST(parse(code), {transform: true});
 // TODO
 
+
+function printRawProcessing(code) {
+    var wrapped = "public class Dummy {" + code + "}";
+    var cst = (0, _javaParser.parse)(wrapped);
+    printCstNodeTree(cst);
+}
 
 function transformProcessing(code) {
     var wrapped = "public class Dummy {" + code + "}";
@@ -25572,32 +25553,32 @@ function reconstructProcessing(code) {
     return extractCodeFromCST(cst, options);
 }
 
-function transformProcessingFile(filename) {
+function applyToFile(filename, transformation) {
     try {
         var input = (0, _fs.readFileSync)(filename, 'utf8');
-        var output = transformProcessing(input);
+        var output = transformation(input);
         return output;
     } catch (err) {
-        console.error("[transformProcessingFile] " + err.message);
+        console.error("[applyToFile] " + err.message);
     }
 }
 
-function reconstructProcessingFile(filename) {
-    try {
-        var input = (0, _fs.readFileSync)(filename, 'utf8');
-        var output = reconstructProcessing(input);
-        return output;
-    } catch (err) {
-        console.error("[reconstructProcessingFile] " + err.message);
-    }
-}
+var printRawProcessingFile = function printRawProcessingFile(filename) {
+    return applyToFile(filename, printRawProcessing);
+};
+var transformProcessingFile = function transformProcessingFile(filename) {
+    return applyToFile(filename, transformProcessing);
+};
+var reconstructProcessingFile = function reconstructProcessingFile(filename) {
+    return applyToFile(filename, reconstructProcessing);
+};
 
 if (typeof module !== 'undefined') {
     module.exports = {
-        printCST: printCST,
         reconstructJava: reconstructJava,
         transformJava: transformJava,
         transformProcessing: transformProcessing,
+        printRawProcessingFile: printRawProcessingFile,
         transformProcessingFile: transformProcessingFile,
         reconstructProcessingFile: reconstructProcessingFile
     };

@@ -4,10 +4,10 @@
 
 
 export {
-    printCST, 
     reconstructJava, 
     transformJava, 
     transformProcessing,
+    printRawProcessingFile,
     transformProcessingFile,
     reconstructProcessingFile
 };
@@ -20,47 +20,7 @@ const beautify = js['js'];
 import { readFileSync } from 'fs';
 
 
-// extract raw code from nodes with "image" keys
-
-function extractCodeRecursive(object, text)
-{
-    for (const thing in object)
-    {
-        if (thing === "image")
-        {
-            text = text + object[thing] + " ";
-        }
-        else if (typeof object[thing] === "object")
-        {
-            text = extractCodeRecursive(object[thing], text);
-        }
-    }
-
-    return text;
-}
-
-const extractCode = cst => extractCodeRecursive(cst, "");
-
-
-function printCstNode(node, level)
-{
-    if (!('name' in node)) return;
-
-    console.log(" ".repeat(level) + node.name + " " + extractCode(node)); // doubly recursive
-
-    for (const nodeName in node.children)
-    {
-        const childArray = node.children[nodeName];
-
-        for (const index in childArray)
-        {
-            printCstNode(childArray[index], level+1);
-        }
-    }
-}
-
-const printCst = cst => printCstNode(cst, 0);
-
+// recursion implementation
 
 function visitChildren(node, level, doSomething, options, data)
 {
@@ -83,6 +43,9 @@ function visitNodesRecursive(node, level, doSomething, options, data)
         visitChildren(node, level+1, doSomething, options, data);
 }
 
+
+// raw code extraction
+
 function printName(node, level, options, data) {
     if ("name" in node)
         console.log(" ".repeat(level) + node.name);
@@ -94,8 +57,8 @@ function printName(node, level, options, data) {
 
 const printCstNodeTree = cst => visitNodesRecursive(cst, 0, printName, null, null);
 
-const printCST = code => printCstNodeTree(parse(code));
 
+// special node handlers for extractCodeVisitor()
 
 function handle_fqnOrRefType(node, level, options, data) {
 
@@ -254,22 +217,7 @@ function handle_basicForStatement(node, level, options, data) {
     visitNodesRecursive(node.children.statement[0], level+1, extractCodeVisitor, options, data);
 }
 
-
-function getClassBody(node, level, options, data) {
-    if ("name" in node && node.name == "classBody")
-    {
-        data["node"] = node;
-        return false;
-    }
-    return true;
-}
-
-function getClassBodyNode(cst)
-{
-    let classBody = {}
-    visitNodesRecursive(cst, 0, getClassBody, null, classBody);
-    return classBody.node;
-}
+// TODO: deprecated
 
 function transformCodeFromCST(cst)
 {
@@ -279,6 +227,7 @@ function transformCodeFromCST(cst)
     return transformedCode.code;
 }
 
+// primary node visitor for code reconstruction/transformation
 
 function extractCodeVisitor(node, level, options, result) // TODO new code here
 {
@@ -367,6 +316,26 @@ function extractCodeVisitor(node, level, options, result) // TODO new code here
     return true;
 }
 
+// helper functions
+
+function getClassBody(node, level, options, data) {
+    if ("name" in node && node.name == "classBody")
+    {
+        data["node"] = node;
+        return false;
+    }
+    return true;
+}
+
+function getClassBodyNode(cst)
+{
+    let classBody = {}
+    visitNodesRecursive(cst, 0, getClassBody, null, classBody);
+    return classBody.node;
+}
+
+
+// main entry function to visit cst
 
 function extractCodeFromCST(cst, options)
 {
@@ -385,6 +354,9 @@ function extractCodeFromCST(cst, options)
 }
 
 
+// top-level functions
+
+
 function reconstructJava(code)  // TODO: test
 {
     const options = {
@@ -399,6 +371,14 @@ function reconstructJava(code)  // TODO: test
 const transformJava = code => transformCodeFromCST(parse(code));
 //const transformJava = code => extractCodeFromCST(parse(code), {transform: true});
 // TODO
+
+
+function printRawProcessing(code)
+{
+    const wrapped = "public class Dummy {" + code + "}";
+    const cst = parse(wrapped);
+    printCstNodeTree(cst);
+}
 
 
 function transformProcessing(code)
@@ -428,44 +408,35 @@ function reconstructProcessing(code)
     return extractCodeFromCST(cst, options);
 }
 
-function transformProcessingFile(filename)
+
+function applyToFile(filename, transformation)
 {
     try 
     {
         const input = readFileSync(filename, 'utf8')
-        const output = transformProcessing(input);
+        const output = transformation(input);
         return output;
     } 
     catch (err) 
     {
-        console.error("[transformProcessingFile] " + err.message)
+        console.error("[applyToFile] " + err.message)
     }
 }
 
 
-function reconstructProcessingFile(filename)
-{
-    try 
-    {
-        const input = readFileSync(filename, 'utf8')
-        const output = reconstructProcessing(input);
-        return output;
-    } 
-    catch (err) 
-    {
-        console.error("[reconstructProcessingFile] " + err.message)
-    }
-}
+const printRawProcessingFile = filename => applyToFile(filename, printRawProcessing);
+const transformProcessingFile = filename => applyToFile(filename, transformProcessing);
+const reconstructProcessingFile = filename => applyToFile(filename, reconstructProcessing);
 
 
 if (typeof(module) !== 'undefined')
 {
     module.exports = 
     { 
-        printCST, 
         reconstructJava, 
         transformJava, 
         transformProcessing,
+        printRawProcessingFile,
         transformProcessingFile,
         reconstructProcessingFile,
     };

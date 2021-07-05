@@ -4,12 +4,14 @@
 
 
 import { 
+    printRawProcessingFile, 
     transformProcessingFile, 
     reconstructProcessingFile } 
 from './processing-p5-convert.js';
 
 
 let reconstruct = false;
+let raw = false;
 
 
 function main()
@@ -26,6 +28,8 @@ function main()
         {
             if (option === '--reconstruct')
                 reconstruct = true;
+            else if (option === '--raw')
+                raw = true;
         }
         else 
         {
@@ -42,6 +46,9 @@ function main()
 
         if (reconstruct === true) {
             code = reconstructProcessingFile(filename);
+        }
+        else if (raw === true) {
+            code = printRawProcessingFile(filename);
         }
         else {
             code = transformProcessingFile(filename);
