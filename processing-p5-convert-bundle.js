@@ -25460,6 +25460,13 @@ function extractCodeVisitor(node, level, options, result) {
 
         if (options.transform) {
             if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
+
+            var tokens = temp.code.replace(/\s/g, "").split(".");
+
+            if (tokens.length >= 2 && tokens[tokens.length - 1] === "add" && options.arrayLists.includes(tokens[tokens.length - 2])) {
+                // transform: (ArrayList) add -> push
+                temp.code = temp.code.replace("add", "push");
+            }
         }
 
         result.code += temp.code;

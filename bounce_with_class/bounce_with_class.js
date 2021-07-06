@@ -5,10 +5,10 @@
      vy;
      c;
      constructor() {
-         this.x = 200;
-         this.y = 200;
-         this.vx = 3;
-         this.vy = 2;
+         this.x = random(50, width - 50);
+         this.y = random(50, height - 50);
+         this.vx = random(-3, 3);
+         this.vy = random(-2, 2);
          this.c = color(random(255), random(255), random(255));
      }
      display() {
@@ -27,6 +27,7 @@
      createCanvas(400, 400);
      ball = new Ball();
      balls = [];
+     for (let i = 0; i < 5; i++) balls.push(new Ball());
  }
 
  function draw() {

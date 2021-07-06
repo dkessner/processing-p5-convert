@@ -5,10 +5,10 @@
      float vy;
      int c;
      Ball() {
-         x = 200;
-         y = 200;
-         vx = 3;
-         vy = 2;
+         x = random(50, width - 50);
+         y = random(50, height - 50);
+         vx = random(-3, 3);
+         vy = random(-2, 2);
          c = color(random(255), random(255), random(255));
      }
      void display() {
@@ -26,6 +26,7 @@
      size(400, 400);
      ball = new Ball();
      balls = new ArrayList < Ball > ();
+     for (int i = 0; i < 5; i++) balls.add(new Ball());
  }
  void draw() {
      background(0);
