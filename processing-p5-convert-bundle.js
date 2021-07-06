@@ -25213,6 +25213,8 @@ var _fs = require('fs');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 //
 // processing_p5_convert.js
 //
@@ -25405,6 +25407,24 @@ function transformCodeFromCST(cst) {
     return transformedCode.code;
 }
 
+function registerField(node, options) {
+    var ok = "unannType" in node.children && "variableDeclaratorList" in node.children;
+
+    var tempOptions = {
+        transform: false,
+        ignoreOuterClass: false
+    };
+
+    var type = extractCodeFromCST(node.children.unannType[0], tempOptions);
+
+    if (type.startsWith("ArrayList")) {
+        // TODO: handle multiple names
+        var name = extractCodeFromCST(node.children.variableDeclaratorList[0], tempOptions);
+        if (!("arrayList" in options)) options.arrayLists = [];
+        options.arrayLists.push(name);
+    }
+}
+
 // primary node visitor for code reconstruction/transformation
 
 function extractCodeVisitor(node, level, options, result) {
@@ -25465,15 +25485,14 @@ function extractCodeVisitor(node, level, options, result) {
         handle_basicForStatement(node, level, options, result);
         return false;
     } else if (node.name === "enhancedForStatement") {
+        // set context enhancedForStatement
         visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { enhancedForStatement: true }), result);
         return false;
     } else if (node.name === "fieldDeclaration") {
-        if (options.classDeclaration === true) {
-            visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { fieldDeclaration: true }), result);
-            return false;
-        }
-
-        return true;
+        // set context fieldDeclaration
+        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { fieldDeclaration: true }), result);
+        registerField(node, options);
+        return false;
     } else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
         {
             // transform field declarations depending on context:
@@ -25494,7 +25513,12 @@ function extractCodeVisitor(node, level, options, result) {
 
         return true;
     } else if (node.name === "classDeclaration") {
-        var newOptions = _extends({}, options, { classDeclaration: true, memberVariables: [] });
+        var newOptions = _extends({}, options, {
+            classDeclaration: true,
+            memberVariables: [],
+            arrayLists: [].concat(_toConsumableArray(options.arrayLists))
+        });
+
         visitChildren(node, level + 1, extractCodeVisitor, newOptions, result);
         return false;
     } else if (node.name === "constructorDeclarator") {
@@ -25545,6 +25569,8 @@ function getClassBodyNode(cst) {
 function extractCodeFromCST(cst, options) {
     var result = { code: "" };
     var root = cst;
+
+    options.arrayLists = [];
 
     if (options.ignoreOuterClass) root = getClassBodyNode(cst);
 

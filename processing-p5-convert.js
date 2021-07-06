@@ -231,6 +231,28 @@ function transformCodeFromCST(cst)
     return transformedCode.code;
 }
 
+
+function registerField(node, options)
+{
+    const ok = "unannType" in node.children && "variableDeclaratorList" in node.children;
+
+    const tempOptions = {
+        transform: false,
+        ignoreOuterClass: false
+    };
+
+    const type = extractCodeFromCST(node.children.unannType[0], tempOptions);
+
+    if (type.startsWith("ArrayList"))
+    {
+        // TODO: handle multiple names
+        const name = extractCodeFromCST(node.children.variableDeclaratorList[0], tempOptions);
+        if (!("arrayList" in options)) options.arrayLists = [];
+        options.arrayLists.push(name); 
+    }
+}
+
+
 // primary node visitor for code reconstruction/transformation
 
 function extractCodeVisitor(node, level, options, result)
@@ -310,18 +332,16 @@ function extractCodeVisitor(node, level, options, result)
     }
     else if (node.name === "enhancedForStatement")
     {
+        // set context enhancedForStatement
         visitChildren(node, level+1, extractCodeVisitor, {...options, enhancedForStatement:true}, result);
         return false;
     }
     else if (node.name === "fieldDeclaration")
     {
-        if (options.classDeclaration === true)
-        {
-            visitChildren(node, level+1, extractCodeVisitor, {...options, fieldDeclaration:true}, result);
-            return false;
-        }
-        
-        return true;
+        // set context fieldDeclaration
+        visitChildren(node, level+1, extractCodeVisitor, {...options, fieldDeclaration:true}, result);
+        registerField(node, options);
+        return false;
     }
     else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
     {
@@ -349,7 +369,13 @@ function extractCodeVisitor(node, level, options, result)
     }
     else if (node.name === "classDeclaration")
     {
-        let newOptions = {...options, classDeclaration: true, memberVariables: []};
+        let newOptions = {
+            ...options, 
+            classDeclaration: true, 
+            memberVariables: [],
+            arrayLists: [...options.arrayLists]
+        };
+
         visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
         return false;
     }
@@ -418,6 +444,8 @@ function extractCodeFromCST(cst, options)
 {
     let result = {code: ""};
     let root = cst;
+
+    options.arrayLists = []
 
     if (options.ignoreOuterClass) 
         root = getClassBodyNode(cst);
