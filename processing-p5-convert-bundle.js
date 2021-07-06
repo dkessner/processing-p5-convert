@@ -25199,7 +25199,7 @@ module.exports = words;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.reconstructProcessingFile = exports.transformProcessingFile = exports.printRawProcessingFile = exports.transformProcessing = exports.transformJava = exports.reconstructJava = undefined;
+exports.reconstructProcessingFile = exports.transformProcessingFile = exports.printOutlineProcessingFile = exports.printRawProcessingFile = exports.transformProcessing = exports.transformJava = exports.reconstructJava = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -25222,6 +25222,7 @@ exports.reconstructJava = reconstructJava;
 exports.transformJava = transformJava;
 exports.transformProcessing = transformProcessing;
 exports.printRawProcessingFile = printRawProcessingFile;
+exports.printOutlineProcessingFile = printOutlineProcessingFile;
 exports.transformProcessingFile = transformProcessingFile;
 exports.reconstructProcessingFile = reconstructProcessingFile;
 
@@ -25580,6 +25581,36 @@ function printRawProcessing(code) {
     printCstNodeTree(cst);
 }
 
+function printOutline(node, level, options, result) {
+
+    if (!("name" in node)) return true;
+
+    if (node.name === "fieldDeclaration") {
+        var tempOptions = {
+            transform: false,
+            ignoreOuterClass: false
+        };
+
+        var code = extractCodeFromCST(node, tempOptions);
+
+        console.log(code);
+
+        return false;
+    }
+
+    return true;
+}
+
+var printOutlineTree = function printOutlineTree(cst) {
+    return visitNodesRecursive(cst, 0, printOutline, null, null);
+};
+
+function printOutlineProcessing(code) {
+    var wrapped = "public class Dummy {" + code + "}";
+    var cst = (0, _javaParser.parse)(wrapped);
+    printOutlineTree(cst);
+}
+
 function transformProcessing(code) {
     var wrapped = "public class Dummy {" + code + "}";
     var cst = (0, _javaParser.parse)(wrapped);
@@ -25617,6 +25648,9 @@ function applyToFile(filename, transformation) {
 var printRawProcessingFile = function printRawProcessingFile(filename) {
     return applyToFile(filename, printRawProcessing);
 };
+var printOutlineProcessingFile = function printOutlineProcessingFile(filename) {
+    return applyToFile(filename, printOutlineProcessing);
+};
 var transformProcessingFile = function transformProcessingFile(filename) {
     return applyToFile(filename, transformProcessing);
 };
@@ -25630,6 +25664,7 @@ if (typeof module !== 'undefined') {
         transformJava: transformJava,
         transformProcessing: transformProcessing,
         printRawProcessingFile: printRawProcessingFile,
+        printOutlineProcessingFile: printOutlineProcessingFile,
         transformProcessingFile: transformProcessingFile,
         reconstructProcessingFile: reconstructProcessingFile
     };

@@ -8,6 +8,7 @@ export {
     transformJava, 
     transformProcessing,
     printRawProcessingFile,
+    printOutlineProcessingFile,
     transformProcessingFile,
     reconstructProcessingFile
 };
@@ -56,6 +57,9 @@ function printName(node, level, options, data) {
 }
 
 const printCstNodeTree = cst => visitNodesRecursive(cst, 0, printName, null, null);
+
+
+
 
 
 // special node handlers for extractCodeVisitor()
@@ -454,6 +458,39 @@ function printRawProcessing(code)
 }
 
 
+function printOutline(node, level, options, result) {
+
+    if (!("name" in node)) return true;
+
+    if (node.name === "fieldDeclaration")
+    {
+        const tempOptions = {
+            transform: false,
+            ignoreOuterClass: false
+        };
+
+        let code = extractCodeFromCST(node, tempOptions);
+
+        console.log(code);
+
+        return false;
+    }
+
+    return true;
+}
+
+
+const printOutlineTree = cst => visitNodesRecursive(cst, 0, printOutline, null, null);
+
+
+function printOutlineProcessing(code)
+{
+    const wrapped = "public class Dummy {" + code + "}";
+    const cst = parse(wrapped);
+    printOutlineTree(cst);
+}
+
+
 function transformProcessing(code)
 {
     const wrapped = "public class Dummy {" + code + "}";
@@ -498,6 +535,7 @@ function applyToFile(filename, transformation)
 
 
 const printRawProcessingFile = filename => applyToFile(filename, printRawProcessing);
+const printOutlineProcessingFile = filename => applyToFile(filename, printOutlineProcessing);
 const transformProcessingFile = filename => applyToFile(filename, transformProcessing);
 const reconstructProcessingFile = filename => applyToFile(filename, reconstructProcessing);
 
@@ -510,6 +548,7 @@ if (typeof(module) !== 'undefined')
         transformJava, 
         transformProcessing,
         printRawProcessingFile,
+        printOutlineProcessingFile,
         transformProcessingFile,
         reconstructProcessingFile,
     };

@@ -5,6 +5,7 @@
 
 import { 
     printRawProcessingFile, 
+    printOutlineProcessingFile, 
     transformProcessingFile, 
     reconstructProcessingFile } 
 from './processing-p5-convert.js';
@@ -12,6 +13,7 @@ from './processing-p5-convert.js';
 
 let reconstruct = false;
 let raw = false;
+let outline = false;
 
 
 function main()
@@ -30,6 +32,8 @@ function main()
                 reconstruct = true;
             else if (option === '--raw')
                 raw = true;
+            else if (option === '--outline')
+                outline = true;
         }
         else 
         {
@@ -49,6 +53,9 @@ function main()
         }
         else if (raw === true) {
             code = printRawProcessingFile(filename);
+        }
+        else if (outline === true) {
+            code = printOutlineProcessingFile(filename);
         }
         else {
             code = transformProcessingFile(filename);
