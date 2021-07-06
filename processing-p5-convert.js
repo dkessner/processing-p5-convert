@@ -235,7 +235,8 @@ function extractCodeVisitor(node, level, options, result)
     {
         if (options.transform === true)
         {
-            // if we're in a class method body, check the member variable list
+            // transform:  member variables in class method body x -> this.x
+
             if (options.methodBody === true && 
                 "memberVariables" in options && 
                 options.memberVariables.includes(node.image))
@@ -244,11 +245,15 @@ function extractCodeVisitor(node, level, options, result)
                 return true;
             }
 
+            // transform: for each loop : -> of
+
             if (options.enhancedForStatement === true)
             {
                 if (node.image === ":")
-                    result.code += "of"; 
-                //return true;
+                {
+                    result.code += "of ";  
+                    return true;
+                }
             }
         }
 

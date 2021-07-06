@@ -32,4 +32,5 @@
  function draw() {
      background(0);
      ball.display();
+     for (let b of balls) b.display();
  }

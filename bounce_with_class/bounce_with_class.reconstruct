@@ -5,19 +5,19 @@
      float vy;
      int c;
      Ball() {
-         this.x = 200;
-         this.y = 200;
-         this.vx = 3;
-         this.vy = 2;
-         this.c = color(random(255), random(255), random(255));
+         x = 200;
+         y = 200;
+         vx = 3;
+         vy = 2;
+         c = color(random(255), random(255), random(255));
      }
      void display() {
-         fill(this.c);
-         ellipse(this.x, this.y, 100, 100);
-         this.x += this.vx;
-         this.y += this.vy;
-         if (this.x < 50 || this.x > width - 50) this.vx *= -1;
-         if (this.y < 50 || this.y > height - 50) this.vy *= -1;
+         fill(c);
+         ellipse(x, y, 100, 100);
+         x += vx;
+         y += vy;
+         if (x < 50 || x > width - 50) vx *= -1;
+         if (y < 50 || y > height - 50) vy *= -1;
      }
  }
  Ball ball;
@@ -30,4 +30,5 @@
  void draw() {
      background(0);
      ball.display();
+     for (Ball b: balls) b.display();
  }
