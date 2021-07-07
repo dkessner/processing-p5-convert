@@ -60,6 +60,9 @@ void draw()
       b.display();
 
     Ball temp = balls.get(0);
+    temp.x += 50;
+    temp.display();
+    temp.x -= 50;
 }
 
 

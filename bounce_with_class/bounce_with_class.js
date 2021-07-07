@@ -35,4 +35,7 @@
      ball.display();
      for (let b of balls) b.display();
      let temp = balls[0];
+     temp.x += 50;
+     temp.display();
+     temp.x -= 50;
  }

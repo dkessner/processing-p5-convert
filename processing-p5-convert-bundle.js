@@ -25292,6 +25292,11 @@ function extractCodeVisitor(node, level, options, result) {
             // hack for transform: ArrayList get() -> []
             var ok = "argumentList" in node.children;
 
+            if (!ok) {
+                console.log("[processing-p5-convert] arrayListConversionHack error.");
+                return true;
+            }
+
             var tempOptions = {
                 transform: false,
                 ignoreOuterClass: false
@@ -25300,6 +25305,8 @@ function extractCodeVisitor(node, level, options, result) {
             var args = extractCodeFromCST(node.children.argumentList[0], tempOptions);
 
             result.code += "[" + args + "]";
+
+            options.arrayListConversionHack = false;
 
             return false;
         }
