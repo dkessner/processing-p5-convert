@@ -32,4 +32,5 @@
      background(0);
      ball.display();
      for (Ball b: balls) b.display();
+     Ball temp = balls.get(0);
  }

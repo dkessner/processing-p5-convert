@@ -34,4 +34,5 @@
      background(0);
      ball.display();
      for (let b of balls) b.display();
+     let temp = balls[0];
  }

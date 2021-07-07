@@ -301,16 +301,43 @@ function extractCodeVisitor(node, level, options, result)
             let tokens = temp.code.replace(/\s/g,"").split(".");
 
             if (tokens.length >= 2 && 
-                tokens[tokens.length-1] === "add" &&
                 options.arrayLists.includes(tokens[tokens.length-2]))
             {
-                // transform: (ArrayList) add -> push
-                temp.code = temp.code.replace("add", "push"); 
+                if (tokens[tokens.length-1] === "add")
+                {
+                    temp.code = temp.code.replace("add", "push"); 
+                }
+                else if (tokens[tokens.length-1] === "get")
+                {
+                    temp.code = temp.code.replace(/\..*get/,"");
+                    options.arrayListConversionHack = true;
+                }
             }
         }
 
         result.code += temp.code;
         return false; // treat special nodes as terminal
+    }
+    else if (node.name === "methodInvocationSuffix")
+    {
+        if (options.arrayListConversionHack === true)
+        {
+            // hack for transform: ArrayList get() -> []
+            const ok = "argumentList" in node.children;
+
+            const tempOptions = {
+               transform: false,
+               ignoreOuterClass: false
+            };
+
+            const args = extractCodeFromCST(node.children.argumentList[0], tempOptions);
+            
+            result.code += "[" + args + "]";
+
+            return false;
+        }
+
+        return true;
     }
     else if (node.name === "argumentList")
     {

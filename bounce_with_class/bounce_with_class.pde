@@ -58,6 +58,8 @@ void draw()
 
     for (Ball b : balls)
       b.display();
+
+    Ball temp = balls.get(0);
 }
 
 
