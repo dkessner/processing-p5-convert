@@ -37,3 +37,7 @@
      temp.display();
      temp.x -= 50;
  }
+ void keyPressed() {
+     if (key == 'a') balls.add(new Ball());
+     if (key == 'r' && balls.size() > 1) balls.remove(0);
+ }

@@ -1,3 +1,12 @@
+
+class ArrayList extends Array {
+    constructor() {super(...[]);}
+    size() {return this.length;}
+    add(x) {this.push(x);}
+    get(i) {return this[i];}
+    remove(i) {this.splice(i,1);}
+}
+
  class Ball {
      x;
      y;
@@ -26,16 +35,21 @@
  function setup() {
      createCanvas(400, 400);
      ball = new Ball();
-     balls = [];
-     for (let i = 0; i < 5; i++) balls.push(new Ball());
+     balls = new ArrayList();
+     for (let i = 0; i < 5; i++) balls.add(new Ball());
  }
 
  function draw() {
      background(0);
      ball.display();
      for (let b of balls) b.display();
-     let temp = balls[0];
+     let temp = balls.get(0);
      temp.x += 50;
      temp.display();
      temp.x -= 50;
+ }
+
+ function keyPressed() {
+     if (key == 'a') balls.add(new Ball());
+     if (key == 'r' && balls.size() > 1) balls.remove(0);
  }

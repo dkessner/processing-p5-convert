@@ -245,10 +245,12 @@ function registerField(node, options)
 
     if (type.startsWith("ArrayList"))
     {
-        // TODO: handle multiple names
+        // save ArrayList names in options.arrayLists
+
         const name = extractCodeFromCST(node.children.variableDeclaratorList[0], tempOptions);
         if (!("arrayList" in options)) options.arrayLists = [];
         options.arrayLists.push(name); 
+        // TODO: handle multiple names
     }
 }
 
@@ -297,55 +299,10 @@ function extractCodeVisitor(node, level, options, result)
         if (options.transform) {
             if (temp.code === "size ")
                 temp.code = "createCanvas "; // transform: size -> createCanvas
-
-            let tokens = temp.code.replace(/\s/g,"").split(".");
-
-            if (tokens.length >= 2 && 
-                options.arrayLists.includes(tokens[tokens.length-2]))
-            {
-                if (tokens[tokens.length-1] === "add")
-                {
-                    temp.code = temp.code.replace("add", "push"); 
-                }
-                else if (tokens[tokens.length-1] === "get")
-                {
-                    temp.code = temp.code.replace(/\..*get/,"");
-                    options.arrayListConversionHack = true;
-                }
-            }
         }
 
         result.code += temp.code;
         return false; // treat special nodes as terminal
-    }
-    else if (node.name === "methodInvocationSuffix")
-    {
-        if (options.arrayListConversionHack === true)
-        {
-            // hack for transform: ArrayList get() -> []
-            const ok = "argumentList" in node.children;
-
-            if (!ok)
-            {
-                console.log("[processing-p5-convert] arrayListConversionHack error.");
-                return true;
-            }
-
-            const tempOptions = {
-               transform: false,
-               ignoreOuterClass: false
-            };
-
-            const args = extractCodeFromCST(node.children.argumentList[0], tempOptions);
-            
-            result.code += "[" + args + "]";
-
-            options.arrayListConversionHack = false;
-
-            return false;
-        }
-
-        return true;
     }
     else if (node.name === "argumentList")
     {
@@ -454,7 +411,7 @@ function extractCodeVisitor(node, level, options, result)
 
         if (className.code.startsWith("ArrayList"))
         {
-            result.code += "[]";
+            result.code += "new ArrayList()";
             return false;
         }
 
@@ -564,6 +521,18 @@ function printOutlineProcessing(code)
 }
 
 
+const header = `
+class ArrayList extends Array {
+    constructor() {super(...[]);}
+    size() {return this.length;}
+    add(x) {this.push(x);}
+    get(i) {return this[i];}
+    remove(i) {this.splice(i,1);}
+}
+
+`;
+
+
 function transformProcessing(code)
 {
     const wrapped = "public class Dummy {" + code + "}";
@@ -574,7 +543,7 @@ function transformProcessing(code)
         ignoreOuterClass: true
     };
 
-    return extractCodeFromCST(cst, options);
+    return header + extractCodeFromCST(cst, options);
 }
 
 

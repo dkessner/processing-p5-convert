@@ -25230,10 +25230,12 @@ function registerField(node, options) {
     var type = extractCodeFromCST(node.children.unannType[0], tempOptions);
 
     if (type.startsWith("ArrayList")) {
-        // TODO: handle multiple names
+        // save ArrayList names in options.arrayLists
+
         var name = extractCodeFromCST(node.children.variableDeclaratorList[0], tempOptions);
         if (!("arrayList" in options)) options.arrayLists = [];
         options.arrayLists.push(name);
+        // TODO: handle multiple names
     }
 }
 
@@ -25272,46 +25274,10 @@ function extractCodeVisitor(node, level, options, result) {
 
         if (options.transform) {
             if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
-
-            var tokens = temp.code.replace(/\s/g, "").split(".");
-
-            if (tokens.length >= 2 && options.arrayLists.includes(tokens[tokens.length - 2])) {
-                if (tokens[tokens.length - 1] === "add") {
-                    temp.code = temp.code.replace("add", "push");
-                } else if (tokens[tokens.length - 1] === "get") {
-                    temp.code = temp.code.replace(/\..*get/, "");
-                    options.arrayListConversionHack = true;
-                }
-            }
         }
 
         result.code += temp.code;
         return false; // treat special nodes as terminal
-    } else if (node.name === "methodInvocationSuffix") {
-        if (options.arrayListConversionHack === true) {
-            // hack for transform: ArrayList get() -> []
-            var ok = "argumentList" in node.children;
-
-            if (!ok) {
-                console.log("[processing-p5-convert] arrayListConversionHack error.");
-                return true;
-            }
-
-            var tempOptions = {
-                transform: false,
-                ignoreOuterClass: false
-            };
-
-            var args = extractCodeFromCST(node.children.argumentList[0], tempOptions);
-
-            result.code += "[" + args + "]";
-
-            options.arrayListConversionHack = false;
-
-            return false;
-        }
-
-        return true;
     } else if (node.name === "argumentList") {
         handle_argumentList(node, level, options, result);
         return false;
@@ -25379,14 +25345,14 @@ function extractCodeVisitor(node, level, options, result) {
         result.code += "constructor"; // transform: ClassName() -> constructor()
         return false;
     } else if (node.name === "newExpression" && options.transform === true) {
-        var _ok = "unqualifiedClassInstanceCreationExpression" in node.children && "classOrInterfaceTypeToInstantiate" in node.children.unqualifiedClassInstanceCreationExpression[0].children;
+        var ok = "unqualifiedClassInstanceCreationExpression" in node.children && "classOrInterfaceTypeToInstantiate" in node.children.unqualifiedClassInstanceCreationExpression[0].children;
 
         var className = { code: "" };
         var start = node.children.unqualifiedClassInstanceCreationExpression[0].children.classOrInterfaceTypeToInstantiate[0];
         visitNodesRecursive(start, level + 1, extractCodeVisitor, options, className);
 
         if (className.code.startsWith("ArrayList")) {
-            result.code += "[]";
+            result.code += "new ArrayList()";
             return false;
         }
 
@@ -25485,6 +25451,8 @@ function printOutlineProcessing(code) {
     printOutlineTree(cst);
 }
 
+var header = '\nclass ArrayList extends Array {\n    constructor() {super(...[]);}\n    size() {return this.length;}\n    add(x) {this.push(x);}\n    get(i) {return this[i];}\n    remove(i) {this.splice(i,1);}\n}\n\n';
+
 function transformProcessing(code) {
     var wrapped = "public class Dummy {" + code + "}";
     var cst = (0, _javaParser.parse)(wrapped);
@@ -25494,7 +25462,7 @@ function transformProcessing(code) {
         ignoreOuterClass: true
     };
 
-    return extractCodeFromCST(cst, options);
+    return header + extractCodeFromCST(cst, options);
 }
 
 function reconstructProcessing(code) {
