@@ -66,3 +66,12 @@ void draw()
 }
 
 
+void keyPressed()
+{
+    if (key == 'a')
+        balls.add(new Ball());
+    else if (key == 'r' && balls.size() > 1)
+        balls.remove(0);
+}
+
+
