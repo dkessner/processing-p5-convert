@@ -51,5 +51,8 @@ class ArrayList extends Array {
 
  function keyPressed() {
      if (key == 'a') balls.add(new Ball());
-     if (key == 'r' && balls.size() > 1) balls.remove(0);
+     else if (key == 'r' && balls.size() > 1) balls.remove(0);
+     else {
+         console.log("How's it going?");
+     }
  }

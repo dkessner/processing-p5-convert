@@ -71,8 +71,13 @@ void keyPressed()
     if (key == 'a')
         balls.add(new Ball());
 
-    if (key == 'r' && balls.size() > 1)
+    else if (key == 'r' && balls.size() > 1)
         balls.remove(0);
+
+    else
+    {
+      println("How's it going?");
+    }
 }
 
 

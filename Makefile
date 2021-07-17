@@ -19,6 +19,7 @@ tests: \
 
 %.langtest:
 	node ppconvert --reconstruct $*/*.pde | diff - $*/$*.reconstruct
+	node ppconvert  $*/$*.reconstruct | diff - $*/$*.js
 
 serve:
 	bundle exec jekyll serve --baseurl=''

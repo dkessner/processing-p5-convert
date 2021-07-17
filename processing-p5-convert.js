@@ -221,6 +221,31 @@ function handle_basicForStatement(node, level, options, data) {
     visitNodesRecursive(node.children.statement[0], level+1, extractCodeVisitor, options, data);
 }
 
+function handle_ifStatement(node, level, options, data) {
+
+    const ok = "If" in node.children &&
+               "Else" in node.children &&
+               "LBrace" in node.children &&
+               "RBrace" in node.children &&
+               "expression" in node.children &&
+               "statement" in node.children && node.children.statement.length === 2;
+
+    if (!ok)
+    {
+        console.log("[handle_ifStatement else handler] I am insane!");
+        return;
+    }
+
+    visitNodesRecursive(node.children.If[0], level+1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.LBrace[0], level+1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.expression[0], level+1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.RBrace[0], level+1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.statement[0], level+1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.Else[0], level+1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.statement[1], level+1, extractCodeVisitor, options, data);
+}
+
+
 // TODO: deprecated
 
 function transformCodeFromCST(cst)
@@ -299,6 +324,8 @@ function extractCodeVisitor(node, level, options, result)
         if (options.transform) {
             if (temp.code === "size ")
                 temp.code = "createCanvas "; // transform: size -> createCanvas
+            else if (temp.code === "println ")
+                temp.code = "console.log "; // transform println -> console.log
         }
 
         result.code += temp.code;
@@ -331,6 +358,15 @@ function extractCodeVisitor(node, level, options, result)
     {
         handle_basicForStatement(node, level, options, result);
         return false;
+    }
+    else if (node.name === "ifStatement")
+    {
+        if ("Else" in node.children)
+        {
+            handle_ifStatement(node, level, options, result);
+            return false;
+        }
+        return true;
     }
     else if (node.name === "enhancedForStatement")
     {
