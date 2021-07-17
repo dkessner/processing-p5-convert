@@ -116,6 +116,44 @@ function handle_fqnOrRefType(node, level, options, data) {
     data.code += temp.code;
 }
 
+function handle_variableDeclaratorList(node, level, options, data) {
+    //
+    // variableDeclaratorList stores arguments and commas in separate arrays
+    //
+    // float mouseX, mouseY;
+    //  Comma: [\,]
+    //  variableDeclarator: [mouseX, mouseY]
+    //
+
+    // sanity check
+
+    const ok = "variableDeclarator" in node.children && "Comma" in node.children;
+
+    if (!ok)
+    {
+        console.log("[handle_variableDeclaratorList] I am insane!");
+        return;
+    }
+
+    // extract code
+
+    const variableDeclaratorArray = node.children.variableDeclarator;
+    const commaArray = "Comma" in node.children ? node.children.Comma : null;
+
+    let temp = {code:""};
+
+    for (const index in variableDeclaratorArray)
+    {
+        visitNodesRecursive(variableDeclaratorArray[index], level+1, extractCodeVisitor, options, temp);
+        if (commaArray !== null && index in commaArray)
+            visitNodesRecursive(commaArray[index], level+1, extractCodeVisitor, options, temp);
+    }
+
+    // save extracted code
+
+    data.code += temp.code;
+}
+
 function handle_argumentList(node, level, options, data) {
     //
     // argumentList stores arguments and commas in separate arrays
@@ -335,6 +373,16 @@ function extractCodeVisitor(node, level, options, result)
     {
         handle_argumentList(node, level, options, result);
         return false;
+    }
+    else if (node.name === "variableDeclaratorList")
+    {
+        if ("Comma" in node.children)
+        {
+            handle_variableDeclaratorList(node, level, options, result);
+            return false;
+        }
+        else
+            return true;
     }
     else if (node.name === "result")
     {
