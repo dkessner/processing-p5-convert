@@ -40,6 +40,7 @@ function handleConvertButton()
     // run the p5.js code
 
     window.eval(codeOutput);
+    preload();
     setup();
 }
 

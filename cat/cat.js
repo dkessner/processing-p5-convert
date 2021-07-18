@@ -11,17 +11,17 @@ class ArrayList extends Array {
  let mouse;
  let mouse_x, mouse_y;
 
- function preload() {
-     cat = loadImage("cat.png");
-     mouse = loadImage("mouse.png");
- }
-
  function setup() {
      createCanvas(400, 400);
      noCursor();
      cat.resize(100, 100);
      mouse.resize(50, 50);
      moveMouse();
+ }
+
+ function preload() {
+     cat = loadImage("cat.png");
+     mouse = loadImage("mouse.png");
  }
 
  function moveMouse() {

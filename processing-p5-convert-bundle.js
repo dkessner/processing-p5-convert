@@ -25516,6 +25516,7 @@ function extractCodeVisitor(node, level, options, result) {
         if (options.transform) {
             if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
             else if (temp.code === "println ") temp.code = "console.log "; // transform println -> console.log
+                else if (temp.code === "loadImage " && options.insideSetup === true) options.isLoadImage = true;
         }
 
         result.code += temp.code;
@@ -25581,7 +25582,7 @@ function extractCodeVisitor(node, level, options, result) {
         return true;
     } else if (node.name === "classDeclaration") {
         var newOptions = _extends({}, options, {
-            classDeclaration: true,
+            classDeclaration: true, // set context: inside class declaration
             memberVariables: [],
             arrayLists: [].concat(_toConsumableArray(options.arrayLists))
         });
@@ -25610,6 +25611,43 @@ function extractCodeVisitor(node, level, options, result) {
         }
 
         return true;
+    } else if (node.name === "methodDeclaration") {
+        var _newOptions = _extends({}, options, {
+            methodDeclaration: true // set context: inside method declaration
+        });
+
+        visitChildren(node, level + 1, extractCodeVisitor, _newOptions, result);
+
+        if (_newOptions.insideSetup === true && _newOptions.preload) {
+            result.code += "function preload() {" + _newOptions.preload + "}";
+        }
+
+        return false;
+    } else if (node.name === "methodDeclarator") {
+        if (options.classDeclaration !== true && options.methodDeclaration === true) {
+            var methodName = node.children.Identifier[0].image;
+
+            if (methodName === "setup") {
+                options.insideSetup = true; // add more context: inside setup()
+                options.preload = "";
+            }
+
+            return true;
+        }
+    } else if (node.name === "blockStatement") {
+        if (options.insideSetup === true) {
+            var _temp = { code: "" };
+            visitChildren(node, level + 1, extractCodeVisitor, options, _temp);
+
+            if (options.isLoadImage === true) {
+                options.preload += _temp.code;
+                options.isLoadImage = false;
+            } else {
+                result.code += _temp.code;
+            }
+
+            return false;
+        }
     }
 
     return true;

@@ -12,7 +12,8 @@ tests: \
     hello.test hello.langtest \
     bounce.test bounce.langtest \
     grid.test grid.langtest \
-    bounce_with_class.test bounce_with_class.langtest 
+    bounce_with_class.test bounce_with_class.langtest \
+    cat.test cat.langtest
 
 %.test:
 	node ppconvert $*/*.pde | diff - $*/$*.js
