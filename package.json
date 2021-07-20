@@ -2,12 +2,15 @@
   "name": "processing-p5-convert",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "ppconvert.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Darren Kessner",
   "license": "ISC",
+  "bin": {
+        "ppconvert": "./ppconvert.js"
+  },
   "dependencies": {
     "fs": "^0.0.1-security",
     "java-parser": "^1.2.0",
