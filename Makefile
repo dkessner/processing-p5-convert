@@ -33,6 +33,12 @@ install:
 	npm install
 	bundle install
 
+install-cli:
+	npm install -g .
+
+uninstall-cli:
+	npm uninstall -g ppconvert processing-p5-convert
+
 clean:
 	rm -f processing-p5-convert-bundle.js*
 
