@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 //
 // ppconvert.js
 //
@@ -20,6 +22,16 @@ let outline = false;
 function main()
 {
     let args = process.argv.slice(2);
+
+    if (args.length === 0)
+    {
+        console.log("Usage: ppconvert [option] filename1.pde [...]");
+        console.log("Options:");
+        console.log("  --reconstruct: print reconstructed Processing code");
+        console.log("  --raw: print syntax tree");
+        console.log("  --outline: print outline");
+        return;
+    }
 
     let switches = args.filter(option => option.startsWith('--'));
     let filenames = args.filter(option => !option.startsWith('--'));
@@ -48,6 +60,7 @@ function main()
         catch (err) 
         {
             console.error("[ppconvert] " + err.message)
+            return;
         }
     }
 

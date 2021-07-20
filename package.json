@@ -9,7 +9,8 @@
   "author": "Darren Kessner",
   "license": "ISC",
   "bin": {
-        "ppconvert": "./ppconvert.js"
+        "ppconvert": "./ppconvert.js",
+        "processing-p5-convert": "./processing-p5-convert.js"
   },
   "dependencies": {
     "fs": "^0.0.1-security",
