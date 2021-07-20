@@ -1,7 +1,7 @@
 //FYI I DID FINISH HARD MODE YET!
 int gameState = 0;
 
-PImage background;
+PImage bg;
 PImage elephant1;
 PImage elephant2;
 
@@ -51,8 +51,8 @@ void setup() {
   elephant2.resize(width/4, height/4);
 
   //background header
-  background = loadImage("background.png");
-  background.resize(800, 800);
+  bg = loadImage("background.png");
+  bg.resize(800, 800);
 
   //cars!
   redcar = loadImage("redcar.png");
@@ -163,7 +163,7 @@ void keyPressed() {
 }
 void drawStart() {
 
-  background(background);
+  background(bg);
 
   //text
   textAlign(CENTER);
