@@ -669,10 +669,26 @@ class ArrayList extends Array {
 `;
 
 
+function preprocessProcessing(code)
+{
+    let wrapped = "public class Dummy {" + code + "}";
+   
+    // hack: Processing allows int/color literals of the form #ff1234 (6 digits
+    // exactly), but Processing literals are not valid Java, and java-parser
+    // chokes on them.  Also, p5.js uses strings.  So we quote all Processing
+    // color literals before parsing.
+
+    const regex_hex = /#[0-9A-Fa-f]{6}/g;
+    wrapped = wrapped.replace(regex_hex, '"$&"');
+
+    return wrapped;
+}
+
+
 function transformProcessing(code)
 {
-    const wrapped = "public class Dummy {" + code + "}";
-    const cst = parse(wrapped);
+    const preprocessed = preprocessProcessing(code);
+    const cst = parse(preprocessed);
 
     const options = {
         transform: true,
@@ -685,15 +701,22 @@ function transformProcessing(code)
 
 function reconstructProcessing(code)
 {
-    const wrapped = "public class Dummy {" + code + "}";
-    const cst = parse(wrapped);
+    const preprocessed = preprocessProcessing(code);
+    const cst = parse(preprocessed);
 
     const options = {
         transform: false,
         ignoreOuterClass: true
     };
 
-    return extractCodeFromCST(cst, options);
+    let output = extractCodeFromCST(cst, options);
+
+    // hack: we quote Processing color literals in preprocessProcessing, so
+    // we need to un-quote for round-trip back to valid Processing code
+
+    const regex_quoted_hex = /\"#[0-9A-Fa-f]{6}\"/g;
+    let unquoted = output.replace(regex_quoted_hex, s => s.substring(1, s.length-1));
+    return unquoted;
 }
 
 
