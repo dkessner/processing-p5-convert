@@ -8,11 +8,13 @@
 <main></main>
 
 Converted p5.js:
-```javascript
-{% include_relative cow_game.js %}```
+
+```javascript {% include_relative cow_game.js %}```
 
 Original Processing:
-```java
-{% include_relative balls.pde  %}
-{% include_relative cow_game.pde %}```
+
+```java {% include_relative balls.pde  %}```
+
+```java {% include_relative cow_game.pde %}```
+
 
