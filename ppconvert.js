@@ -4,12 +4,13 @@
 
 
 import { 
-    printRawProcessingFile, 
-    printOutlineProcessingFile, 
-    transformProcessingFile, 
-    reconstructProcessingFile } 
+    printRawProcessing, 
+    printOutlineProcessing, 
+    transformProcessing, 
+    reconstructProcessing} 
 from './processing-p5-convert.js';
 
+import { readFileSync } from 'fs';
 
 let reconstruct = false;
 let raw = false;
@@ -20,49 +21,52 @@ function main()
 {
     let args = process.argv.slice(2);
 
-    // handle command line
+    let switches = args.filter(option => option.startsWith('--'));
+    let filenames = args.filter(option => !option.startsWith('--'));
 
-    for (let i=0; i<args.length; i++)
+    for (const option of switches)
     {
-        let option = args[i];
-
-        if (option.startsWith('--'))
-        {
-            if (option === '--reconstruct')
-                reconstruct = true;
-            else if (option === '--raw')
-                raw = true;
-            else if (option === '--outline')
-                outline = true;
-        }
+        if (option === '--reconstruct')
+            reconstruct = true;
+        else if (option === '--raw')
+            raw = true;
+        else if (option === '--outline')
+            outline = true;
         else 
-        {
-            args.splice(0, i);
-            break;
-        }
+            console.log("[ppconvert] Ignoring unkown option " + option);
     }
 
-    // convert files
+    let inputCode = "";
 
-    for (const filename of args)
+    for (const filename of filenames)
     {
-        let code;
-
-        if (reconstruct === true) {
-            code = reconstructProcessingFile(filename);
+        try 
+        {
+            const temp = readFileSync(filename, 'utf8')
+            inputCode += temp;
+        } 
+        catch (err) 
+        {
+            console.error("[ppconvert] " + err.message)
         }
-        else if (raw === true) {
-            code = printRawProcessingFile(filename);
-        }
-        else if (outline === true) {
-            code = printOutlineProcessingFile(filename);
-        }
-        else {
-            code = transformProcessingFile(filename);
-        }
-
-        if (code) console.log(code);
     }
+
+    let outputCode;
+
+    if (reconstruct === true) {
+        outputCode = reconstructProcessing(inputCode);
+    }
+    else if (raw === true) {
+        outputCode = printRawProcessing(inputCode);
+    }
+    else if (outline === true) {
+        outputCode = printOutlineProcessing(inputCode);
+    }
+    else {
+        outputCode = transformProcessing(inputCode);
+    }
+
+    if (outputCode) console.log(outputCode);
 }
 
 

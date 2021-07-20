@@ -14008,7 +14008,7 @@ module.exports = {
 };
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":228}],59:[function(require,module,exports){
+},{"_process":227}],59:[function(require,module,exports){
 /*jshint node:true */
 /* globals define */
 /*
@@ -25011,7 +25011,7 @@ module.exports = words;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.reconstructProcessingFile = exports.transformProcessingFile = exports.printOutlineProcessingFile = exports.printRawProcessingFile = exports.transformProcessing = exports.transformJava = exports.reconstructJava = undefined;
+exports.reconstructProcessing = exports.transformProcessing = exports.printOutlineProcessing = exports.printRawProcessing = exports.transformJava = exports.reconstructJava = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -25020,8 +25020,6 @@ var _javaParser = require('java-parser');
 var _jsBeautify = require('js-beautify');
 
 var _jsBeautify2 = _interopRequireDefault(_jsBeautify);
-
-var _fs = require('fs');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -25034,11 +25032,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 exports.reconstructJava = reconstructJava;
 exports.transformJava = transformJava;
+exports.printRawProcessing = printRawProcessing;
+exports.printOutlineProcessing = printOutlineProcessing;
 exports.transformProcessing = transformProcessing;
-exports.printRawProcessingFile = printRawProcessingFile;
-exports.printOutlineProcessingFile = printOutlineProcessingFile;
-exports.transformProcessingFile = transformProcessingFile;
-exports.reconstructProcessingFile = reconstructProcessingFile;
+exports.reconstructProcessing = reconstructProcessing;
 
 var beautify = _jsBeautify2.default['js'];
 
@@ -25582,46 +25579,20 @@ function reconstructProcessing(code) {
     return extractCodeFromCST(cst, options);
 }
 
-function applyToFile(filename, transformation) {
-    try {
-        var input = (0, _fs.readFileSync)(filename, 'utf8');
-        var output = transformation(input);
-        return output;
-    } catch (err) {
-        console.error("[applyToFile] " + err.message);
-    }
-}
-
-var printRawProcessingFile = function printRawProcessingFile(filename) {
-    return applyToFile(filename, printRawProcessing);
-};
-var printOutlineProcessingFile = function printOutlineProcessingFile(filename) {
-    return applyToFile(filename, printOutlineProcessing);
-};
-var transformProcessingFile = function transformProcessingFile(filename) {
-    return applyToFile(filename, transformProcessing);
-};
-var reconstructProcessingFile = function reconstructProcessingFile(filename) {
-    return applyToFile(filename, reconstructProcessing);
-};
-
 if (typeof module !== 'undefined') {
     module.exports = {
         reconstructJava: reconstructJava,
         transformJava: transformJava,
+        printRawProcessing: printRawProcessing,
+        printOutlineProcessing: printOutlineProcessing,
         transformProcessing: transformProcessing,
-        printRawProcessingFile: printRawProcessingFile,
-        printOutlineProcessingFile: printOutlineProcessingFile,
-        transformProcessingFile: transformProcessingFile,
-        reconstructProcessingFile: reconstructProcessingFile
+        reconstructProcessing: reconstructProcessing
     };
 
     console.log("processing-p5js-convert");
 }
 
-},{"fs":227,"java-parser":44,"js-beautify":59}],227:[function(require,module,exports){
-
-},{}],228:[function(require,module,exports){
+},{"java-parser":44,"js-beautify":59}],227:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 

@@ -6,19 +6,16 @@
 export {
     reconstructJava, 
     transformJava, 
+    printRawProcessing,
+    printOutlineProcessing,
     transformProcessing,
-    printRawProcessingFile,
-    printOutlineProcessingFile,
-    transformProcessingFile,
-    reconstructProcessingFile
+    reconstructProcessing
 };
 
 import { parse } from 'java-parser';
 
 import js from 'js-beautify';
 const beautify = js['js'];
-
-import { readFileSync } from 'fs';
 
 
 // recursion implementation
@@ -700,38 +697,16 @@ function reconstructProcessing(code)
 }
 
 
-function applyToFile(filename, transformation)
-{
-    try 
-    {
-        const input = readFileSync(filename, 'utf8')
-        const output = transformation(input);
-        return output;
-    } 
-    catch (err) 
-    {
-        console.error("[applyToFile] " + err.message)
-    }
-}
-
-
-const printRawProcessingFile = filename => applyToFile(filename, printRawProcessing);
-const printOutlineProcessingFile = filename => applyToFile(filename, printOutlineProcessing);
-const transformProcessingFile = filename => applyToFile(filename, transformProcessing);
-const reconstructProcessingFile = filename => applyToFile(filename, reconstructProcessing);
-
-
 if (typeof(module) !== 'undefined')
 {
     module.exports = 
     { 
         reconstructJava, 
         transformJava, 
+        printRawProcessing,
+        printOutlineProcessing,
         transformProcessing,
-        printRawProcessingFile,
-        printOutlineProcessingFile,
-        transformProcessingFile,
-        reconstructProcessingFile,
+        reconstructProcessing,
     };
 
     console.log("processing-p5js-convert");
