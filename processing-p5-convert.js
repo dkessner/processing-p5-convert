@@ -448,12 +448,14 @@ function extractCodeVisitor(node, level, options, result)
 
         if (options.classDeclaration === true && options.fieldDeclaration === true)
         { 
-            let variableName = {code: ""};
-            visitChildren(node, level, extractCodeVisitor, options, variableName);
-            options.memberVariables.push(variableName.code.trim());
+            // look ahead...
+            let variableNameContainer = {code: ""};
+            visitChildren(node, level, extractCodeVisitor, options, variableNameContainer);
+            let variableName = variableNameContainer.code.split(' ')[0];
+            options.memberVariables.push(variableName);
         }
         
-        return true;        
+        return true;  // ...but keep going      
     }
     else if (node.name === "classDeclaration")
     {
