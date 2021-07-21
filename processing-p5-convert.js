@@ -181,6 +181,13 @@ function handle_argumentList(node, level, options, data) {
     for (const index in expressionArray)
     {
         visitNodesRecursive(expressionArray[index], level+1, extractCodeVisitor, options, temp);
+
+        if (options.isCreateFont === true)
+        {
+            options.isCreateFont = false;
+            break;  // retain first argument only (transform: createFont -> loadFont)
+        }
+
         if (commaArray !== null && index in commaArray)
             visitNodesRecursive(commaArray[index], level+1, extractCodeVisitor, options, temp);
     }
@@ -370,11 +377,12 @@ function extractCodeVisitor(node, level, options, result)
             else if (temp.code === "LEFT ")
                 temp.code = "LEFT_ARROW ";
             else if (options.insideSetup === true && temp.code.startsWith("load"))
-                options.isLoadImage = true; 
+                options.isLoadFile = true; 
             else if (temp.code === "createFont ")
             {
                 temp.code = "loadFont "; // transform println -> console.log
-                options.isLoadImage = true; 
+                options.isLoadFile = true; 
+                options.isCreateFont = true;
             }
         }
 
@@ -549,14 +557,14 @@ function extractCodeVisitor(node, level, options, result)
     else if (node.name === "blockStatement")
     {
         if (options.insideSetup === true)
-        { 
+        {
             let temp = {code:""};
             visitChildren(node, level+1, extractCodeVisitor, options, temp);
 
-            if (options.isLoadImage === true)
+            if (options.isLoadFile === true)
             {
                 options.preload += temp.code;
-                options.isLoadImage = false;
+                options.isLoadFile = false;
             }
             else
             {

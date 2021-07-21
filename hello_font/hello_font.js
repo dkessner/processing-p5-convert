@@ -19,6 +19,5 @@ class ArrayList extends Array {
  }
 
  function preload() {
-     //myFont = loadFont("data/sudegnakno4.ttf", 64);
-     myFont = loadFont("data/sudegnakno4.ttf"); // TODO remove 2nd arg
+     myFont = loadFont("data/sudegnakno4.ttf");
  }
