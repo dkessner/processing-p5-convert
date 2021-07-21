@@ -1,0 +1,9 @@
+
+Open­Type SVG color font (SVG-​in-​OT) for­mat is pro­posal for multi-​color, 
+vec­tor fonts. To be able to use the color fonts you need to have 
+installed Adobe Photoshop CC2017, Adobe Illustrator CC2018, 
+Mozilla Fire­fox or Microsoft Edge.
+
+Enjoy!
+Grzegorz (gluk)
+www.glukfonts.pl

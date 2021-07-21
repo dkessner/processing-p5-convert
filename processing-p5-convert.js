@@ -371,6 +371,11 @@ function extractCodeVisitor(node, level, options, result)
                 temp.code = "LEFT_ARROW ";
             else if (options.insideSetup === true && temp.code.startsWith("load"))
                 options.isLoadImage = true; 
+            else if (temp.code === "createFont ")
+            {
+                temp.code = "loadFont "; // transform println -> console.log
+                options.isLoadImage = true; 
+            }
         }
 
         result.code += temp.code;
