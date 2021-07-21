@@ -7,7 +7,7 @@
 
 Transformations:
 - variable declarations: `int/float/...` -> `let`
-- standard operators, conditions, and loops are unchanged
+- standard operators and conditions are unchanged
 
 
 <main></main>

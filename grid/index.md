@@ -5,6 +5,11 @@
 
 # grid
 
+Transformations:
+- `for (int i=0; i<5; i++)` -> `for (let i=0; i<5; i++)` 
+ 
+
+
 <main></main>
 
 Converted p5.js:
