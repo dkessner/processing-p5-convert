@@ -1,22 +1,15 @@
 	
-//import processing.sound.*;
-
+import processing.sound.*;
 
 
 SoundFile meow;
-
-
-SoundFile loadSound(String filename)
-{
-    return new SoundFile(this, filename);
-}
 
 
 void setup() {
   size(400, 400);
   background(0);
     
-  meow = loadSound("meow.wav");
+  meow = new SoundFile(this, "meow.wav");
   meow.play();
 }      
 
