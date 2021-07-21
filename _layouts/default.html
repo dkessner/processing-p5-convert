@@ -17,33 +17,9 @@
           <h1>{{ site.title | default: site.github.repository_name }}</h1>
         </a>
         <h2>{{ site.description | default: site.github.project_tagline }}</h2>
-
-        <!--
-        <section id="downloads">
-          {% if site.show_downloads %}
-            <a href="{{ site.github.zip_url }}" class="btn">Download as .zip</a>
-            <a href="{{ site.github.tar_url }}" class="btn">Download as .tar.gz</a>
-          {% endif %}
-          <a href="{{ site.github.repository_url }}" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
-        </section>
-        -->
       </div>
 
-      <div class="container">
-          <h3>Tests</h3>
-          <a href="{{ site.baseurl }}/hello">hello</a>
-          <a href="{{ site.baseurl }}/bounce">bounce</a>
-          <a href="{{ site.baseurl }}/grid">grid</a>
-          <a href="{{ site.baseurl }}/bounce_with_class">bounce_with_class</a>
-          <a href="{{ site.baseurl }}/cat">cat</a>
-      </div>
-      <br/>
-
-      <div class="container">
-          <h3>Summer 2021 student projects</h3>
-          <a href="{{ site.baseurl }}/summer2021/cow_game">cow_game</a>
-          <a href="{{ site.baseurl }}/summer2021/Cross_the_Road">Cross_the_Road</a>
-      </div>
+      {% include menu.html %}
 
     </header>
 
@@ -52,6 +28,8 @@
         {{ content }}
       </section>
     </div>
+
+    {% include suppress_default_keypress.html %}
 
     {% if site.google_analytics %}
       <script>
