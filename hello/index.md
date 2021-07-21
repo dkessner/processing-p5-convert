@@ -5,6 +5,11 @@
 
 # hello
 
+Transformations:
+- `size()` -> `createCanvas()`
+- function declarations: `void/int/...` -> `function`
+- Processing color/int literals: `#ff1234`-> `'#ff1234'`
+
 <main></main>
 
 Converted p5.js:

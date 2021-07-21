@@ -5,6 +5,17 @@
 
 # bounce with class
 
+Transformations:
+- class
+    - member field declarations: `int x;` -> `x;`
+    - `ClassName()` -> `constructor()`
+    - all member variable references: `x` -> `this.x`
+    - `int methodName()` -> `methodName()`
+- for-each loop -> for-of loop
+- simple `ArrayList` implementation in Javascript (wrapper over Array)
+    
+
+
 <main></main>
 
 Converted p5.js:

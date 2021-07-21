@@ -5,6 +5,11 @@
 
 # bounce
 
+Transformations:
+- variable declarations: `int/float/...` -> `let`
+- standard operators, conditions, and loops are unchanged
+
+
 <main></main>
 
 Converted p5.js:
