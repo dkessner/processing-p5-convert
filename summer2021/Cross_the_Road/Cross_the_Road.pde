@@ -39,8 +39,8 @@ void setup() {
 
   //setup
   size(800, 800);
-  font = loadFont("AmericanTypewriter-Semibold-48.vlw");
-  textFont(font);
+  //font = loadFont("AmericanTypewriter-Semibold-48.vlw");
+  //textFont(font);
 
   //elephant header
   elephant1 = loadImage("elephant.png");
@@ -290,7 +290,7 @@ void drawGame3() {
 
 void drawWin() {
 
-  background(background);
+  background(bg);
 
   fill(#28A03F);
   text("You Win!", width/2, height/2 - 50);
@@ -299,7 +299,7 @@ void drawWin() {
 
 void drawLose() {
 
-  background(background);
+  background(bg);
 
   fill(#FC2424);
   text("You Lost!", width/2, height/2 - 50);

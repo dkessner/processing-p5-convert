@@ -41,8 +41,6 @@ class ArrayList extends Array {
 
  function setup() {
      createCanvas(800, 800);
-     font = loadFont("AmericanTypewriter-Semibold-48.vlw");
-     textFont(font);
      elephant1.resize(width / 4 + 50, height / 4 + 50);
      elephant2.resize(width / 4, height / 4);
      bg.resize(800, 800);
@@ -112,13 +110,13 @@ class ArrayList extends Array {
      if (keyCode == TAB) {
          gameState = 0;
      }
-     if (keyCode == UP) {
+     if (keyCode == UP_ARROW) {
          playerY -= 10;
-     } else if (keyCode == DOWN) {
+     } else if (keyCode == DOWN_ARROW) {
          playerY += 10;
-     } else if (keyCode == RIGHT) {
+     } else if (keyCode == RIGHT_ARROW) {
          playerX += 10;
-     } else if (keyCode == LEFT) {
+     } else if (keyCode == LEFT_ARROW) {
          playerX -= 10;
      } else if (key == '0') {
          playerY -= 10;
@@ -232,14 +230,14 @@ class ArrayList extends Array {
  }
 
  function drawWin() {
-     background(background);
+     background(bg);
      fill("#28A03F");
      text("You Win!", width / 2, height / 2 - 50);
      text("Click Tab to Play Again", width / 2, height / 2 + 50);
  }
 
  function drawLose() {
-     background(background);
+     background(bg);
      fill("#FC2424");
      text("You Lost!", width / 2, height / 2 - 50);
      text("Click Tab to Play Again", width / 2, height / 2 + 50);

@@ -361,7 +361,15 @@ function extractCodeVisitor(node, level, options, result)
                 temp.code = "createCanvas "; // transform: size -> createCanvas
             else if (temp.code === "println ")
                 temp.code = "console.log "; // transform println -> console.log
-            else if (temp.code === "loadImage " && options.insideSetup === true)
+            else if (temp.code === "UP ")
+                temp.code = "UP_ARROW ";
+            else if (temp.code === "DOWN ")
+                temp.code = "DOWN_ARROW ";
+            else if (temp.code === "RIGHT ")
+                temp.code = "RIGHT_ARROW ";
+            else if (temp.code === "LEFT ")
+                temp.code = "LEFT_ARROW ";
+            else if (options.insideSetup === true && temp.code.startsWith("load"))
                 options.isLoadImage = true; 
         }
 
@@ -618,7 +626,11 @@ const transformJava = code => transformCodeFromCST(parse(code));
 
 function printRawProcessing(code)
 {
-    const wrapped = "public class Dummy {" + code + "}";
+    let wrapped = "public class Dummy {" + code + "}";
+
+    const regex_hex = /#[0-9A-Fa-f]{6}/g;
+    wrapped = wrapped.replace(regex_hex, '"$&"'); // hack Processing color hex literal
+
     const cst = parse(wrapped);
     printCstNodeTree(cst);
 }
