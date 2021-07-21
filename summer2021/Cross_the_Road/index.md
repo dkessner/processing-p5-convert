@@ -1,6 +1,6 @@
 
 
-<script src="/p5/p5.min.js"></script>
+<script src="{{ site.baseurl }}/p5/p5.min.js"></script>
 <script src="Cross_the_Road.js"></script>
 
 # Cross_the_Road

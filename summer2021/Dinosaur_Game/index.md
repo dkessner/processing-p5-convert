@@ -1,6 +1,6 @@
 
 
-<script src="/p5/p5.min.js"></script>
+<script src="{{ site.baseurl }}/p5/p5.min.js"></script>
 <script src="Dinosaur_Game.js"></script>
 
 # Dinosaur_Game
