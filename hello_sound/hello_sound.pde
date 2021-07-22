@@ -10,7 +10,6 @@ void setup() {
   background(0);
     
   meow = new SoundFile(this, "meow.wav");
-  meow.play();
 }      
 
 

@@ -640,9 +640,7 @@ const transformJava = code => transformCodeFromCST(parse(code));
 function printRawProcessing(code)
 {
     const preprocessed = preprocessProcessing(code);
-    let wrapped = "public class Dummy {" + preprocessed + "}";
-
-    const cst = parse(wrapped);
+    const cst = parse(preprocessed);
     printCstNodeTree(cst);
 }
 
@@ -704,10 +702,41 @@ function preprocessProcessing(code)
     const regex_hex = /#[0-9A-Fa-f]{6}/g;
     wrapped = wrapped.replace(regex_hex, '"$&"');
 
+    // comment out import statements
+    
     const regex_import = /import/g;
     wrapped = wrapped.replace(regex_import, '//$&');
 
+    // hack: add missing Processing loadSound()
+
+    const regex_soundFile = /new.*SoundFile.*,/g;
+    wrapped = wrapped.replace(regex_soundFile, 'loadSound(');
+
     return wrapped;
+}
+
+
+function unpreprocessProcessing(code)
+{
+    // undo the regex transformations (but not the outer Dummy class (for now?))
+
+    // we quote Processing color literals in preprocessProcessing, so
+    // we need to un-quote for round-trip back to valid Processing code
+
+    const regex_quoted_hex = /\"#[0-9A-Fa-f]{6}\"/g;
+    code = code.replace(regex_quoted_hex, s => s.substring(1, s.length-1));
+
+    // expand loadSound(), add import if necessary
+
+    const regex_soundFile = /loadSound\(/;
+    let matches = code.match(regex_soundFile);
+    if (matches)
+    {
+        code = code.replace(regex_soundFile, 'new SoundFile(this, ');
+        code = "import processing.sound.*;\n" + code;
+    }
+
+    return code;
 }
 
 
@@ -736,13 +765,8 @@ function reconstructProcessing(code)
     };
 
     let output = extractCodeFromCST(cst, options);
-
-    // hack: we quote Processing color literals in preprocessProcessing, so
-    // we need to un-quote for round-trip back to valid Processing code
-
-    const regex_quoted_hex = /\"#[0-9A-Fa-f]{6}\"/g;
-    let unquoted = output.replace(regex_quoted_hex, s => s.substring(1, s.length-1));
-    return unquoted;
+    
+    return unpreprocessProcessing(output);
 }
 
 

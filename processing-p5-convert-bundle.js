@@ -25529,9 +25529,7 @@ var transformJava = function transformJava(code) {
 
 function printRawProcessing(code) {
     var preprocessed = preprocessProcessing(code);
-    var wrapped = "public class Dummy {" + preprocessed + "}";
-
-    var cst = (0, _javaParser.parse)(wrapped);
+    var cst = (0, _javaParser.parse)(preprocessed);
     printCstNodeTree(cst);
 }
 
@@ -25578,10 +25576,40 @@ function preprocessProcessing(code) {
     var regex_hex = /#[0-9A-Fa-f]{6}/g;
     wrapped = wrapped.replace(regex_hex, '"$&"');
 
+    // comment out import statements
+
     var regex_import = /import/g;
     wrapped = wrapped.replace(regex_import, '//$&');
 
+    // hack: add missing Processing loadSound()
+
+    var regex_soundFile = /new.*SoundFile.*,/g;
+    wrapped = wrapped.replace(regex_soundFile, 'loadSound(');
+
     return wrapped;
+}
+
+function unpreprocessProcessing(code) {
+    // undo the regex transformations (but not the outer Dummy class (for now?))
+
+    // we quote Processing color literals in preprocessProcessing, so
+    // we need to un-quote for round-trip back to valid Processing code
+
+    var regex_quoted_hex = /\"#[0-9A-Fa-f]{6}\"/g;
+    code = code.replace(regex_quoted_hex, function (s) {
+        return s.substring(1, s.length - 1);
+    });
+
+    // expand loadSound(), add import if necessary
+
+    var regex_soundFile = /loadSound\(/;
+    var matches = code.match(regex_soundFile);
+    if (matches) {
+        code = code.replace(regex_soundFile, 'new SoundFile(this, ');
+        code = "import processing.sound.*;\n" + code;
+    }
+
+    return code;
 }
 
 function transformProcessing(code) {
@@ -25607,14 +25635,7 @@ function reconstructProcessing(code) {
 
     var output = extractCodeFromCST(cst, options);
 
-    // hack: we quote Processing color literals in preprocessProcessing, so
-    // we need to un-quote for round-trip back to valid Processing code
-
-    var regex_quoted_hex = /\"#[0-9A-Fa-f]{6}\"/g;
-    var unquoted = output.replace(regex_quoted_hex, function (s) {
-        return s.substring(1, s.length - 1);
-    });
-    return unquoted;
+    return unpreprocessProcessing(output);
 }
 
 if (typeof module !== 'undefined') {

@@ -12,8 +12,10 @@ class ArrayList extends Array {
  function setup() {
      createCanvas(400, 400);
      background(0);
-     meow = new SoundFile(this, "meow.wav");
-     meow.play();
+ }
+
+ function preload() {
+     meow = loadSound("meow.wav");
  }
 
  function draw() {
