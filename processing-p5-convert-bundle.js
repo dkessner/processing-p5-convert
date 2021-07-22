@@ -25582,6 +25582,9 @@ function preprocessProcessing(code) {
     wrapped = wrapped.replace(regex_import, '//$&');
 
     // hack: add missing Processing loadSound()
+    // note: this is a quick-and-dirty fix, with the side-effect that the
+    // loadSound() call is moved to preload(); this fix will not work on 
+    // multi-line statements involving "new SoundFile()"
 
     var regex_soundFile = /new.*SoundFile.*,/g;
     wrapped = wrapped.replace(regex_soundFile, 'loadSound(');
