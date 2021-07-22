@@ -639,10 +639,8 @@ const transformJava = code => transformCodeFromCST(parse(code));
 
 function printRawProcessing(code)
 {
-    let wrapped = "public class Dummy {" + code + "}";
-
-    const regex_hex = /#[0-9A-Fa-f]{6}/g;
-    wrapped = wrapped.replace(regex_hex, '"$&"'); // hack Processing color hex literal
+    const preprocessed = preprocessProcessing(code);
+    let wrapped = "public class Dummy {" + preprocessed + "}";
 
     const cst = parse(wrapped);
     printCstNodeTree(cst);
@@ -705,6 +703,9 @@ function preprocessProcessing(code)
 
     const regex_hex = /#[0-9A-Fa-f]{6}/g;
     wrapped = wrapped.replace(regex_hex, '"$&"');
+
+    const regex_import = /import/g;
+    wrapped = wrapped.replace(regex_import, '//$&');
 
     return wrapped;
 }

@@ -25528,10 +25528,8 @@ var transformJava = function transformJava(code) {
 
 
 function printRawProcessing(code) {
-    var wrapped = "public class Dummy {" + code + "}";
-
-    var regex_hex = /#[0-9A-Fa-f]{6}/g;
-    wrapped = wrapped.replace(regex_hex, '"$&"'); // hack Processing color hex literal
+    var preprocessed = preprocessProcessing(code);
+    var wrapped = "public class Dummy {" + preprocessed + "}";
 
     var cst = (0, _javaParser.parse)(wrapped);
     printCstNodeTree(cst);
@@ -25579,6 +25577,9 @@ function preprocessProcessing(code) {
 
     var regex_hex = /#[0-9A-Fa-f]{6}/g;
     wrapped = wrapped.replace(regex_hex, '"$&"');
+
+    var regex_import = /import/g;
+    wrapped = wrapped.replace(regex_import, '//$&');
 
     return wrapped;
 }
