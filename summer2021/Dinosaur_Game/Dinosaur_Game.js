@@ -58,7 +58,6 @@ class ArrayList extends Array {
 
  function setup() {
      createCanvas(600, 600);
-     baskerville = createFont("Baskerville-BoldItalic", 20);
      imageMode(CENTER);
      dino.resize(200, 200);
      rock.resize(200, 100);
@@ -71,6 +70,8 @@ class ArrayList extends Array {
  }
 
  function preload() {
+     //baskerville = loadFont("Baskerville-BoldItalic");
+     baskerville = "Arial"; // manual hack for now: p5.js textFont(string) works
      dino = loadImage("dino.png");
      dinofood = loadImage("dinofood.png");
      rock = loadImage("rock.png");
