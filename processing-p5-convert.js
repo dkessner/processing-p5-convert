@@ -611,7 +611,7 @@ function cstExtractCode(cst, options)
 
     let output = beautify(result.code);
 
-    if (options.includeHeaders === true && 
+    if (options.transform === true && 
         !context.noHeader && 
         result.arrayListReference === true)
         output = arrayListDeclaration + output;
@@ -725,8 +725,7 @@ function transformProcessing(code)
 
     const options = {
         transform: true,
-        ignoreOuterClass: true,
-        includeHeaders: true
+        ignoreOuterClass: true
     };
 
     return cstExtractCode(cst, options);

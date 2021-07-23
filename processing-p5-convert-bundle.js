@@ -25496,7 +25496,7 @@ function cstExtractCode(cst, options) {
 
     var output = beautify(result.code);
 
-    if (options.includeHeaders === true && !context.noHeader && result.arrayListReference === true) output = arrayListDeclaration + output;
+    if (options.transform === true && !context.noHeader && result.arrayListReference === true) output = arrayListDeclaration + output;
 
     return output;
 }
@@ -25589,8 +25589,7 @@ function transformProcessing(code) {
 
     var options = {
         transform: true,
-        ignoreOuterClass: true,
-        includeHeaders: true
+        ignoreOuterClass: true
     };
 
     return cstExtractCode(cst, options);
