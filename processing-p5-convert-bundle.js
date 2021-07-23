@@ -25090,7 +25090,7 @@ function handle_fqnOrRefType(node, level, options, context, data) {
     var multiple = "Dot" in node.children && "fqnOrRefTypePartRest" in node.children;
 
     if (!ok) {
-        console.log("[handle_fqnOrRefType] I am insane!");
+        console.log("[processing-p5-convert] handle_fqnOrRefType not ok");
         return;
     }
 
@@ -25135,7 +25135,7 @@ function handle_variableDeclaratorList(node, level, options, context, data) {
     var ok = "variableDeclarator" in node.children && "Comma" in node.children;
 
     if (!ok) {
-        console.log("[handle_variableDeclaratorList] I am insane!");
+        console.log("[processing-p5-convert] handle_variableDeclaratorList not ok");
         return;
     }
 
@@ -25171,7 +25171,7 @@ function handle_argumentList(node, level, options, context, data) {
     var multiple = "Comma" in node.children;
 
     if (!ok) {
-        console.log("[handle_argumentList] I am insane!");
+        console.log("[processing-p5-convert] handle_argumentList not ok");
         return;
     }
 
@@ -25185,9 +25185,10 @@ function handle_argumentList(node, level, options, context, data) {
     for (var index in expressionArray) {
         visitNodesRecursive(expressionArray[index], level + 1, extractCodeVisitor, options, context, temp);
 
-        if (context.isCreateFont === true) {
+        if (options.transform === true && context.isCreateFont === true) {
+            // transform: createFont -> loadFont
             context.isCreateFont = false;
-            break; // retain first argument only (transform: createFont -> loadFont)
+            break; // retain first argument only 
         }
 
         if (commaArray !== null && index in commaArray) visitNodesRecursive(commaArray[index], level + 1, extractCodeVisitor, options, context, temp);
@@ -25212,7 +25213,7 @@ function handle_binaryOperator(node, level, options, context, data) {
     var ok = "BinaryOperator" in node.children && "unaryExpression" in node.children && node.children.BinaryOperator.length >= 1 && node.children.unaryExpression.length === node.children.BinaryOperator.length + 1;
 
     if (!ok) {
-        console.log("[handle_binaryOperator] I am insane!");
+        console.log("[processing-p5-convert] handle_binaryOperator not ok");
         return;
     }
 
@@ -25235,7 +25236,7 @@ function handle_basicForStatement(node, level, options, context, data) {
     var ok = "For" in node.children && "LBrace" in node.children && "RBrace" in node.children && "Semicolon" in node.children && node.children.Semicolon.length === 2 && "expression" in node.children && "forInit" in node.children && "forUpdate" in node.children && "statement" in node.children;
 
     if (!ok) {
-        console.log("[handle_basicForStatement] I am insane!");
+        console.log("[processing-p5-convert] handle_basicForStatement not ok");
         return;
     }
 
@@ -25255,7 +25256,7 @@ function handle_ifStatement(node, level, options, context, data) {
     var ok = "If" in node.children && "Else" in node.children && "LBrace" in node.children && "RBrace" in node.children && "expression" in node.children && "statement" in node.children && node.children.statement.length === 2;
 
     if (!ok) {
-        console.log("[handle_ifStatement else handler] I am insane!");
+        console.log("[processing-p5-convert] handle_ifStatement not ok");
         return;
     }
 
@@ -25272,7 +25273,7 @@ function registerField(node, context, result) {
     var ok = "unannType" in node.children && "variableDeclaratorList" in node.children;
 
     if (!ok) {
-        console.log("[registerField] I am insane!");
+        console.log("[processing-p5-convert] registerField not ok");
         return;
     }
 

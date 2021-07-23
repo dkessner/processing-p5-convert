@@ -82,7 +82,7 @@ function handle_fqnOrRefType(node, level, options, context, data) {
 
     if (!ok)
     {
-        console.log("[handle_fqnOrRefType] I am insane!");
+        console.log("[processing-p5-convert] handle_fqnOrRefType not ok");
         return;
     }
 
@@ -131,7 +131,7 @@ function handle_variableDeclaratorList(node, level, options, context, data) {
 
     if (!ok)
     {
-        console.log("[handle_variableDeclaratorList] I am insane!");
+        console.log("[processing-p5-convert] handle_variableDeclaratorList not ok");
         return;
     }
 
@@ -170,7 +170,7 @@ function handle_argumentList(node, level, options, context, data) {
 
     if (!ok)
     {
-        console.log("[handle_argumentList] I am insane!");
+        console.log("[processing-p5-convert] handle_argumentList not ok");
         return;
     }
 
@@ -185,10 +185,11 @@ function handle_argumentList(node, level, options, context, data) {
     {
         visitNodesRecursive(expressionArray[index], level+1, extractCodeVisitor, options, context, temp);
 
-        if (context.isCreateFont === true)
-        {
+        if (options.transform === true && context.isCreateFont === true)
+        {   
+            // transform: createFont -> loadFont
             context.isCreateFont = false;
-            break;  // retain first argument only (transform: createFont -> loadFont)
+            break;  // retain first argument only 
         }
 
         if (commaArray !== null && index in commaArray)
@@ -218,7 +219,7 @@ function handle_binaryOperator(node, level, options, context, data) {
 
     if (!ok)
     {
-        console.log("[handle_binaryOperator] I am insane!");
+        console.log("[processing-p5-convert] handle_binaryOperator not ok");
         return;
     }
 
@@ -251,7 +252,7 @@ function handle_basicForStatement(node, level, options, context, data) {
 
     if (!ok)
     {
-        console.log("[handle_basicForStatement] I am insane!");
+        console.log("[processing-p5-convert] handle_basicForStatement not ok");
         return;
     }
 
@@ -277,7 +278,7 @@ function handle_ifStatement(node, level, options, context, data) {
 
     if (!ok)
     {
-        console.log("[handle_ifStatement else handler] I am insane!");
+        console.log("[processing-p5-convert] handle_ifStatement not ok");
         return;
     }
 
@@ -297,7 +298,7 @@ function registerField(node, context, result)
 
     if (!ok) 
     {
-        console.log("[registerField] I am insane!");
+        console.log("[processing-p5-convert] registerField not ok");
         return;
     }
 
