@@ -185,9 +185,9 @@ function handle_argumentList(node, level, options, context, data) {
     {
         visitNodesRecursive(expressionArray[index], level+1, extractCodeVisitor, options, context, temp);
 
-        if (options.isCreateFont === true)
+        if (context.isCreateFont === true)
         {
-            options.isCreateFont = false;
+            context.isCreateFont = false;
             break;  // retain first argument only (transform: createFont -> loadFont)
         }
 
@@ -291,7 +291,7 @@ function handle_ifStatement(node, level, options, context, data) {
 }
 
 
-function registerField(node, options)
+function registerField(node, context)
 {
     const ok = "unannType" in node.children && "variableDeclaratorList" in node.children;
 
@@ -304,11 +304,11 @@ function registerField(node, options)
 
     if (type.startsWith("ArrayList"))
     {
-        // save ArrayList names in options.arrayLists
+        // save ArrayList names in context.arrayLists
 
         const name = cstExtractCode(node.children.variableDeclaratorList[0], tempOptions);
-        if (!("arrayList" in options)) options.arrayLists = [];
-        options.arrayLists.push(name); 
+        if (!("arrayList" in context)) context.arrayLists = [];
+        context.arrayLists.push(name); 
         // TODO: handle multiple names
     }
 }
@@ -324,9 +324,9 @@ function extractCodeVisitor(node, level, options, context, result)
         {
             // transform:  member variables in class method body x -> this.x
 
-            if (options.methodBody === true && 
-                "memberVariables" in options && 
-                options.memberVariables.includes(node.image))
+            if (context.methodBody === true && 
+                "memberVariables" in context && 
+                context.memberVariables.includes(node.image))
             {
                 result.code += "this." + node.image + " ";
                 return true;
@@ -334,7 +334,7 @@ function extractCodeVisitor(node, level, options, context, result)
 
             // transform: for each loop : -> of
 
-            if (options.enhancedForStatement === true)
+            if (context.enhancedForStatement === true)
             {
                 if (node.image === ":")
                 {
@@ -368,13 +368,13 @@ function extractCodeVisitor(node, level, options, context, result)
                 temp.code = "RIGHT_ARROW ";
             else if (temp.code === "LEFT ")
                 temp.code = "LEFT_ARROW ";
-            else if (options.insideSetup === true && temp.code.startsWith("load"))
-                options.isLoadFile = true; 
+            else if (context.insideSetup === true && temp.code.startsWith("load"))
+                context.isLoadFile = true; 
             else if (temp.code === "createFont ")
             {
                 temp.code = "loadFont "; // transform println -> console.log
-                options.isLoadFile = true; 
-                options.isCreateFont = true;
+                context.isLoadFile = true; 
+                context.isCreateFont = true;
             }
         }
 
@@ -403,7 +403,7 @@ function extractCodeVisitor(node, level, options, context, result)
         // - class: void/int/... -> ""
 
         if (options.transform === true) {
-            if (options.classDeclaration !== true) {
+            if (context.classDeclaration !== true) {
                 result.code +=  "function "; 
             }
             return false;
@@ -430,15 +430,15 @@ function extractCodeVisitor(node, level, options, context, result)
     }
     else if (node.name === "enhancedForStatement")
     {
-        // set context enhancedForStatement
-        visitChildren(node, level+1, extractCodeVisitor, {...options, enhancedForStatement:true}, context, result);
+        visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, enhancedForStatement:true}, result);
         return false;
     }
     else if (node.name === "fieldDeclaration")
     {
-        // set context fieldDeclaration
-        visitChildren(node, level+1, extractCodeVisitor, {...options, fieldDeclaration:true}, context, result);
-        registerField(node, options);
+        visitChildren(node, level+1, extractCodeVisitor, 
+                options, {...context, fieldDeclaration:true}, result);
+        registerField(node, context);
         return false;
     }
     else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
@@ -447,7 +447,7 @@ function extractCodeVisitor(node, level, options, context, result)
         // - global: int/float/... -> let
         // - class:  int/float/... -> ""
 
-        if (options.classDeclaration !== true)
+        if (context.classDeclaration !== true)
             result.code += "let ";
 
         return false;
@@ -456,43 +456,45 @@ function extractCodeVisitor(node, level, options, context, result)
     {
         // if we're declaring a variable in a class, save it to the memberVariables list
 
-        if (options.classDeclaration === true && options.fieldDeclaration === true)
+        if (context.classDeclaration === true && context.fieldDeclaration === true)
         { 
             // look ahead...
             let variableNameContainer = {code: ""};
             visitChildren(node, level, extractCodeVisitor, options, context, variableNameContainer);
             let variableName = variableNameContainer.code.split(' ')[0];
-            options.memberVariables.push(variableName);
+            context.memberVariables.push(variableName);
         }
         
         return true;  // ...but keep going      
     }
     else if (node.name === "classDeclaration")
     {
-        let newOptions = {
-            ...options, 
-            classDeclaration: true,  // set context: inside class declaration
+        let newContext = {
+            ...context, 
+            classDeclaration: true,
             memberVariables: [],
-            arrayLists: [...options.arrayLists]
+            arrayLists: [...context.arrayLists]
         };
 
-        visitChildren(node, level+1, extractCodeVisitor, newOptions, context, result);
+        visitChildren(node, level+1, extractCodeVisitor, options, newContext, result);
         return false;
     }
     else if (node.name === "constructorDeclarator")
     {
-        visitChildren(node, level+1, extractCodeVisitor, {...options, constructorDeclarator:true}, context, result);
+        visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, constructorDeclarator:true}, result);
         return false;
     }
-    else if (options.classDeclaration === true && 
+    else if (context.classDeclaration === true && 
             (node.name === "constructorBody" || 
              node.name === "methodBody"))
     {
-        visitChildren(node, level+1, extractCodeVisitor, {...options, methodBody:true}, context, result);
+        visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, methodBody:true}, result);
         return false;
     }
     else if (node.name === "simpleTypeName" && 
-        options.constructorDeclarator === true &&
+        context.constructorDeclarator === true &&
         options.transform)
     {
         result.code += "constructor"; // transform: ClassName() -> constructor()
@@ -517,30 +519,28 @@ function extractCodeVisitor(node, level, options, context, result)
     }
     else if (node.name === "methodDeclaration")
     {
-        let newOptions = {
-            ...options, 
-            methodDeclaration: true,  // set context: inside method declaration
-        };
+        let newContext = {...context, methodDeclaration: true};
 
-        visitChildren(node, level+1, extractCodeVisitor, newOptions, context, result);
+        visitChildren(node, level+1, extractCodeVisitor, 
+            options, newContext, result);
 
-        if (newOptions.insideSetup === true && newOptions.preload)
+        if (newContext.insideSetup === true && newContext.preload)
         {
-            result.code += "function preload() {" + newOptions.preload + "}";
+            result.code += "function preload() {" + newContext.preload + "}";
         }
 
         return false;
     }
     else if (node.name === "methodDeclarator")
     {
-        if (options.classDeclaration !== true && options.methodDeclaration === true)
+        if (context.classDeclaration !== true && context.methodDeclaration === true)
         {
             const methodName = node.children.Identifier[0].image;
 
             if (methodName === "setup")
             {
-                options.insideSetup = true; // add more context: inside setup()
-                options.preload = "";
+                context.insideSetup = true; // add more context: inside setup()
+                context.preload = "";
             }
 
             return true;
@@ -548,15 +548,15 @@ function extractCodeVisitor(node, level, options, context, result)
     }
     else if (node.name === "blockStatement")
     {
-        if (options.insideSetup === true)
+        if (context.insideSetup === true)
         {
             let temp = {code:""};
             visitChildren(node, level+1, extractCodeVisitor, options, context, temp);
 
-            if (options.isLoadFile === true)
+            if (context.isLoadFile === true)
             {
-                options.preload += temp.code;
-                options.isLoadFile = false;
+                context.preload += temp.code;
+                context.isLoadFile = false;
             }
             else
             {
@@ -594,10 +594,8 @@ function getClassBodyNode(cst)
 function cstExtractCode(cst, options)
 {
     let root = cst;
-    let context = {};
+    let context = {arrayLists:[]};
     let result = {code: ""};
-
-    options.arrayLists = []
 
     if (options.ignoreOuterClass) 
         root = getClassBodyNode(cst);

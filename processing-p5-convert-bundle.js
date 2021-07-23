@@ -25373,8 +25373,8 @@ function handle_argumentList(node, level, options, context, data) {
     for (var index in expressionArray) {
         visitNodesRecursive(expressionArray[index], level + 1, extractCodeVisitor, options, context, temp);
 
-        if (options.isCreateFont === true) {
-            options.isCreateFont = false;
+        if (context.isCreateFont === true) {
+            context.isCreateFont = false;
             break; // retain first argument only (transform: createFont -> loadFont)
         }
 
@@ -25456,7 +25456,7 @@ function handle_ifStatement(node, level, options, context, data) {
     visitNodesRecursive(node.children.statement[1], level + 1, extractCodeVisitor, options, context, data);
 }
 
-function registerField(node, options) {
+function registerField(node, context) {
     var ok = "unannType" in node.children && "variableDeclaratorList" in node.children;
 
     var tempOptions = {
@@ -25467,11 +25467,11 @@ function registerField(node, options) {
     var type = cstExtractCode(node.children.unannType[0], tempOptions);
 
     if (type.startsWith("ArrayList")) {
-        // save ArrayList names in options.arrayLists
+        // save ArrayList names in context.arrayLists
 
         var name = cstExtractCode(node.children.variableDeclaratorList[0], tempOptions);
-        if (!("arrayList" in options)) options.arrayLists = [];
-        options.arrayLists.push(name);
+        if (!("arrayList" in context)) context.arrayLists = [];
+        context.arrayLists.push(name);
         // TODO: handle multiple names
     }
 }
@@ -25484,14 +25484,14 @@ function extractCodeVisitor(node, level, options, context, result) {
             if (options.transform === true) {
                 // transform:  member variables in class method body x -> this.x
 
-                if (options.methodBody === true && "memberVariables" in options && options.memberVariables.includes(node.image)) {
+                if (context.methodBody === true && "memberVariables" in context && context.memberVariables.includes(node.image)) {
                     result.code += "this." + node.image + " ";
                     return true;
                 }
 
                 // transform: for each loop : -> of
 
-                if (options.enhancedForStatement === true) {
+                if (context.enhancedForStatement === true) {
                     if (node.image === ":") {
                         result.code += "of ";
                         return true;
@@ -25512,10 +25512,10 @@ function extractCodeVisitor(node, level, options, context, result) {
         if (options.transform) {
             if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
             else if (temp.code === "println ") temp.code = "console.log "; // transform println -> console.log
-                else if (temp.code === "UP ") temp.code = "UP_ARROW ";else if (temp.code === "DOWN ") temp.code = "DOWN_ARROW ";else if (temp.code === "RIGHT ") temp.code = "RIGHT_ARROW ";else if (temp.code === "LEFT ") temp.code = "LEFT_ARROW ";else if (options.insideSetup === true && temp.code.startsWith("load")) options.isLoadFile = true;else if (temp.code === "createFont ") {
+                else if (temp.code === "UP ") temp.code = "UP_ARROW ";else if (temp.code === "DOWN ") temp.code = "DOWN_ARROW ";else if (temp.code === "RIGHT ") temp.code = "RIGHT_ARROW ";else if (temp.code === "LEFT ") temp.code = "LEFT_ARROW ";else if (context.insideSetup === true && temp.code.startsWith("load")) context.isLoadFile = true;else if (temp.code === "createFont ") {
                         temp.code = "loadFont "; // transform println -> console.log
-                        options.isLoadFile = true;
-                        options.isCreateFont = true;
+                        context.isLoadFile = true;
+                        context.isCreateFont = true;
                     }
         }
 
@@ -25535,7 +25535,7 @@ function extractCodeVisitor(node, level, options, context, result) {
         // - class: void/int/... -> ""
 
         if (options.transform === true) {
-            if (options.classDeclaration !== true) {
+            if (context.classDeclaration !== true) {
                 result.code += "function ";
             }
             return false;
@@ -25553,13 +25553,11 @@ function extractCodeVisitor(node, level, options, context, result) {
         }
         return true;
     } else if (node.name === "enhancedForStatement") {
-        // set context enhancedForStatement
-        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { enhancedForStatement: true }), context, result);
+        visitChildren(node, level + 1, extractCodeVisitor, options, _extends({}, context, { enhancedForStatement: true }), result);
         return false;
     } else if (node.name === "fieldDeclaration") {
-        // set context fieldDeclaration
-        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { fieldDeclaration: true }), context, result);
-        registerField(node, options);
+        visitChildren(node, level + 1, extractCodeVisitor, options, _extends({}, context, { fieldDeclaration: true }), result);
+        registerField(node, context);
         return false;
     } else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
         {
@@ -25567,37 +25565,37 @@ function extractCodeVisitor(node, level, options, context, result) {
             // - global: int/float/... -> let
             // - class:  int/float/... -> ""
 
-            if (options.classDeclaration !== true) result.code += "let ";
+            if (context.classDeclaration !== true) result.code += "let ";
 
             return false;
         } else if (node.name === "variableDeclarator") {
         // if we're declaring a variable in a class, save it to the memberVariables list
 
-        if (options.classDeclaration === true && options.fieldDeclaration === true) {
+        if (context.classDeclaration === true && context.fieldDeclaration === true) {
             // look ahead...
             var variableNameContainer = { code: "" };
             visitChildren(node, level, extractCodeVisitor, options, context, variableNameContainer);
             var variableName = variableNameContainer.code.split(' ')[0];
-            options.memberVariables.push(variableName);
+            context.memberVariables.push(variableName);
         }
 
         return true; // ...but keep going      
     } else if (node.name === "classDeclaration") {
-        var newOptions = _extends({}, options, {
-            classDeclaration: true, // set context: inside class declaration
+        var newContext = _extends({}, context, {
+            classDeclaration: true,
             memberVariables: [],
-            arrayLists: [].concat(_toConsumableArray(options.arrayLists))
+            arrayLists: [].concat(_toConsumableArray(context.arrayLists))
         });
 
-        visitChildren(node, level + 1, extractCodeVisitor, newOptions, context, result);
+        visitChildren(node, level + 1, extractCodeVisitor, options, newContext, result);
         return false;
     } else if (node.name === "constructorDeclarator") {
-        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { constructorDeclarator: true }), context, result);
+        visitChildren(node, level + 1, extractCodeVisitor, options, _extends({}, context, { constructorDeclarator: true }), result);
         return false;
-    } else if (options.classDeclaration === true && (node.name === "constructorBody" || node.name === "methodBody")) {
-        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { methodBody: true }), context, result);
+    } else if (context.classDeclaration === true && (node.name === "constructorBody" || node.name === "methodBody")) {
+        visitChildren(node, level + 1, extractCodeVisitor, options, _extends({}, context, { methodBody: true }), result);
         return false;
-    } else if (node.name === "simpleTypeName" && options.constructorDeclarator === true && options.transform) {
+    } else if (node.name === "simpleTypeName" && context.constructorDeclarator === true && options.transform) {
         result.code += "constructor"; // transform: ClassName() -> constructor()
         return false;
     } else if (node.name === "newExpression" && options.transform === true) {
@@ -25614,36 +25612,34 @@ function extractCodeVisitor(node, level, options, context, result) {
 
         return true;
     } else if (node.name === "methodDeclaration") {
-        var _newOptions = _extends({}, options, {
-            methodDeclaration: true // set context: inside method declaration
-        });
+        var _newContext = _extends({}, context, { methodDeclaration: true });
 
-        visitChildren(node, level + 1, extractCodeVisitor, _newOptions, context, result);
+        visitChildren(node, level + 1, extractCodeVisitor, options, _newContext, result);
 
-        if (_newOptions.insideSetup === true && _newOptions.preload) {
-            result.code += "function preload() {" + _newOptions.preload + "}";
+        if (_newContext.insideSetup === true && _newContext.preload) {
+            result.code += "function preload() {" + _newContext.preload + "}";
         }
 
         return false;
     } else if (node.name === "methodDeclarator") {
-        if (options.classDeclaration !== true && options.methodDeclaration === true) {
+        if (context.classDeclaration !== true && context.methodDeclaration === true) {
             var methodName = node.children.Identifier[0].image;
 
             if (methodName === "setup") {
-                options.insideSetup = true; // add more context: inside setup()
-                options.preload = "";
+                context.insideSetup = true; // add more context: inside setup()
+                context.preload = "";
             }
 
             return true;
         }
     } else if (node.name === "blockStatement") {
-        if (options.insideSetup === true) {
+        if (context.insideSetup === true) {
             var _temp = { code: "" };
             visitChildren(node, level + 1, extractCodeVisitor, options, context, _temp);
 
-            if (options.isLoadFile === true) {
-                options.preload += _temp.code;
-                options.isLoadFile = false;
+            if (context.isLoadFile === true) {
+                context.preload += _temp.code;
+                context.isLoadFile = false;
             } else {
                 result.code += _temp.code;
             }
@@ -25675,10 +25671,8 @@ function getClassBodyNode(cst) {
 
 function cstExtractCode(cst, options) {
     var root = cst;
-    var context = {};
+    var context = { arrayLists: [] };
     var result = { code: "" };
-
-    options.arrayLists = [];
 
     if (options.ignoreOuterClass) root = getClassBodyNode(cst);
 
