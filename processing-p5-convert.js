@@ -18,7 +18,7 @@ const beautify = js['js'];
 
 // recursion implementation
 
-function visitChildren(node, level, doSomething, options, data)
+function visitChildren(node, level, doSomething, options, context, data)
 {
     for (const nodeName in node.children)
     {
@@ -26,17 +26,17 @@ function visitChildren(node, level, doSomething, options, data)
 
         for (const index in childArray)
         {
-            visitNodesRecursive(childArray[index], level, doSomething, options, data);
+            visitNodesRecursive(childArray[index], level, doSomething, options, context, data);
         }
     }
 }
 
-function visitNodesRecursive(node, level, doSomething, options, data)
+function visitNodesRecursive(node, level, doSomething, options, context, data)
 {
-    const shouldRecurse = doSomething(node, level, options, data);
+    const shouldRecurse = doSomething(node, level, options, context, data);
 
     if (shouldRecurse)
-        visitChildren(node, level+1, doSomething, options, data);
+        visitChildren(node, level+1, doSomething, options, context, data);
 }
 
 
@@ -51,7 +51,7 @@ function cstPrintRawVisitor(node, level, options, data) {
     return true;
 }
 
-const cstPrintRaw = cst => visitNodesRecursive(cst, 0, cstPrintRawVisitor, null, null);
+const cstPrintRaw = cst => visitNodesRecursive(cst, 0, cstPrintRawVisitor, null, null, null);
 
 function printRawProcessing(code)
 {
@@ -64,7 +64,7 @@ function printRawProcessing(code)
 
 // special node handlers for extractCodeVisitor()
 
-function handle_fqnOrRefType(node, level, options, data) {
+function handle_fqnOrRefType(node, level, options, context, data) {
 
     // fqnOrRefType nodes store stuff in arrays, so we need to reconstruct:
     //
@@ -89,7 +89,7 @@ function handle_fqnOrRefType(node, level, options, data) {
     // extract the first part
 
     let temp = {code:""};
-    visitNodesRecursive(node.children.fqnOrRefTypePartFirst["0"], level+1, extractCodeVisitor, options, temp);
+    visitNodesRecursive(node.children.fqnOrRefTypePartFirst["0"], level+1, extractCodeVisitor, options, context, temp);
 
     // extract the rest, iterating through the dot and rest arrays in parallel
 
@@ -106,8 +106,8 @@ function handle_fqnOrRefType(node, level, options, data) {
 
         for (const index in dotArray)
         {
-            visitNodesRecursive(dotArray[index], level+1, extractCodeVisitor, options, temp);
-            visitNodesRecursive(restArray[index], level+1, extractCodeVisitor, options, temp);
+            visitNodesRecursive(dotArray[index], level+1, extractCodeVisitor, options, context, temp);
+            visitNodesRecursive(restArray[index], level+1, extractCodeVisitor, options, context, temp);
         }
     }
 
@@ -116,7 +116,7 @@ function handle_fqnOrRefType(node, level, options, data) {
     data.code += temp.code;
 }
 
-function handle_variableDeclaratorList(node, level, options, data) {
+function handle_variableDeclaratorList(node, level, options, context, data) {
     //
     // variableDeclaratorList stores arguments and commas in separate arrays
     //
@@ -144,9 +144,9 @@ function handle_variableDeclaratorList(node, level, options, data) {
 
     for (const index in variableDeclaratorArray)
     {
-        visitNodesRecursive(variableDeclaratorArray[index], level+1, extractCodeVisitor, options, temp);
+        visitNodesRecursive(variableDeclaratorArray[index], level+1, extractCodeVisitor, options, context, temp);
         if (commaArray !== null && index in commaArray)
-            visitNodesRecursive(commaArray[index], level+1, extractCodeVisitor, options, temp);
+            visitNodesRecursive(commaArray[index], level+1, extractCodeVisitor, options, context, temp);
     }
 
     // save extracted code
@@ -154,7 +154,7 @@ function handle_variableDeclaratorList(node, level, options, data) {
     data.code += temp.code;
 }
 
-function handle_argumentList(node, level, options, data) {
+function handle_argumentList(node, level, options, context, data) {
     //
     // argumentList stores arguments and commas in separate arrays
     //
@@ -183,7 +183,7 @@ function handle_argumentList(node, level, options, data) {
 
     for (const index in expressionArray)
     {
-        visitNodesRecursive(expressionArray[index], level+1, extractCodeVisitor, options, temp);
+        visitNodesRecursive(expressionArray[index], level+1, extractCodeVisitor, options, context, temp);
 
         if (options.isCreateFont === true)
         {
@@ -192,7 +192,7 @@ function handle_argumentList(node, level, options, data) {
         }
 
         if (commaArray !== null && index in commaArray)
-            visitNodesRecursive(commaArray[index], level+1, extractCodeVisitor, options, temp);
+            visitNodesRecursive(commaArray[index], level+1, extractCodeVisitor, options, context, temp);
     }
 
     // save extracted code
@@ -200,7 +200,7 @@ function handle_argumentList(node, level, options, data) {
     data.code += temp.code;
 }
 
-function handle_binaryOperator(node, level, options, data) {
+function handle_binaryOperator(node, level, options, context, data) {
     //
     // binaryExpression stores binary operator and arguments in separate arrays
     //
@@ -229,16 +229,16 @@ function handle_binaryOperator(node, level, options, data) {
 
     for (const index in binaryOperatorArray)
     {
-        visitNodesRecursive(unaryExpressionArray[index], level+1, extractCodeVisitor, options, temp);
-        visitNodesRecursive(binaryOperatorArray[index], level+1, extractCodeVisitor, options, temp);
+        visitNodesRecursive(unaryExpressionArray[index], level+1, extractCodeVisitor, options, context, temp);
+        visitNodesRecursive(binaryOperatorArray[index], level+1, extractCodeVisitor, options, context, temp);
     }
-    visitNodesRecursive(unaryExpressionArray[unaryExpressionArray.length-1], level+1, extractCodeVisitor, options, temp);
+    visitNodesRecursive(unaryExpressionArray[unaryExpressionArray.length-1], level+1, extractCodeVisitor, options, context, temp);
 
     data.code += temp.code;
 }
 
 
-function handle_basicForStatement(node, level, options, data) {
+function handle_basicForStatement(node, level, options, context, data) {
 
     const ok = "For" in node.children &&
                "LBrace" in node.children &&
@@ -255,18 +255,18 @@ function handle_basicForStatement(node, level, options, data) {
         return;
     }
 
-    visitNodesRecursive(node.children.For[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.LBrace[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.forInit[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.Semicolon[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.expression[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.Semicolon[1], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.forUpdate[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.RBrace[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.statement[0], level+1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.For[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.LBrace[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.forInit[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.Semicolon[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.expression[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.Semicolon[1], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.forUpdate[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.RBrace[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.statement[0], level+1, extractCodeVisitor, options, context, data);
 }
 
-function handle_ifStatement(node, level, options, data) {
+function handle_ifStatement(node, level, options, context, data) {
 
     const ok = "If" in node.children &&
                "Else" in node.children &&
@@ -281,13 +281,13 @@ function handle_ifStatement(node, level, options, data) {
         return;
     }
 
-    visitNodesRecursive(node.children.If[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.LBrace[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.expression[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.RBrace[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.statement[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.Else[0], level+1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.statement[1], level+1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.If[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.LBrace[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.expression[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.RBrace[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.statement[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.Else[0], level+1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.statement[1], level+1, extractCodeVisitor, options, context, data);
 }
 
 
@@ -316,7 +316,7 @@ function registerField(node, options)
 
 // primary node visitor for code reconstruction/transformation
 
-function extractCodeVisitor(node, level, options, result)
+function extractCodeVisitor(node, level, options, context, result)
 {
     if ("image" in node) // actual code is stored as node["image"]
     {
@@ -353,7 +353,7 @@ function extractCodeVisitor(node, level, options, result)
     if (node.name === "fqnOrRefType")
     {
         let temp = {code:""};
-        handle_fqnOrRefType(node, level, options, temp);
+        handle_fqnOrRefType(node, level, options, context, temp);
 
         if (options.transform) {
             if (temp.code === "size ")
@@ -383,14 +383,14 @@ function extractCodeVisitor(node, level, options, result)
     }
     else if (node.name === "argumentList")
     {
-        handle_argumentList(node, level, options, result);
+        handle_argumentList(node, level, options, context, result);
         return false;
     }
     else if (node.name === "variableDeclaratorList")
     {
         if ("Comma" in node.children)
         {
-            handle_variableDeclaratorList(node, level, options, result);
+            handle_variableDeclaratorList(node, level, options, context, result);
             return false;
         }
         else
@@ -411,19 +411,19 @@ function extractCodeVisitor(node, level, options, result)
     }
     else if (node.name === "binaryExpression" && "BinaryOperator" in node.children)
     {
-        handle_binaryOperator(node, level, options, result);
+        handle_binaryOperator(node, level, options, context, result);
         return false;
     }
     else if (node.name === "basicForStatement")
     {
-        handle_basicForStatement(node, level, options, result);
+        handle_basicForStatement(node, level, options, context, result);
         return false;
     }
     else if (node.name === "ifStatement")
     {
         if ("Else" in node.children)
         {
-            handle_ifStatement(node, level, options, result);
+            handle_ifStatement(node, level, options, context, result);
             return false;
         }
         return true;
@@ -431,13 +431,13 @@ function extractCodeVisitor(node, level, options, result)
     else if (node.name === "enhancedForStatement")
     {
         // set context enhancedForStatement
-        visitChildren(node, level+1, extractCodeVisitor, {...options, enhancedForStatement:true}, result);
+        visitChildren(node, level+1, extractCodeVisitor, {...options, enhancedForStatement:true}, context, result);
         return false;
     }
     else if (node.name === "fieldDeclaration")
     {
         // set context fieldDeclaration
-        visitChildren(node, level+1, extractCodeVisitor, {...options, fieldDeclaration:true}, result);
+        visitChildren(node, level+1, extractCodeVisitor, {...options, fieldDeclaration:true}, context, result);
         registerField(node, options);
         return false;
     }
@@ -460,7 +460,7 @@ function extractCodeVisitor(node, level, options, result)
         { 
             // look ahead...
             let variableNameContainer = {code: ""};
-            visitChildren(node, level, extractCodeVisitor, options, variableNameContainer);
+            visitChildren(node, level, extractCodeVisitor, options, context, variableNameContainer);
             let variableName = variableNameContainer.code.split(' ')[0];
             options.memberVariables.push(variableName);
         }
@@ -476,19 +476,19 @@ function extractCodeVisitor(node, level, options, result)
             arrayLists: [...options.arrayLists]
         };
 
-        visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
+        visitChildren(node, level+1, extractCodeVisitor, newOptions, context, result);
         return false;
     }
     else if (node.name === "constructorDeclarator")
     {
-        visitChildren(node, level+1, extractCodeVisitor, {...options, constructorDeclarator:true}, result);
+        visitChildren(node, level+1, extractCodeVisitor, {...options, constructorDeclarator:true}, context, result);
         return false;
     }
     else if (options.classDeclaration === true && 
             (node.name === "constructorBody" || 
              node.name === "methodBody"))
     {
-        visitChildren(node, level+1, extractCodeVisitor, {...options, methodBody:true}, result);
+        visitChildren(node, level+1, extractCodeVisitor, {...options, methodBody:true}, context, result);
         return false;
     }
     else if (node.name === "simpleTypeName" && 
@@ -505,7 +505,7 @@ function extractCodeVisitor(node, level, options, result)
 
         let className = {code:""};
         let start = node.children.unqualifiedClassInstanceCreationExpression[0].children.classOrInterfaceTypeToInstantiate[0];
-        visitNodesRecursive(start, level+1, extractCodeVisitor, options, className);
+        visitNodesRecursive(start, level+1, extractCodeVisitor, options, context, className);
 
         if (className.code.startsWith("ArrayList"))
         {
@@ -522,7 +522,7 @@ function extractCodeVisitor(node, level, options, result)
             methodDeclaration: true,  // set context: inside method declaration
         };
 
-        visitChildren(node, level+1, extractCodeVisitor, newOptions, result);
+        visitChildren(node, level+1, extractCodeVisitor, newOptions, context, result);
 
         if (newOptions.insideSetup === true && newOptions.preload)
         {
@@ -551,7 +551,7 @@ function extractCodeVisitor(node, level, options, result)
         if (options.insideSetup === true)
         {
             let temp = {code:""};
-            visitChildren(node, level+1, extractCodeVisitor, options, temp);
+            visitChildren(node, level+1, extractCodeVisitor, options, context, temp);
 
             if (options.isLoadFile === true)
             {
@@ -572,7 +572,7 @@ function extractCodeVisitor(node, level, options, result)
 
 // helper functions
 
-function getClassBody(node, level, options, data) {
+function getClassBody(node, level, options, context, data) {
     if ("name" in node && node.name == "classBody")
     {
         data["node"] = node;
@@ -584,7 +584,7 @@ function getClassBody(node, level, options, data) {
 function getClassBodyNode(cst)
 {
     let classBody = {}
-    visitNodesRecursive(cst, 0, getClassBody, null, classBody);
+    visitNodesRecursive(cst, 0, getClassBody, null, null, classBody);
     return classBody.node;
 }
 
@@ -593,15 +593,16 @@ function getClassBodyNode(cst)
 
 function cstExtractCode(cst, options)
 {
-    let result = {code: ""};
     let root = cst;
+    let context = {};
+    let result = {code: ""};
 
     options.arrayLists = []
 
     if (options.ignoreOuterClass) 
         root = getClassBodyNode(cst);
 
-    visitNodesRecursive(root, 0, extractCodeVisitor, options, result);
+    visitNodesRecursive(root, 0, extractCodeVisitor, options, context, result);
 
     if (options.ignoreOuterClass) 
         result.code = result.code.trim().slice(1,-1); // remove braces
@@ -610,7 +611,7 @@ function cstExtractCode(cst, options)
 }
 
 
-function cstPrintOutlineVisitor(node, level, options, result) {
+function cstPrintOutlineVisitor(node, level, options, context, result) {
 
     if (!("name" in node)) return true;
 
@@ -632,7 +633,7 @@ function cstPrintOutlineVisitor(node, level, options, result) {
 }
 
 
-const cstPrintOutline = cst => visitNodesRecursive(cst, 0, cstPrintOutlineVisitor, null, null);
+const cstPrintOutline = cst => visitNodesRecursive(cst, 0, cstPrintOutlineVisitor, null, null, null);
 
 
 function printOutlineProcessing(code)

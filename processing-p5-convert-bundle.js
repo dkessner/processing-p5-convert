@@ -25225,20 +25225,20 @@ var beautify = _jsBeautify2.default['js'];
 
 // recursion implementation
 
-function visitChildren(node, level, doSomething, options, data) {
+function visitChildren(node, level, doSomething, options, context, data) {
     for (var nodeName in node.children) {
         var childArray = node.children[nodeName];
 
         for (var index in childArray) {
-            visitNodesRecursive(childArray[index], level, doSomething, options, data);
+            visitNodesRecursive(childArray[index], level, doSomething, options, context, data);
         }
     }
 }
 
-function visitNodesRecursive(node, level, doSomething, options, data) {
-    var shouldRecurse = doSomething(node, level, options, data);
+function visitNodesRecursive(node, level, doSomething, options, context, data) {
+    var shouldRecurse = doSomething(node, level, options, context, data);
 
-    if (shouldRecurse) visitChildren(node, level + 1, doSomething, options, data);
+    if (shouldRecurse) visitChildren(node, level + 1, doSomething, options, context, data);
 }
 
 // raw code extraction
@@ -25250,7 +25250,7 @@ function cstPrintRawVisitor(node, level, options, data) {
 }
 
 var cstPrintRaw = function cstPrintRaw(cst) {
-    return visitNodesRecursive(cst, 0, cstPrintRawVisitor, null, null);
+    return visitNodesRecursive(cst, 0, cstPrintRawVisitor, null, null, null);
 };
 
 function printRawProcessing(code) {
@@ -25261,7 +25261,7 @@ function printRawProcessing(code) {
 
 // special node handlers for extractCodeVisitor()
 
-function handle_fqnOrRefType(node, level, options, data) {
+function handle_fqnOrRefType(node, level, options, context, data) {
 
     // fqnOrRefType nodes store stuff in arrays, so we need to reconstruct:
     //
@@ -25285,7 +25285,7 @@ function handle_fqnOrRefType(node, level, options, data) {
     // extract the first part
 
     var temp = { code: "" };
-    visitNodesRecursive(node.children.fqnOrRefTypePartFirst["0"], level + 1, extractCodeVisitor, options, temp);
+    visitNodesRecursive(node.children.fqnOrRefTypePartFirst["0"], level + 1, extractCodeVisitor, options, context, temp);
 
     // extract the rest, iterating through the dot and rest arrays in parallel
 
@@ -25299,8 +25299,8 @@ function handle_fqnOrRefType(node, level, options, data) {
         }
 
         for (var index in dotArray) {
-            visitNodesRecursive(dotArray[index], level + 1, extractCodeVisitor, options, temp);
-            visitNodesRecursive(restArray[index], level + 1, extractCodeVisitor, options, temp);
+            visitNodesRecursive(dotArray[index], level + 1, extractCodeVisitor, options, context, temp);
+            visitNodesRecursive(restArray[index], level + 1, extractCodeVisitor, options, context, temp);
         }
     }
 
@@ -25309,7 +25309,7 @@ function handle_fqnOrRefType(node, level, options, data) {
     data.code += temp.code;
 }
 
-function handle_variableDeclaratorList(node, level, options, data) {
+function handle_variableDeclaratorList(node, level, options, context, data) {
     //
     // variableDeclaratorList stores arguments and commas in separate arrays
     //
@@ -25335,8 +25335,8 @@ function handle_variableDeclaratorList(node, level, options, data) {
     var temp = { code: "" };
 
     for (var index in variableDeclaratorArray) {
-        visitNodesRecursive(variableDeclaratorArray[index], level + 1, extractCodeVisitor, options, temp);
-        if (commaArray !== null && index in commaArray) visitNodesRecursive(commaArray[index], level + 1, extractCodeVisitor, options, temp);
+        visitNodesRecursive(variableDeclaratorArray[index], level + 1, extractCodeVisitor, options, context, temp);
+        if (commaArray !== null && index in commaArray) visitNodesRecursive(commaArray[index], level + 1, extractCodeVisitor, options, context, temp);
     }
 
     // save extracted code
@@ -25344,7 +25344,7 @@ function handle_variableDeclaratorList(node, level, options, data) {
     data.code += temp.code;
 }
 
-function handle_argumentList(node, level, options, data) {
+function handle_argumentList(node, level, options, context, data) {
     //
     // argumentList stores arguments and commas in separate arrays
     //
@@ -25371,14 +25371,14 @@ function handle_argumentList(node, level, options, data) {
     var temp = { code: "" };
 
     for (var index in expressionArray) {
-        visitNodesRecursive(expressionArray[index], level + 1, extractCodeVisitor, options, temp);
+        visitNodesRecursive(expressionArray[index], level + 1, extractCodeVisitor, options, context, temp);
 
         if (options.isCreateFont === true) {
             options.isCreateFont = false;
             break; // retain first argument only (transform: createFont -> loadFont)
         }
 
-        if (commaArray !== null && index in commaArray) visitNodesRecursive(commaArray[index], level + 1, extractCodeVisitor, options, temp);
+        if (commaArray !== null && index in commaArray) visitNodesRecursive(commaArray[index], level + 1, extractCodeVisitor, options, context, temp);
     }
 
     // save extracted code
@@ -25386,7 +25386,7 @@ function handle_argumentList(node, level, options, data) {
     data.code += temp.code;
 }
 
-function handle_binaryOperator(node, level, options, data) {
+function handle_binaryOperator(node, level, options, context, data) {
     //
     // binaryExpression stores binary operator and arguments in separate arrays
     //
@@ -25410,15 +25410,15 @@ function handle_binaryOperator(node, level, options, data) {
     var temp = { code: "" };
 
     for (var index in binaryOperatorArray) {
-        visitNodesRecursive(unaryExpressionArray[index], level + 1, extractCodeVisitor, options, temp);
-        visitNodesRecursive(binaryOperatorArray[index], level + 1, extractCodeVisitor, options, temp);
+        visitNodesRecursive(unaryExpressionArray[index], level + 1, extractCodeVisitor, options, context, temp);
+        visitNodesRecursive(binaryOperatorArray[index], level + 1, extractCodeVisitor, options, context, temp);
     }
-    visitNodesRecursive(unaryExpressionArray[unaryExpressionArray.length - 1], level + 1, extractCodeVisitor, options, temp);
+    visitNodesRecursive(unaryExpressionArray[unaryExpressionArray.length - 1], level + 1, extractCodeVisitor, options, context, temp);
 
     data.code += temp.code;
 }
 
-function handle_basicForStatement(node, level, options, data) {
+function handle_basicForStatement(node, level, options, context, data) {
 
     var ok = "For" in node.children && "LBrace" in node.children && "RBrace" in node.children && "Semicolon" in node.children && node.children.Semicolon.length === 2 && "expression" in node.children && "forInit" in node.children && "forUpdate" in node.children && "statement" in node.children;
 
@@ -25427,18 +25427,18 @@ function handle_basicForStatement(node, level, options, data) {
         return;
     }
 
-    visitNodesRecursive(node.children.For[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.LBrace[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.forInit[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.Semicolon[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.expression[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.Semicolon[1], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.forUpdate[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.RBrace[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.statement[0], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.For[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.LBrace[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.forInit[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.Semicolon[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.expression[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.Semicolon[1], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.forUpdate[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.RBrace[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.statement[0], level + 1, extractCodeVisitor, options, context, data);
 }
 
-function handle_ifStatement(node, level, options, data) {
+function handle_ifStatement(node, level, options, context, data) {
 
     var ok = "If" in node.children && "Else" in node.children && "LBrace" in node.children && "RBrace" in node.children && "expression" in node.children && "statement" in node.children && node.children.statement.length === 2;
 
@@ -25447,13 +25447,13 @@ function handle_ifStatement(node, level, options, data) {
         return;
     }
 
-    visitNodesRecursive(node.children.If[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.LBrace[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.expression[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.RBrace[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.statement[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.Else[0], level + 1, extractCodeVisitor, options, data);
-    visitNodesRecursive(node.children.statement[1], level + 1, extractCodeVisitor, options, data);
+    visitNodesRecursive(node.children.If[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.LBrace[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.expression[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.RBrace[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.statement[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.Else[0], level + 1, extractCodeVisitor, options, context, data);
+    visitNodesRecursive(node.children.statement[1], level + 1, extractCodeVisitor, options, context, data);
 }
 
 function registerField(node, options) {
@@ -25478,7 +25478,7 @@ function registerField(node, options) {
 
 // primary node visitor for code reconstruction/transformation
 
-function extractCodeVisitor(node, level, options, result) {
+function extractCodeVisitor(node, level, options, context, result) {
     if ("image" in node) // actual code is stored as node["image"]
         {
             if (options.transform === true) {
@@ -25507,7 +25507,7 @@ function extractCodeVisitor(node, level, options, result) {
 
     if (node.name === "fqnOrRefType") {
         var temp = { code: "" };
-        handle_fqnOrRefType(node, level, options, temp);
+        handle_fqnOrRefType(node, level, options, context, temp);
 
         if (options.transform) {
             if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
@@ -25522,11 +25522,11 @@ function extractCodeVisitor(node, level, options, result) {
         result.code += temp.code;
         return false; // treat special nodes as terminal
     } else if (node.name === "argumentList") {
-        handle_argumentList(node, level, options, result);
+        handle_argumentList(node, level, options, context, result);
         return false;
     } else if (node.name === "variableDeclaratorList") {
         if ("Comma" in node.children) {
-            handle_variableDeclaratorList(node, level, options, result);
+            handle_variableDeclaratorList(node, level, options, context, result);
             return false;
         } else return true;
     } else if (node.name === "result") {
@@ -25541,24 +25541,24 @@ function extractCodeVisitor(node, level, options, result) {
             return false;
         }
     } else if (node.name === "binaryExpression" && "BinaryOperator" in node.children) {
-        handle_binaryOperator(node, level, options, result);
+        handle_binaryOperator(node, level, options, context, result);
         return false;
     } else if (node.name === "basicForStatement") {
-        handle_basicForStatement(node, level, options, result);
+        handle_basicForStatement(node, level, options, context, result);
         return false;
     } else if (node.name === "ifStatement") {
         if ("Else" in node.children) {
-            handle_ifStatement(node, level, options, result);
+            handle_ifStatement(node, level, options, context, result);
             return false;
         }
         return true;
     } else if (node.name === "enhancedForStatement") {
         // set context enhancedForStatement
-        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { enhancedForStatement: true }), result);
+        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { enhancedForStatement: true }), context, result);
         return false;
     } else if (node.name === "fieldDeclaration") {
         // set context fieldDeclaration
-        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { fieldDeclaration: true }), result);
+        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { fieldDeclaration: true }), context, result);
         registerField(node, options);
         return false;
     } else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
@@ -25576,7 +25576,7 @@ function extractCodeVisitor(node, level, options, result) {
         if (options.classDeclaration === true && options.fieldDeclaration === true) {
             // look ahead...
             var variableNameContainer = { code: "" };
-            visitChildren(node, level, extractCodeVisitor, options, variableNameContainer);
+            visitChildren(node, level, extractCodeVisitor, options, context, variableNameContainer);
             var variableName = variableNameContainer.code.split(' ')[0];
             options.memberVariables.push(variableName);
         }
@@ -25589,13 +25589,13 @@ function extractCodeVisitor(node, level, options, result) {
             arrayLists: [].concat(_toConsumableArray(options.arrayLists))
         });
 
-        visitChildren(node, level + 1, extractCodeVisitor, newOptions, result);
+        visitChildren(node, level + 1, extractCodeVisitor, newOptions, context, result);
         return false;
     } else if (node.name === "constructorDeclarator") {
-        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { constructorDeclarator: true }), result);
+        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { constructorDeclarator: true }), context, result);
         return false;
     } else if (options.classDeclaration === true && (node.name === "constructorBody" || node.name === "methodBody")) {
-        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { methodBody: true }), result);
+        visitChildren(node, level + 1, extractCodeVisitor, _extends({}, options, { methodBody: true }), context, result);
         return false;
     } else if (node.name === "simpleTypeName" && options.constructorDeclarator === true && options.transform) {
         result.code += "constructor"; // transform: ClassName() -> constructor()
@@ -25605,7 +25605,7 @@ function extractCodeVisitor(node, level, options, result) {
 
         var className = { code: "" };
         var start = node.children.unqualifiedClassInstanceCreationExpression[0].children.classOrInterfaceTypeToInstantiate[0];
-        visitNodesRecursive(start, level + 1, extractCodeVisitor, options, className);
+        visitNodesRecursive(start, level + 1, extractCodeVisitor, options, context, className);
 
         if (className.code.startsWith("ArrayList")) {
             result.code += "new ArrayList()";
@@ -25618,7 +25618,7 @@ function extractCodeVisitor(node, level, options, result) {
             methodDeclaration: true // set context: inside method declaration
         });
 
-        visitChildren(node, level + 1, extractCodeVisitor, _newOptions, result);
+        visitChildren(node, level + 1, extractCodeVisitor, _newOptions, context, result);
 
         if (_newOptions.insideSetup === true && _newOptions.preload) {
             result.code += "function preload() {" + _newOptions.preload + "}";
@@ -25639,7 +25639,7 @@ function extractCodeVisitor(node, level, options, result) {
     } else if (node.name === "blockStatement") {
         if (options.insideSetup === true) {
             var _temp = { code: "" };
-            visitChildren(node, level + 1, extractCodeVisitor, options, _temp);
+            visitChildren(node, level + 1, extractCodeVisitor, options, context, _temp);
 
             if (options.isLoadFile === true) {
                 options.preload += _temp.code;
@@ -25657,7 +25657,7 @@ function extractCodeVisitor(node, level, options, result) {
 
 // helper functions
 
-function getClassBody(node, level, options, data) {
+function getClassBody(node, level, options, context, data) {
     if ("name" in node && node.name == "classBody") {
         data["node"] = node;
         return false;
@@ -25667,28 +25667,29 @@ function getClassBody(node, level, options, data) {
 
 function getClassBodyNode(cst) {
     var classBody = {};
-    visitNodesRecursive(cst, 0, getClassBody, null, classBody);
+    visitNodesRecursive(cst, 0, getClassBody, null, null, classBody);
     return classBody.node;
 }
 
 // main entry function to visit cst
 
 function cstExtractCode(cst, options) {
-    var result = { code: "" };
     var root = cst;
+    var context = {};
+    var result = { code: "" };
 
     options.arrayLists = [];
 
     if (options.ignoreOuterClass) root = getClassBodyNode(cst);
 
-    visitNodesRecursive(root, 0, extractCodeVisitor, options, result);
+    visitNodesRecursive(root, 0, extractCodeVisitor, options, context, result);
 
     if (options.ignoreOuterClass) result.code = result.code.trim().slice(1, -1); // remove braces
 
     return beautify(result.code);
 }
 
-function cstPrintOutlineVisitor(node, level, options, result) {
+function cstPrintOutlineVisitor(node, level, options, context, result) {
 
     if (!("name" in node)) return true;
 
@@ -25709,7 +25710,7 @@ function cstPrintOutlineVisitor(node, level, options, result) {
 }
 
 var cstPrintOutline = function cstPrintOutline(cst) {
-    return visitNodesRecursive(cst, 0, cstPrintOutlineVisitor, null, null);
+    return visitNodesRecursive(cst, 0, cstPrintOutlineVisitor, null, null, null);
 };
 
 function printOutlineProcessing(code) {
