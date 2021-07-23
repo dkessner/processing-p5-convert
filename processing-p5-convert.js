@@ -310,6 +310,7 @@ function registerField(node, context, result)
         if (!("arrayList" in context)) context.arrayLists = [];
         context.arrayLists.push(name); 
 
+        result.arrayListReference = true;
 
         // TODO: handle multiple names
     }
@@ -610,7 +611,7 @@ function cstExtractCode(cst, options)
 
     let output = beautify(result.code);
 
-    if (options.includeHeaders === true && !context.noHeader)
+    if (options.includeHeaders === true && !context.noHeader && result.arrayListReference === true)
         output = arrayListDeclaration + output;
 
     return output;

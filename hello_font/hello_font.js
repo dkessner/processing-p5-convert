@@ -1,12 +1,3 @@
-
-class ArrayList extends Array {
-    constructor() {super(...[]);}
-    size() {return this.length;}
-    add(x) {this.push(x);}
-    get(i) {return this[i];}
-    remove(i) {this.splice(i,1);}
-}
-
  let myFont;
 
  function setup() {
