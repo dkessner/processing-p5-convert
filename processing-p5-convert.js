@@ -42,7 +42,7 @@ function visitNodesRecursive(node, level, doSomething, options, data)
 
 // raw code extraction
 
-function printName(node, level, options, data) {
+function cstPrintRawVisitor(node, level, options, data) {
     if ("name" in node)
         console.log(" ".repeat(level) + node.name);
     else if ("image" in node)
@@ -51,7 +51,14 @@ function printName(node, level, options, data) {
     return true;
 }
 
-const printCstNodeTree = cst => visitNodesRecursive(cst, 0, printName, null, null);
+const cstPrintRaw = cst => visitNodesRecursive(cst, 0, cstPrintRawVisitor, null, null);
+
+function printRawProcessing(code)
+{
+    const preprocessed = preprocessProcessing(code);
+    const cst = parse(preprocessed);
+    cstPrintRaw(cst);
+}
 
 
 
@@ -293,13 +300,13 @@ function registerField(node, options)
         ignoreOuterClass: false
     };
 
-    const type = extractCodeFromCST(node.children.unannType[0], tempOptions);
+    const type = cstExtractCode(node.children.unannType[0], tempOptions);
 
     if (type.startsWith("ArrayList"))
     {
         // save ArrayList names in options.arrayLists
 
-        const name = extractCodeFromCST(node.children.variableDeclaratorList[0], tempOptions);
+        const name = cstExtractCode(node.children.variableDeclaratorList[0], tempOptions);
         if (!("arrayList" in options)) options.arrayLists = [];
         options.arrayLists.push(name); 
         // TODO: handle multiple names
@@ -584,7 +591,7 @@ function getClassBodyNode(cst)
 
 // main entry function to visit cst
 
-function extractCodeFromCST(cst, options)
+function cstExtractCode(cst, options)
 {
     let result = {code: ""};
     let root = cst;
@@ -603,15 +610,7 @@ function extractCodeFromCST(cst, options)
 }
 
 
-function printRawProcessing(code)
-{
-    const preprocessed = preprocessProcessing(code);
-    const cst = parse(preprocessed);
-    printCstNodeTree(cst);
-}
-
-
-function printOutline(node, level, options, result) {
+function cstPrintOutlineVisitor(node, level, options, result) {
 
     if (!("name" in node)) return true;
 
@@ -622,7 +621,7 @@ function printOutline(node, level, options, result) {
             ignoreOuterClass: false
         };
 
-        let code = extractCodeFromCST(node, tempOptions);
+        let code = cstExtractCode(node, tempOptions);
 
         console.log(code);
 
@@ -633,14 +632,14 @@ function printOutline(node, level, options, result) {
 }
 
 
-const printOutlineTree = cst => visitNodesRecursive(cst, 0, printOutline, null, null);
+const cstPrintOutline = cst => visitNodesRecursive(cst, 0, cstPrintOutlineVisitor, null, null);
 
 
 function printOutlineProcessing(code)
 {
     const wrapped = "public class Dummy {" + code + "}";
     const cst = parse(wrapped);
-    printOutlineTree(cst);
+    cstPrintOutline(cst);
 }
 
 
@@ -719,7 +718,7 @@ function transformProcessing(code)
         ignoreOuterClass: true
     };
 
-    return header + extractCodeFromCST(cst, options);
+    return header + cstExtractCode(cst, options);
 }
 
 
@@ -733,7 +732,7 @@ function reconstructProcessing(code)
         ignoreOuterClass: true
     };
 
-    let output = extractCodeFromCST(cst, options);
+    let output = cstExtractCode(cst, options);
     
     return unpreprocessProcessing(output);
 }
