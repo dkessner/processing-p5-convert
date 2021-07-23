@@ -4,8 +4,6 @@
 
 
 export {
-    reconstructJava, 
-    transformJava, 
     printRawProcessing,
     printOutlineProcessing,
     transformProcessing,
@@ -54,8 +52,6 @@ function printName(node, level, options, data) {
 }
 
 const printCstNodeTree = cst => visitNodesRecursive(cst, 0, printName, null, null);
-
-
 
 
 
@@ -285,17 +281,6 @@ function handle_ifStatement(node, level, options, data) {
     visitNodesRecursive(node.children.statement[0], level+1, extractCodeVisitor, options, data);
     visitNodesRecursive(node.children.Else[0], level+1, extractCodeVisitor, options, data);
     visitNodesRecursive(node.children.statement[1], level+1, extractCodeVisitor, options, data);
-}
-
-
-// TODO: deprecated
-
-function transformCodeFromCST(cst)
-{
-    let classBodyNode = getClassBodyNode(cst);
-    let transformedCode = {code: ""};
-    visitNodesRecursive(classBodyNode, 0, appendAndTransformCode, null, transformedCode);
-    return transformedCode.code;
 }
 
 
@@ -618,25 +603,6 @@ function extractCodeFromCST(cst, options)
 }
 
 
-// top-level functions
-
-
-function reconstructJava(code)  // TODO: test
-{
-    const options = {
-        transform: false,
-        ignoreOuterClass: false
-    };
-
-    return extractCodeFromCST(parse(code), options);
-}
-
-
-const transformJava = code => transformCodeFromCST(parse(code));
-//const transformJava = code => extractCodeFromCST(parse(code), {transform: true});
-// TODO
-
-
 function printRawProcessing(code)
 {
     const preprocessed = preprocessProcessing(code);
@@ -777,8 +743,6 @@ if (typeof(module) !== 'undefined')
 {
     module.exports = 
     { 
-        reconstructJava, 
-        transformJava, 
         printRawProcessing,
         printOutlineProcessing,
         transformProcessing,
