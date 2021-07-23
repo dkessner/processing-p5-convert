@@ -25456,7 +25456,7 @@ function handle_ifStatement(node, level, options, context, data) {
     visitNodesRecursive(node.children.statement[1], level + 1, extractCodeVisitor, options, context, data);
 }
 
-function registerField(node, context) {
+function registerField(node, context, result) {
     var ok = "unannType" in node.children && "variableDeclaratorList" in node.children;
 
     var tempOptions = {
@@ -25472,6 +25472,7 @@ function registerField(node, context) {
         var name = cstExtractCode(node.children.variableDeclaratorList[0], tempOptions);
         if (!("arrayList" in context)) context.arrayLists = [];
         context.arrayLists.push(name);
+
         // TODO: handle multiple names
     }
 }
@@ -25557,7 +25558,7 @@ function extractCodeVisitor(node, level, options, context, result) {
         return false;
     } else if (node.name === "fieldDeclaration") {
         visitChildren(node, level + 1, extractCodeVisitor, options, _extends({}, context, { fieldDeclaration: true }), result);
-        registerField(node, context);
+        registerField(node, context, result);
         return false;
     } else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
         {
@@ -25676,11 +25677,15 @@ function cstExtractCode(cst, options) {
 
     if (options.ignoreOuterClass) root = getClassBodyNode(cst);
 
-    visitNodesRecursive(root, 0, extractCodeVisitor, options, context, result);
+    visitNodesRecursive(root, 0, extractCodeVisitor, options, _extends({}, context, { noHeader: true }), result);
 
     if (options.ignoreOuterClass) result.code = result.code.trim().slice(1, -1); // remove braces
 
-    return beautify(result.code);
+    var output = beautify(result.code);
+
+    if (options.includeHeaders === true && !context.noHeader) output = arrayListDeclaration + output;
+
+    return output;
 }
 
 function cstPrintOutlineVisitor(node, level, options, context, result) {
@@ -25713,7 +25718,7 @@ function printOutlineProcessing(code) {
     cstPrintOutline(cst);
 }
 
-var header = '\nclass ArrayList extends Array {\n    constructor() {super(...[]);}\n    size() {return this.length;}\n    add(x) {this.push(x);}\n    get(i) {return this[i];}\n    remove(i) {this.splice(i,1);}\n}\n\n';
+var arrayListDeclaration = '\nclass ArrayList extends Array {\n    constructor() {super(...[]);}\n    size() {return this.length;}\n    add(x) {this.push(x);}\n    get(i) {return this[i];}\n    remove(i) {this.splice(i,1);}\n}\n\n';
 
 function preprocessProcessing(code) {
     var wrapped = "public class Dummy {" + code + "}";
@@ -25771,10 +25776,11 @@ function transformProcessing(code) {
 
     var options = {
         transform: true,
-        ignoreOuterClass: true
+        ignoreOuterClass: true,
+        includeHeaders: true
     };
 
-    return header + cstExtractCode(cst, options);
+    return cstExtractCode(cst, options);
 }
 
 function reconstructProcessing(code) {

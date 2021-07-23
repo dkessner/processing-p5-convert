@@ -291,7 +291,7 @@ function handle_ifStatement(node, level, options, context, data) {
 }
 
 
-function registerField(node, context)
+function registerField(node, context, result)
 {
     const ok = "unannType" in node.children && "variableDeclaratorList" in node.children;
 
@@ -309,6 +309,8 @@ function registerField(node, context)
         const name = cstExtractCode(node.children.variableDeclaratorList[0], tempOptions);
         if (!("arrayList" in context)) context.arrayLists = [];
         context.arrayLists.push(name); 
+
+
         // TODO: handle multiple names
     }
 }
@@ -438,7 +440,7 @@ function extractCodeVisitor(node, level, options, context, result)
     {
         visitChildren(node, level+1, extractCodeVisitor, 
                 options, {...context, fieldDeclaration:true}, result);
-        registerField(node, context);
+        registerField(node, context, result);
         return false;
     }
     else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
@@ -600,12 +602,18 @@ function cstExtractCode(cst, options)
     if (options.ignoreOuterClass) 
         root = getClassBodyNode(cst);
 
-    visitNodesRecursive(root, 0, extractCodeVisitor, options, context, result);
+    visitNodesRecursive(root, 0, extractCodeVisitor, 
+            options, {...context, noHeader:true}, result);
 
     if (options.ignoreOuterClass) 
         result.code = result.code.trim().slice(1,-1); // remove braces
 
-    return beautify(result.code);
+    let output = beautify(result.code);
+
+    if (options.includeHeaders === true && !context.noHeader)
+        output = arrayListDeclaration + output;
+
+    return output;
 }
 
 
@@ -642,7 +650,7 @@ function printOutlineProcessing(code)
 }
 
 
-const header = `
+const arrayListDeclaration = `
 class ArrayList extends Array {
     constructor() {super(...[]);}
     size() {return this.length;}
@@ -714,10 +722,11 @@ function transformProcessing(code)
 
     const options = {
         transform: true,
-        ignoreOuterClass: true
+        ignoreOuterClass: true,
+        includeHeaders: true
     };
 
-    return header + cstExtractCode(cst, options);
+    return cstExtractCode(cst, options);
 }
 
 
