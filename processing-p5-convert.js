@@ -295,6 +295,12 @@ function registerField(node, context, result)
 {
     const ok = "unannType" in node.children && "variableDeclaratorList" in node.children;
 
+    if (!ok) 
+    {
+        console.log("[registerField] I am insane!");
+        return;
+    }
+
     const tempOptions = {
         transform: false,
         ignoreOuterClass: false
@@ -304,20 +310,11 @@ function registerField(node, context, result)
 
     if (type.startsWith("ArrayList"))
     {
-        // save ArrayList names in context.arrayLists
-
-        const name = cstExtractCode(node.children.variableDeclaratorList[0], tempOptions);
-        if (!("arrayList" in context)) context.arrayLists = [];
-        context.arrayLists.push(name); 
-
         result.arrayListReference = true;
-
-        // TODO: handle multiple names
     }
 }
 
-
-// primary node visitor for code reconstruction/transformation
+// visitor for cstExtractCode
 
 function extractCodeVisitor(node, level, options, context, result)
 {
@@ -441,7 +438,10 @@ function extractCodeVisitor(node, level, options, context, result)
     {
         visitChildren(node, level+1, extractCodeVisitor, 
                 options, {...context, fieldDeclaration:true}, result);
-        registerField(node, context, result);
+
+        if (options.transform === true)
+            registerField(node, context, result);
+
         return false;
     }
     else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
@@ -475,8 +475,7 @@ function extractCodeVisitor(node, level, options, context, result)
         let newContext = {
             ...context, 
             classDeclaration: true,
-            memberVariables: [],
-            arrayLists: [...context.arrayLists]
+            memberVariables: []
         };
 
         visitChildren(node, level+1, extractCodeVisitor, options, newContext, result);
@@ -514,7 +513,8 @@ function extractCodeVisitor(node, level, options, context, result)
 
         if (className.code.startsWith("ArrayList"))
         {
-            result.code += "new ArrayList()";
+            // transform: ArrayList<ClassName> -> ArrayList
+            result.code += "new ArrayList()"; 
             return false;
         }
 
@@ -597,7 +597,7 @@ function getClassBodyNode(cst)
 function cstExtractCode(cst, options)
 {
     let root = cst;
-    let context = {arrayLists:[]};
+    let context = {};
     let result = {code: ""};
 
     if (options.ignoreOuterClass) 
@@ -611,7 +611,9 @@ function cstExtractCode(cst, options)
 
     let output = beautify(result.code);
 
-    if (options.includeHeaders === true && !context.noHeader && result.arrayListReference === true)
+    if (options.includeHeaders === true && 
+        !context.noHeader && 
+        result.arrayListReference === true)
         output = arrayListDeclaration + output;
 
     return output;
