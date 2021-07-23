@@ -25106,7 +25106,7 @@ function handle_fqnOrRefType(node, level, options, context, data) {
         var restArray = node.children.fqnOrRefTypePartRest;
 
         if (dotArray.length !== restArray.length) {
-            console.log("[handle_fqnOrRefType] Array lengths do not match.");
+            console.log("[processing-p5-convert] handle_fqnOrRefType array lengths do not match.");
             return;
         }
 
