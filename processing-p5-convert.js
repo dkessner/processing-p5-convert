@@ -324,6 +324,89 @@ function extractCodeVisitor_binaryExpression(node, level, options, context, resu
     return true;
 }
 
+function extractCodeVisitor_enhancedForStatement(node, level, options, context, result)
+{
+    visitChildren(node, level+1, extractCodeVisitor, 
+        options, {...context, enhancedForStatement:true}, result);
+    return false;
+}
+
+function extractCodeVisitor_fieldDeclaration(node, level, options, context, result)
+{
+    visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, fieldDeclaration:true}, result);
+
+    if (options.transform === true)
+        registerField(node, context, result);
+
+    return false;
+}
+
+
+function extractCodeVisitor_unannType(node, level, options, context, result)
+{
+    if (options.transform)
+    {
+        // transform field declarations depending on context:
+        // - global: int/float/... -> let
+        // - class:  int/float/... -> ""
+
+        if (context.classDeclaration !== true)
+            result.code += "let ";
+
+        return false;
+    }
+
+    return true;
+}
+
+function extractCodeVisitor_variableDeclarator(node, level, options, context, result)
+{
+    // if we're declaring a variable in a class, save it to the memberVariables list
+
+    if (context.classDeclaration === true && context.fieldDeclaration === true)
+    { 
+        // look ahead...
+        let variableNameContainer = {code: ""};
+        visitChildren(node, level, extractCodeVisitor, options, context, variableNameContainer);
+        let variableName = variableNameContainer.code.split(' ')[0];
+        context.memberVariables.push(variableName);
+    }
+    
+    return true;  // ...but keep going      
+}
+
+function extractCodeVisitor_classDeclaration(node, level, options, context, result)
+{
+    let newContext = {
+        ...context, 
+        classDeclaration: true,
+        memberVariables: []
+    };
+
+    visitChildren(node, level+1, extractCodeVisitor, options, newContext, result);
+    return false;
+}
+
+function extractCodeVisitor_constructorDeclarator(node, level, options, context, result)
+{
+    visitChildren(node, level+1, extractCodeVisitor, 
+        options, {...context, constructorDeclarator:true}, result);
+    return false;
+}
+
+function extractCodeVisitor_methodBody(node, level, options, context, result)
+{
+    if (context.classDeclaration === true)
+    {
+        visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, methodBody:true}, result);
+        return false;
+    }
+
+    return true;
+}
+
 const extractCodeVisitor_specialHandlers = {
     fqnOrRefType: extractCodeVisitor_fqnOrRefType,
     argumentList: extractCodeVisitor_argumentList,
@@ -332,6 +415,14 @@ const extractCodeVisitor_specialHandlers = {
     binaryExpression: extractCodeVisitor_binaryExpression,
     basicForStatement: extractCodeVisitor_basicForStatement,
     ifStatement: extractCodeVisitor_ifStatement,
+    enhancedForStatement: extractCodeVisitor_enhancedForStatement,
+    fieldDeclaration: extractCodeVisitor_fieldDeclaration,
+    unannType: extractCodeVisitor_unannType,
+    variableDeclarator: extractCodeVisitor_variableDeclarator,
+    classDeclaration: extractCodeVisitor_classDeclaration,
+    constructorDeclarator: extractCodeVisitor_constructorDeclarator,
+    methodBody: extractCodeVisitor_methodBody,
+    constructorBody: extractCodeVisitor_methodBody, // same as methodBody
 }
 
 function extractCodeVisitor(node, level, options, context, result)
@@ -347,74 +438,9 @@ function extractCodeVisitor(node, level, options, context, result)
     if (node.name in extractCodeVisitor_specialHandlers)
         return extractCodeVisitor_specialHandlers[node.name](node, level, options, context, result);
 
-    if (node.name === "enhancedForStatement")
-    {
-        visitChildren(node, level+1, extractCodeVisitor, 
-            options, {...context, enhancedForStatement:true}, result);
-        return false;
-    }
-    else if (node.name === "fieldDeclaration")
-    {
-        visitChildren(node, level+1, extractCodeVisitor, 
-                options, {...context, fieldDeclaration:true}, result);
+    //TODO
 
-        if (options.transform === true)
-            registerField(node, context, result);
-
-        return false;
-    }
-    else if (node.name === "unannType" && options.transform) // inside "fieldDeclaration"
-    {
-        // transform field declarations depending on context:
-        // - global: int/float/... -> let
-        // - class:  int/float/... -> ""
-
-        if (context.classDeclaration !== true)
-            result.code += "let ";
-
-        return false;
-    }
-    else if (node.name === "variableDeclarator")
-    {
-        // if we're declaring a variable in a class, save it to the memberVariables list
-
-        if (context.classDeclaration === true && context.fieldDeclaration === true)
-        { 
-            // look ahead...
-            let variableNameContainer = {code: ""};
-            visitChildren(node, level, extractCodeVisitor, options, context, variableNameContainer);
-            let variableName = variableNameContainer.code.split(' ')[0];
-            context.memberVariables.push(variableName);
-        }
-        
-        return true;  // ...but keep going      
-    }
-    else if (node.name === "classDeclaration")
-    {
-        let newContext = {
-            ...context, 
-            classDeclaration: true,
-            memberVariables: []
-        };
-
-        visitChildren(node, level+1, extractCodeVisitor, options, newContext, result);
-        return false;
-    }
-    else if (node.name === "constructorDeclarator")
-    {
-        visitChildren(node, level+1, extractCodeVisitor, 
-            options, {...context, constructorDeclarator:true}, result);
-        return false;
-    }
-    else if (context.classDeclaration === true && 
-            (node.name === "constructorBody" || 
-             node.name === "methodBody"))
-    {
-        visitChildren(node, level+1, extractCodeVisitor, 
-            options, {...context, methodBody:true}, result);
-        return false;
-    }
-    else if (node.name === "simpleTypeName" && 
+if (node.name === "simpleTypeName" && 
         context.constructorDeclarator === true &&
         options.transform)
     {
