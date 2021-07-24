@@ -25363,6 +25363,49 @@ function extractCodeVisitor_newExpression(node, level, options, context, result)
     return true;
 }
 
+function extractCodeVisitor_methodDeclaration(node, level, options, context, result) {
+    var newContext = _extends({}, context, { methodDeclaration: true });
+
+    visitChildren(node, level + 1, extractCodeVisitor, options, newContext, result);
+
+    if (options.transform === true && newContext.insideSetup === true && newContext.preload) {
+        result.code += "function preload() {" + newContext.preload + "}";
+    }
+
+    return false;
+}
+
+function extractCodeVisitor_methodDeclarator(node, level, options, context, result) {
+    if (context.classDeclaration !== true && context.methodDeclaration === true) {
+        var methodName = node.children.Identifier[0].image;
+
+        if (methodName === "setup") {
+            context.insideSetup = true; // add more context: inside setup()
+            context.preload = "";
+        }
+    }
+
+    return true;
+}
+
+function extractCodeVisitor_blockStatement(node, level, options, context, result) {
+    if (context.insideSetup === true) {
+        var temp = { code: "" };
+        visitChildren(node, level + 1, extractCodeVisitor, options, context, temp);
+
+        if (context.isLoadFile === true) {
+            context.preload += temp.code;
+            context.isLoadFile = false;
+        } else {
+            result.code += temp.code;
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
 var extractCodeVisitor_specialHandlers = {
     fqnOrRefType: extractCodeVisitor_fqnOrRefType,
     argumentList: extractCodeVisitor_argumentList,
@@ -25380,56 +25423,16 @@ var extractCodeVisitor_specialHandlers = {
     methodBody: extractCodeVisitor_methodBody,
     constructorBody: extractCodeVisitor_methodBody, // same as methodBody
     simpleTypeName: extractCodeVisitor_simpleTypeName,
-    newExpression: extractCodeVisitor_newExpression
+    newExpression: extractCodeVisitor_newExpression,
+    methodDeclaration: extractCodeVisitor_methodDeclaration,
+    methodDeclarator: extractCodeVisitor_methodDeclarator,
+    blockStatement: extractCodeVisitor_blockStatement
 };
 
 function extractCodeVisitor(node, level, options, context, result) {
-    // actual code is stored as node["image"]
-
     if ("image" in node) return extractCodeVisitor_image(node, level, options, context, result);
 
-    if (!("name" in node)) return true;
-
-    if (node.name in extractCodeVisitor_specialHandlers) return extractCodeVisitor_specialHandlers[node.name](node, level, options, context, result);
-
-    //TODO
-
-    if (node.name === "methodDeclaration") {
-        var newContext = _extends({}, context, { methodDeclaration: true });
-
-        visitChildren(node, level + 1, extractCodeVisitor, options, newContext, result);
-
-        if (newContext.insideSetup === true && newContext.preload) {
-            result.code += "function preload() {" + newContext.preload + "}";
-        }
-
-        return false;
-    } else if (node.name === "methodDeclarator") {
-        if (context.classDeclaration !== true && context.methodDeclaration === true) {
-            var methodName = node.children.Identifier[0].image;
-
-            if (methodName === "setup") {
-                context.insideSetup = true; // add more context: inside setup()
-                context.preload = "";
-            }
-
-            return true;
-        }
-    } else if (node.name === "blockStatement") {
-        if (context.insideSetup === true) {
-            var temp = { code: "" };
-            visitChildren(node, level + 1, extractCodeVisitor, options, context, temp);
-
-            if (context.isLoadFile === true) {
-                context.preload += temp.code;
-                context.isLoadFile = false;
-            } else {
-                result.code += temp.code;
-            }
-
-            return false;
-        }
-    }
+    if ("name" in node && node.name in extractCodeVisitor_specialHandlers) return extractCodeVisitor_specialHandlers[node.name](node, level, options, context, result);
 
     return true;
 }
