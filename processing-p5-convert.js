@@ -116,43 +116,45 @@ function handle_fqnOrRefType(node, level, options, context, data) {
     data.code += temp.code;
 }
 
-function handle_variableDeclaratorList(node, level, options, context, data) {
-    //
-    // variableDeclaratorList stores arguments and commas in separate arrays
-    //
-    // float mouseX, mouseY;
-    //  Comma: [\,]
-    //  variableDeclarator: [mouseX, mouseY]
-    //
+//
+// variableDeclaratorList stores arguments and commas in separate arrays:
+//
+// float mouseX, mouseY;
+//
+// variableDeclaratorList
+//  - variableDeclarator: [mouseX, mouseY]
+//  - Comma: [\,]
+//
+ 
+function visitChildrenInterleaved(node, zeroth, first, second, 
+                                  level, options, context, data) 
+{
+    let temp = {code:""};
 
-    // sanity check
+    if (zeroth && zeroth in node.children)
+        visitNodesRecursive(node.children[zeroth][0], level+1, extractCodeVisitor, options, context, temp);
 
-    const ok = "variableDeclarator" in node.children && "Comma" in node.children;
+    let ok = first && first in node.children;
 
     if (!ok)
     {
-        console.log("[processing-p5-convert] handle_variableDeclaratorList not ok");
+        console.log("visitChildrenInterleaved Not ok!");
         return;
     }
 
-    // extract code
-
-    const variableDeclaratorArray = node.children.variableDeclarator;
-    const commaArray = "Comma" in node.children ? node.children.Comma : null;
-
-    let temp = {code:""};
-
-    for (const index in variableDeclaratorArray)
+    let firstArray = node.children[first];
+    let secondArray = second in node.children ? node.children[second] : null;
+    
+    for (const index in firstArray)
     {
-        visitNodesRecursive(variableDeclaratorArray[index], level+1, extractCodeVisitor, options, context, temp);
-        if (commaArray !== null && index in commaArray)
-            visitNodesRecursive(commaArray[index], level+1, extractCodeVisitor, options, context, temp);
+        visitNodesRecursive(firstArray[index], level+1, extractCodeVisitor, options, context, temp);
+        if (secondArray !== null && index in secondArray)
+            visitNodesRecursive(secondArray[index], level+1, extractCodeVisitor, options, context, temp);
     }
-
-    // save extracted code
 
     data.code += temp.code;
 }
+
 
 function handle_argumentList(node, level, options, context, data) {
     //
@@ -389,13 +391,9 @@ function extractCodeVisitor(node, level, options, context, result)
     }
     else if (node.name === "variableDeclaratorList")
     {
-        if ("Comma" in node.children)
-        {
-            handle_variableDeclaratorList(node, level, options, context, result);
-            return false;
-        }
-        else
-            return true;
+        visitChildrenInterleaved(node, "", "variableDeclarator", "Comma",
+                                 level+1, options, context, result); 
+        return false;
     }
     else if (node.name === "result")
     {
