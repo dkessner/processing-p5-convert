@@ -64,95 +64,48 @@ function printRawProcessing(code)
 
 // special node handlers for extractCodeVisitor()
 
-function handle_fqnOrRefType(node, level, options, context, data) {
-
-    // fqnOrRefType nodes store stuff in arrays, so we need to reconstruct:
-    //
-    // System.out.println ->
-    //
-    //  fqnOrRefTypePartFirst: "System"
-    //  fqnOrRefTypePartRest: ["out", "println"]
-    //  Dot: [".", "."]
-    //
-
-    // sanity check
-
-    const ok = "fqnOrRefTypePartFirst" in node.children;
-    const multiple = ("Dot" in node.children && "fqnOrRefTypePartRest" in node.children);
-
-    if (!ok)
-    {
-        console.log("[processing-p5-convert] handle_fqnOrRefType not ok");
-        return;
-    }
-
-    // extract the first part
-
-    let temp = {code:""};
-    visitNodesRecursive(node.children.fqnOrRefTypePartFirst["0"], level+1, extractCodeVisitor, options, context, temp);
-
-    // extract the rest, iterating through the dot and rest arrays in parallel
-
-    if (multiple)
-    {
-        const dotArray = node.children.Dot;
-        const restArray = node.children.fqnOrRefTypePartRest;
-
-        if (dotArray.length !== restArray.length)
-        {
-            console.log("[processing-p5-convert] handle_fqnOrRefType array lengths do not match.");
-            return;
-        }
-
-        for (const index in dotArray)
-        {
-            visitNodesRecursive(dotArray[index], level+1, extractCodeVisitor, options, context, temp);
-            visitNodesRecursive(restArray[index], level+1, extractCodeVisitor, options, context, temp);
-        }
-    }
-
-    // save extracted code
-
-    data.code += temp.code;
-}
 
 //
-// variableDeclaratorList stores arguments and commas in separate arrays:
+// variableDeclaratorList
 //
-// float mouseX, mouseY;
+// mouseX, mouseY ->
 //
 // variableDeclaratorList
 //  - variableDeclarator: [mouseX, mouseY]
 //  - Comma: [\,]
 //
- 
+
+// fqnOrRefType
+//
+// System.out.println ->
+//
+// fqnOrRefType
+//  - fqnOrRefTypePartFirst: "System"
+//  - fqnOrRefTypePartRest: ["out", "println"]
+//  - Dot: [".", "."]
+//
+  
 function visitChildrenInterleaved(node, zeroth, first, second, 
-                                  level, options, context, data) 
+                                  level, options, context, result) 
 {
-    let temp = {code:""};
+    // visit zeroth
 
     if (zeroth && zeroth in node.children)
-        visitNodesRecursive(node.children[zeroth][0], level+1, extractCodeVisitor, options, context, temp);
+        visitNodesRecursive(node.children[zeroth][0], level+1, extractCodeVisitor, options, context, result);
 
-    let ok = first && first in node.children;
+    // interleave first and second
 
-    if (!ok)
-    {
-        console.log("visitChildrenInterleaved Not ok!");
-        return;
-    }
+    let firstArray = first in node.children ? node.children[first] : null;
+    if (!firstArray) return;
 
-    let firstArray = node.children[first];
     let secondArray = second in node.children ? node.children[second] : null;
     
     for (const index in firstArray)
     {
-        visitNodesRecursive(firstArray[index], level+1, extractCodeVisitor, options, context, temp);
+        visitNodesRecursive(firstArray[index], level+1, extractCodeVisitor, options, context, result);
         if (secondArray !== null && index in secondArray)
-            visitNodesRecursive(secondArray[index], level+1, extractCodeVisitor, options, context, temp);
+            visitNodesRecursive(secondArray[index], level+1, extractCodeVisitor, options, context, result);
     }
-
-    data.code += temp.code;
 }
 
 
@@ -356,7 +309,12 @@ function extractCodeVisitor(node, level, options, context, result)
     if (node.name === "fqnOrRefType")
     {
         let temp = {code:""};
-        handle_fqnOrRefType(node, level, options, context, temp);
+        
+        visitChildrenInterleaved(node, "fqnOrRefTypePartFirst", 
+                                 "Dot","fqnOrRefTypePartRest",
+                                 level+1, options, context, temp); 
+
+        //handle_fqnOrRefType(node, level, options, context, temp);
 
         if (options.transform) {
             if (temp.code === "size ")

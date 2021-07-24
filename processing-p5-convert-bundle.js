@@ -25073,85 +25073,43 @@ function printRawProcessing(code) {
 
 // special node handlers for extractCodeVisitor()
 
-function handle_fqnOrRefType(node, level, options, context, data) {
-
-    // fqnOrRefType nodes store stuff in arrays, so we need to reconstruct:
-    //
-    // System.out.println ->
-    //
-    //  fqnOrRefTypePartFirst: "System"
-    //  fqnOrRefTypePartRest: ["out", "println"]
-    //  Dot: [".", "."]
-    //
-
-    // sanity check
-
-    var ok = "fqnOrRefTypePartFirst" in node.children;
-    var multiple = "Dot" in node.children && "fqnOrRefTypePartRest" in node.children;
-
-    if (!ok) {
-        console.log("[processing-p5-convert] handle_fqnOrRefType not ok");
-        return;
-    }
-
-    // extract the first part
-
-    var temp = { code: "" };
-    visitNodesRecursive(node.children.fqnOrRefTypePartFirst["0"], level + 1, extractCodeVisitor, options, context, temp);
-
-    // extract the rest, iterating through the dot and rest arrays in parallel
-
-    if (multiple) {
-        var dotArray = node.children.Dot;
-        var restArray = node.children.fqnOrRefTypePartRest;
-
-        if (dotArray.length !== restArray.length) {
-            console.log("[processing-p5-convert] handle_fqnOrRefType array lengths do not match.");
-            return;
-        }
-
-        for (var index in dotArray) {
-            visitNodesRecursive(dotArray[index], level + 1, extractCodeVisitor, options, context, temp);
-            visitNodesRecursive(restArray[index], level + 1, extractCodeVisitor, options, context, temp);
-        }
-    }
-
-    // save extracted code
-
-    data.code += temp.code;
-}
 
 //
-// variableDeclaratorList stores arguments and commas in separate arrays:
+// variableDeclaratorList
 //
-// float mouseX, mouseY;
+// mouseX, mouseY ->
 //
 // variableDeclaratorList
 //  - variableDeclarator: [mouseX, mouseY]
 //  - Comma: [\,]
 //
 
-function visitChildrenInterleaved(node, zeroth, first, second, level, options, context, data) {
-    var temp = { code: "" };
+// fqnOrRefType
+//
+// System.out.println ->
+//
+// fqnOrRefType
+//  - fqnOrRefTypePartFirst: "System"
+//  - fqnOrRefTypePartRest: ["out", "println"]
+//  - Dot: [".", "."]
+//
 
-    if (zeroth && zeroth in node.children) visitNodesRecursive(node.children[zeroth][0], level + 1, extractCodeVisitor, options, context, temp);
+function visitChildrenInterleaved(node, zeroth, first, second, level, options, context, result) {
+    // visit zeroth
 
-    var ok = first && first in node.children;
+    if (zeroth && zeroth in node.children) visitNodesRecursive(node.children[zeroth][0], level + 1, extractCodeVisitor, options, context, result);
 
-    if (!ok) {
-        console.log("visitChildrenInterleaved Not ok!");
-        return;
-    }
+    // interleave first and second
 
-    var firstArray = node.children[first];
+    var firstArray = first in node.children ? node.children[first] : null;
+    if (!firstArray) return;
+
     var secondArray = second in node.children ? node.children[second] : null;
 
     for (var index in firstArray) {
-        visitNodesRecursive(firstArray[index], level + 1, extractCodeVisitor, options, context, temp);
-        if (secondArray !== null && index in secondArray) visitNodesRecursive(secondArray[index], level + 1, extractCodeVisitor, options, context, temp);
+        visitNodesRecursive(firstArray[index], level + 1, extractCodeVisitor, options, context, result);
+        if (secondArray !== null && index in secondArray) visitNodesRecursive(secondArray[index], level + 1, extractCodeVisitor, options, context, result);
     }
-
-    data.code += temp.code;
 }
 
 function handle_argumentList(node, level, options, context, data) {
@@ -25318,7 +25276,10 @@ function extractCodeVisitor(node, level, options, context, result) {
 
     if (node.name === "fqnOrRefType") {
         var temp = { code: "" };
-        handle_fqnOrRefType(node, level, options, context, temp);
+
+        visitChildrenInterleaved(node, "fqnOrRefTypePartFirst", "Dot", "fqnOrRefTypePartRest", level + 1, options, context, temp);
+
+        //handle_fqnOrRefType(node, level, options, context, temp);
 
         if (options.transform) {
             if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
