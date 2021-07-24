@@ -186,35 +186,42 @@ function registerField(node, context, result)
 
 // visitor for cstExtractCode
 
+
+function extractCodeVisitor_image(node, level, options, context, result)
+{
+    if (options.transform === true)
+    {
+        // transform:  member variables in class method body x -> this.x
+
+        if (context.methodBody === true && 
+            "memberVariables" in context && 
+            context.memberVariables.includes(node.image))
+        {
+            result.code += "this." + node.image + " ";
+            return;
+        }
+
+        // transform: for each loop : -> of
+
+        else if (context.enhancedForStatement === true &&
+            node.image === ":")
+        {
+            result.code += "of ";  
+            return;
+        }
+    }
+
+    // default: actual code string is stored in node.image
+
+    result.code += node.image + " ";
+}
+
+
 function extractCodeVisitor(node, level, options, context, result)
 {
     if ("image" in node) // actual code is stored as node["image"]
     {
-        if (options.transform === true)
-        {
-            // transform:  member variables in class method body x -> this.x
-
-            if (context.methodBody === true && 
-                "memberVariables" in context && 
-                context.memberVariables.includes(node.image))
-            {
-                result.code += "this." + node.image + " ";
-                return true;
-            }
-
-            // transform: for each loop : -> of
-
-            if (context.enhancedForStatement === true)
-            {
-                if (node.image === ":")
-                {
-                    result.code += "of ";  
-                    return true;
-                }
-            }
-        }
-
-        result.code += node.image + " ";
+        extractCodeVisitor_image(node, level, options, context, result);
         return true;
     }
 
