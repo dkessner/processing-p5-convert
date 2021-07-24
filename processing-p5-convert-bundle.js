@@ -25336,6 +25336,33 @@ function extractCodeVisitor_methodBody(node, level, options, context, result) {
     return true;
 }
 
+function extractCodeVisitor_simpleTypeName(node, level, options, context, result) {
+    if (options.transform === true && context.constructorDeclarator === true) {
+        result.code += "constructor"; // transform: ClassName() -> constructor()
+        return false;
+    }
+
+    return true;
+}
+
+function extractCodeVisitor_newExpression(node, level, options, context, result) {
+    if (options.transform === true) {
+        var ok = "unqualifiedClassInstanceCreationExpression" in node.children && "classOrInterfaceTypeToInstantiate" in node.children.unqualifiedClassInstanceCreationExpression[0].children;
+
+        var className = { code: "" };
+        var start = node.children.unqualifiedClassInstanceCreationExpression[0].children.classOrInterfaceTypeToInstantiate[0];
+        visitNodesRecursive(start, level + 1, extractCodeVisitor, options, context, className);
+
+        if (className.code.startsWith("ArrayList")) {
+            // transform: ArrayList<ClassName> -> ArrayList
+            result.code += "new ArrayList()";
+            return false;
+        }
+    }
+
+    return true;
+}
+
 var extractCodeVisitor_specialHandlers = {
     fqnOrRefType: extractCodeVisitor_fqnOrRefType,
     argumentList: extractCodeVisitor_argumentList,
@@ -25351,7 +25378,9 @@ var extractCodeVisitor_specialHandlers = {
     classDeclaration: extractCodeVisitor_classDeclaration,
     constructorDeclarator: extractCodeVisitor_constructorDeclarator,
     methodBody: extractCodeVisitor_methodBody,
-    constructorBody: extractCodeVisitor_methodBody // same as methodBody
+    constructorBody: extractCodeVisitor_methodBody, // same as methodBody
+    simpleTypeName: extractCodeVisitor_simpleTypeName,
+    newExpression: extractCodeVisitor_newExpression
 };
 
 function extractCodeVisitor(node, level, options, context, result) {
@@ -25365,24 +25394,7 @@ function extractCodeVisitor(node, level, options, context, result) {
 
     //TODO
 
-    if (node.name === "simpleTypeName" && context.constructorDeclarator === true && options.transform) {
-        result.code += "constructor"; // transform: ClassName() -> constructor()
-        return false;
-    } else if (node.name === "newExpression" && options.transform === true) {
-        var ok = "unqualifiedClassInstanceCreationExpression" in node.children && "classOrInterfaceTypeToInstantiate" in node.children.unqualifiedClassInstanceCreationExpression[0].children;
-
-        var className = { code: "" };
-        var start = node.children.unqualifiedClassInstanceCreationExpression[0].children.classOrInterfaceTypeToInstantiate[0];
-        visitNodesRecursive(start, level + 1, extractCodeVisitor, options, context, className);
-
-        if (className.code.startsWith("ArrayList")) {
-            // transform: ArrayList<ClassName> -> ArrayList
-            result.code += "new ArrayList()";
-            return false;
-        }
-
-        return true;
-    } else if (node.name === "methodDeclaration") {
+    if (node.name === "methodDeclaration") {
         var newContext = _extends({}, context, { methodDeclaration: true });
 
         visitChildren(node, level + 1, extractCodeVisitor, options, newContext, result);
