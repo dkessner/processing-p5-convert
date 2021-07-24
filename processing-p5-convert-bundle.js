@@ -25088,6 +25088,10 @@ function printRawProcessing(code) {
 //  - unaryExpression: [x, width, 10]
 //  - BinaryOperator: [<, +]
 //
+// argumentList: "(420, 666)"
+//  - expression: [420, 666]
+//  - Comma: [\,]
+//
 
 function visitChildrenInterleaved(node, zeroth, first, second, level, options, context, result) {
     // visit zeroth
@@ -25105,81 +25109,6 @@ function visitChildrenInterleaved(node, zeroth, first, second, level, options, c
         visitNodesRecursive(firstArray[index], level + 1, extractCodeVisitor, options, context, result);
         if (secondArray !== null && index in secondArray) visitNodesRecursive(secondArray[index], level + 1, extractCodeVisitor, options, context, result);
     }
-}
-
-function handle_argumentList(node, level, options, context, data) {
-    //
-    // argumentList stores arguments and commas in separate arrays
-    //
-    // argumentList (420, 666)
-    //  Comma: [\,]
-    //  expression: [420, 666]
-    //
-
-    // sanity check
-
-    var ok = "expression" in node.children;
-    var multiple = "Comma" in node.children;
-
-    if (!ok) {
-        console.log("[processing-p5-convert] handle_argumentList not ok");
-        return;
-    }
-
-    // extract the first part
-
-    var expressionArray = node.children.expression;
-    var commaArray = "Comma" in node.children ? node.children.Comma : null;
-
-    var temp = { code: "" };
-
-    for (var index in expressionArray) {
-        visitNodesRecursive(expressionArray[index], level + 1, extractCodeVisitor, options, context, temp);
-
-        if (options.transform === true && context.isCreateFont === true) {
-            // transform: createFont -> loadFont
-            context.isCreateFont = false;
-            break; // retain first argument only 
-        }
-
-        if (commaArray !== null && index in commaArray) visitNodesRecursive(commaArray[index], level + 1, extractCodeVisitor, options, context, temp);
-    }
-
-    // save extracted code
-
-    data.code += temp.code;
-}
-
-function handle_binaryOperator(node, level, options, context, data) {
-    //
-    // binaryExpression stores binary operator and arguments in separate arrays
-    //
-    // binaryExpression x < width + 10
-    //  BinaryOperator: [<, +]
-    //  unaryExpression: [x, width, 10]
-    //
-
-    // sanity check
-
-    var ok = "BinaryOperator" in node.children && "unaryExpression" in node.children && node.children.BinaryOperator.length >= 1 && node.children.unaryExpression.length === node.children.BinaryOperator.length + 1;
-
-    if (!ok) {
-        console.log("[processing-p5-convert] handle_binaryOperator not ok");
-        return;
-    }
-
-    var binaryOperatorArray = node.children.BinaryOperator;
-    var unaryExpressionArray = node.children.unaryExpression;
-
-    var temp = { code: "" };
-
-    for (var index in binaryOperatorArray) {
-        visitNodesRecursive(unaryExpressionArray[index], level + 1, extractCodeVisitor, options, context, temp);
-        visitNodesRecursive(binaryOperatorArray[index], level + 1, extractCodeVisitor, options, context, temp);
-    }
-    visitNodesRecursive(unaryExpressionArray[unaryExpressionArray.length - 1], level + 1, extractCodeVisitor, options, context, temp);
-
-    data.code += temp.code;
 }
 
 function handle_basicForStatement(node, level, options, context, data) {
@@ -25274,8 +25203,6 @@ function extractCodeVisitor(node, level, options, context, result) {
 
         visitChildrenInterleaved(node, "fqnOrRefTypePartFirst", "Dot", "fqnOrRefTypePartRest", level + 1, options, context, temp);
 
-        //handle_fqnOrRefType(node, level, options, context, temp);
-
         if (options.transform) {
             if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
             else if (temp.code === "println ") temp.code = "console.log "; // transform println -> console.log
@@ -25289,7 +25216,21 @@ function extractCodeVisitor(node, level, options, context, result) {
         result.code += temp.code;
         return false; // treat special nodes as terminal
     } else if (node.name === "argumentList") {
-        handle_argumentList(node, level, options, context, result);
+        var _temp = { code: "" };
+
+        visitChildrenInterleaved(node, "", "expression", "Comma", level + 1, options, context, _temp);
+
+        if (options.transform === true) {
+            if (context.isCreateFont === true) {
+                // transform: truncate argumentList in createFont
+                //  createFont("filename.otf",24) -> loadFont("filename.otf")
+                var comma = _temp.code.indexOf(",");
+                _temp.code = _temp.code.slice(0, comma);
+                context.isCreateFont = false;
+            }
+        }
+
+        result.code += _temp.code;
         return false;
     } else if (node.name === "variableDeclaratorList") {
         visitChildrenInterleaved(node, "", "variableDeclarator", "Comma", level + 1, options, context, result);
@@ -25401,14 +25342,14 @@ function extractCodeVisitor(node, level, options, context, result) {
         }
     } else if (node.name === "blockStatement") {
         if (context.insideSetup === true) {
-            var _temp = { code: "" };
-            visitChildren(node, level + 1, extractCodeVisitor, options, context, _temp);
+            var _temp2 = { code: "" };
+            visitChildren(node, level + 1, extractCodeVisitor, options, context, _temp2);
 
             if (context.isLoadFile === true) {
-                context.preload += _temp.code;
+                context.preload += _temp2.code;
                 context.isLoadFile = false;
             } else {
-                result.code += _temp.code;
+                result.code += _temp2.code;
             }
 
             return false;

@@ -79,7 +79,11 @@ function printRawProcessing(code)
 //  - unaryExpression: [x, width, 10]
 //  - BinaryOperator: [<, +]
 //
-  
+// argumentList: "(420, 666)"
+//  - expression: [420, 666]
+//  - Comma: [\,]
+//
+
 function visitChildrenInterleaved(node, zeroth, first, second, 
                                   level, options, context, result) 
 {
@@ -101,91 +105,6 @@ function visitChildrenInterleaved(node, zeroth, first, second,
         if (secondArray !== null && index in secondArray)
             visitNodesRecursive(secondArray[index], level+1, extractCodeVisitor, options, context, result);
     }
-}
-
-
-function handle_argumentList(node, level, options, context, data) {
-    //
-    // argumentList stores arguments and commas in separate arrays
-    //
-    // argumentList (420, 666)
-    //  Comma: [\,]
-    //  expression: [420, 666]
-    //
-
-    // sanity check
-
-    const ok = "expression" in node.children;
-    const multiple = "Comma" in node.children;
-
-    if (!ok)
-    {
-        console.log("[processing-p5-convert] handle_argumentList not ok");
-        return;
-    }
-
-    // extract the first part
-
-    const expressionArray = node.children.expression;
-    const commaArray = "Comma" in node.children ? node.children.Comma : null;
-
-    let temp = {code:""};
-
-    for (const index in expressionArray)
-    {
-        visitNodesRecursive(expressionArray[index], level+1, extractCodeVisitor, options, context, temp);
-
-        if (options.transform === true && context.isCreateFont === true)
-        {   
-            // transform: createFont -> loadFont
-            context.isCreateFont = false;
-            break;  // retain first argument only 
-        }
-
-        if (commaArray !== null && index in commaArray)
-            visitNodesRecursive(commaArray[index], level+1, extractCodeVisitor, options, context, temp);
-    }
-
-    // save extracted code
-
-    data.code += temp.code;
-}
-
-function handle_binaryOperator(node, level, options, context, data) {
-    //
-    // binaryExpression stores binary operator and arguments in separate arrays
-    //
-    // binaryExpression x < width + 10
-    //  BinaryOperator: [<, +]
-    //  unaryExpression: [x, width, 10]
-    //
-
-    // sanity check
-
-    const ok = "BinaryOperator" in node.children && 
-               "unaryExpression" in node.children && 
-                node.children.BinaryOperator.length >= 1 &&
-                node.children.unaryExpression.length === node.children.BinaryOperator.length + 1;
-
-    if (!ok)
-    {
-        console.log("[processing-p5-convert] handle_binaryOperator not ok");
-        return;
-    }
-
-    const binaryOperatorArray = node.children.BinaryOperator;
-    const unaryExpressionArray = node.children.unaryExpression;
-
-    let temp = {code:""};
-
-    for (const index in binaryOperatorArray)
-    {
-        visitNodesRecursive(unaryExpressionArray[index], level+1, extractCodeVisitor, options, context, temp);
-        visitNodesRecursive(binaryOperatorArray[index], level+1, extractCodeVisitor, options, context, temp);
-    }
-    visitNodesRecursive(unaryExpressionArray[unaryExpressionArray.length-1], level+1, extractCodeVisitor, options, context, temp);
-
-    data.code += temp.code;
 }
 
 
@@ -309,8 +228,6 @@ function extractCodeVisitor(node, level, options, context, result)
                                  "Dot","fqnOrRefTypePartRest",
                                  level+1, options, context, temp); 
 
-        //handle_fqnOrRefType(node, level, options, context, temp);
-
         if (options.transform) {
             if (temp.code === "size ")
                 temp.code = "createCanvas "; // transform: size -> createCanvas
@@ -339,7 +256,24 @@ function extractCodeVisitor(node, level, options, context, result)
     }
     else if (node.name === "argumentList")
     {
-        handle_argumentList(node, level, options, context, result);
+        let temp = {code:""};
+        
+        visitChildrenInterleaved(node, "", "expression", "Comma",
+                                 level+1, options, context, temp); 
+
+        if (options.transform === true)
+        {   
+            if (context.isCreateFont === true)
+            {
+                // transform: truncate argumentList in createFont
+                //  createFont("filename.otf",24) -> loadFont("filename.otf")
+                let comma = temp.code.indexOf(",");
+                temp.code = temp.code.slice(0, comma);
+                context.isCreateFont = false;
+            }
+        }
+
+        result.code += temp.code;
         return false;
     }
     else if (node.name === "variableDeclaratorList")
