@@ -25194,6 +25194,52 @@ function extractCodeVisitor_image(node, level, options, context, result) {
     result.code += node.image + " ";
 }
 
+function extractCodeVisitor_fqnOrRefType(node, level, options, context, result) {
+    var temp = { code: "" };
+
+    visitChildrenInterleaved(node, "fqnOrRefTypePartFirst", "Dot", "fqnOrRefTypePartRest", level + 1, options, context, temp);
+
+    if (options.transform) {
+        if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
+        else if (temp.code === "println ") temp.code = "console.log "; // transform println -> console.log
+            else if (temp.code === "UP ") temp.code = "UP_ARROW ";else if (temp.code === "DOWN ") temp.code = "DOWN_ARROW ";else if (temp.code === "RIGHT ") temp.code = "RIGHT_ARROW ";else if (temp.code === "LEFT ") temp.code = "LEFT_ARROW ";else if (context.insideSetup === true && temp.code.startsWith("load")) context.isLoadFile = true;else if (temp.code === "createFont ") {
+                    temp.code = "loadFont "; // transform println -> console.log
+                    context.isLoadFile = true;
+                    context.isCreateFont = true;
+                }
+    }
+
+    result.code += temp.code;
+}
+
+function extractCodeVisitor_argumentList(node, level, options, context, result) {
+    var temp = { code: "" };
+
+    visitChildrenInterleaved(node, "", "expression", "Comma", level + 1, options, context, temp);
+
+    if (options.transform === true) {
+        if (context.isCreateFont === true) {
+            // transform: truncate argumentList in createFont
+            //  createFont("filename.otf",24) -> loadFont("filename.otf")
+            var comma = temp.code.indexOf(",");
+            temp.code = temp.code.slice(0, comma);
+            context.isCreateFont = false;
+        }
+    }
+
+    result.code += temp.code;
+}
+
+function extractCodeVisitor_variableDeclaratorList(node, level, options, context, result) {
+    visitChildrenInterleaved(node, "", "variableDeclarator", "Comma", level + 1, options, context, result);
+}
+
+var extractCodeVisitor_handlers = {
+    fqnOrRefType: extractCodeVisitor_fqnOrRefType,
+    argumentList: extractCodeVisitor_argumentList,
+    variableDeclaratorList: extractCodeVisitor_variableDeclaratorList
+};
+
 function extractCodeVisitor(node, level, options, context, result) {
     if ("image" in node) // actual code is stored as node["image"]
         {
@@ -25203,42 +25249,8 @@ function extractCodeVisitor(node, level, options, context, result) {
 
     if (!("name" in node)) return true;
 
-    if (node.name === "fqnOrRefType") {
-        var temp = { code: "" };
-
-        visitChildrenInterleaved(node, "fqnOrRefTypePartFirst", "Dot", "fqnOrRefTypePartRest", level + 1, options, context, temp);
-
-        if (options.transform) {
-            if (temp.code === "size ") temp.code = "createCanvas "; // transform: size -> createCanvas
-            else if (temp.code === "println ") temp.code = "console.log "; // transform println -> console.log
-                else if (temp.code === "UP ") temp.code = "UP_ARROW ";else if (temp.code === "DOWN ") temp.code = "DOWN_ARROW ";else if (temp.code === "RIGHT ") temp.code = "RIGHT_ARROW ";else if (temp.code === "LEFT ") temp.code = "LEFT_ARROW ";else if (context.insideSetup === true && temp.code.startsWith("load")) context.isLoadFile = true;else if (temp.code === "createFont ") {
-                        temp.code = "loadFont "; // transform println -> console.log
-                        context.isLoadFile = true;
-                        context.isCreateFont = true;
-                    }
-        }
-
-        result.code += temp.code;
-        return false; // treat special nodes as terminal
-    } else if (node.name === "argumentList") {
-        var _temp = { code: "" };
-
-        visitChildrenInterleaved(node, "", "expression", "Comma", level + 1, options, context, _temp);
-
-        if (options.transform === true) {
-            if (context.isCreateFont === true) {
-                // transform: truncate argumentList in createFont
-                //  createFont("filename.otf",24) -> loadFont("filename.otf")
-                var comma = _temp.code.indexOf(",");
-                _temp.code = _temp.code.slice(0, comma);
-                context.isCreateFont = false;
-            }
-        }
-
-        result.code += _temp.code;
-        return false;
-    } else if (node.name === "variableDeclaratorList") {
-        visitChildrenInterleaved(node, "", "variableDeclarator", "Comma", level + 1, options, context, result);
+    if (node.name in extractCodeVisitor_handlers) {
+        extractCodeVisitor_handlers[node.name](node, level, options, context, result);
         return false;
     } else if (node.name === "result") {
         // transform function result type depending on context
@@ -25347,14 +25359,14 @@ function extractCodeVisitor(node, level, options, context, result) {
         }
     } else if (node.name === "blockStatement") {
         if (context.insideSetup === true) {
-            var _temp2 = { code: "" };
-            visitChildren(node, level + 1, extractCodeVisitor, options, context, _temp2);
+            var temp = { code: "" };
+            visitChildren(node, level + 1, extractCodeVisitor, options, context, temp);
 
             if (context.isLoadFile === true) {
-                context.preload += _temp2.code;
+                context.preload += temp.code;
                 context.isLoadFile = false;
             } else {
-                result.code += _temp2.code;
+                result.code += temp.code;
             }
 
             return false;
