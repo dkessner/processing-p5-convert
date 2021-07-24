@@ -25075,23 +25075,18 @@ function printRawProcessing(code) {
 
 
 //
-// variableDeclaratorList
-//
-// mouseX, mouseY ->
-//
-// variableDeclaratorList
+// variableDeclaratorList: "mouseX, mouseY"
 //  - variableDeclarator: [mouseX, mouseY]
 //  - Comma: [\,]
 //
-
-// fqnOrRefType
-//
-// System.out.println ->
-//
-// fqnOrRefType
+// fqnOrRefType: "System.out.println"
 //  - fqnOrRefTypePartFirst: "System"
 //  - fqnOrRefTypePartRest: ["out", "println"]
 //  - Dot: [".", "."]
+//
+// binaryExpression: "x < width + 10"
+//  - unaryExpression: [x, width, 10]
+//  - BinaryOperator: [<, +]
 //
 
 function visitChildrenInterleaved(node, zeroth, first, second, level, options, context, result) {
@@ -25311,7 +25306,7 @@ function extractCodeVisitor(node, level, options, context, result) {
             return false;
         }
     } else if (node.name === "binaryExpression" && "BinaryOperator" in node.children) {
-        handle_binaryOperator(node, level, options, context, result);
+        visitChildrenInterleaved(node, "", "unaryExpression", "BinaryOperator", level + 1, options, context, result);
         return false;
     } else if (node.name === "basicForStatement") {
         handle_basicForStatement(node, level, options, context, result);
