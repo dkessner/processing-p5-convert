@@ -25111,8 +25111,7 @@ function visitChildrenInterleaved(node, zeroth, first, second, level, options, c
     }
 }
 
-function handle_basicForStatement(node, level, options, context, data) {
-
+function extractCodeVisitor_basicForStatement(node, level, options, context, data) {
     var ok = "For" in node.children && "LBrace" in node.children && "RBrace" in node.children && "Semicolon" in node.children && node.children.Semicolon.length === 2 && "expression" in node.children && "forInit" in node.children && "forUpdate" in node.children && "statement" in node.children;
 
     if (!ok) {
@@ -25129,11 +25128,12 @@ function handle_basicForStatement(node, level, options, context, data) {
     visitNodesRecursive(node.children.forUpdate[0], level + 1, extractCodeVisitor, options, context, data);
     visitNodesRecursive(node.children.RBrace[0], level + 1, extractCodeVisitor, options, context, data);
     visitNodesRecursive(node.children.statement[0], level + 1, extractCodeVisitor, options, context, data);
+
+    return false;
 }
 
-function handle_ifStatement(node, level, options, context, data) {
-
-    var ok = "If" in node.children && "Else" in node.children && "LBrace" in node.children && "RBrace" in node.children && "expression" in node.children && "statement" in node.children && node.children.statement.length === 2;
+function extractCodeVisitor_ifStatement(node, level, options, context, data) {
+    var ok = "If" in node.children && "LBrace" in node.children && "RBrace" in node.children && "expression" in node.children && "statement" in node.children;
 
     if (!ok) {
         console.log("[processing-p5-convert] handle_ifStatement not ok");
@@ -25145,8 +25145,13 @@ function handle_ifStatement(node, level, options, context, data) {
     visitNodesRecursive(node.children.expression[0], level + 1, extractCodeVisitor, options, context, data);
     visitNodesRecursive(node.children.RBrace[0], level + 1, extractCodeVisitor, options, context, data);
     visitNodesRecursive(node.children.statement[0], level + 1, extractCodeVisitor, options, context, data);
-    visitNodesRecursive(node.children.Else[0], level + 1, extractCodeVisitor, options, context, data);
-    visitNodesRecursive(node.children.statement[1], level + 1, extractCodeVisitor, options, context, data);
+
+    if ("Else" in node.children) {
+        visitNodesRecursive(node.children.Else[0], level + 1, extractCodeVisitor, options, context, data);
+        visitNodesRecursive(node.children.statement[1], level + 1, extractCodeVisitor, options, context, data);
+    }
+
+    return false;
 }
 
 function registerField(node, context, result) {
@@ -25192,6 +25197,8 @@ function extractCodeVisitor_image(node, level, options, context, result) {
     // default: actual code string is stored in node.image
 
     result.code += node.image + " ";
+
+    return true;
 }
 
 function extractCodeVisitor_fqnOrRefType(node, level, options, context, result) {
@@ -25210,6 +25217,8 @@ function extractCodeVisitor_fqnOrRefType(node, level, options, context, result) 
     }
 
     result.code += temp.code;
+
+    return false;
 }
 
 function extractCodeVisitor_argumentList(node, level, options, context, result) {
@@ -25228,54 +25237,60 @@ function extractCodeVisitor_argumentList(node, level, options, context, result) 
     }
 
     result.code += temp.code;
+
+    return false;
 }
 
 function extractCodeVisitor_variableDeclaratorList(node, level, options, context, result) {
     visitChildrenInterleaved(node, "", "variableDeclarator", "Comma", level + 1, options, context, result);
+
+    return false;
 }
 
-var extractCodeVisitor_handlers = {
+function extractCodeVisitor_result(node, level, options, context, result) {
+    // transform function result type depending on context
+    // - global:  void/int/... -> function
+    // - class: void/int/... -> ""
+
+    if (options.transform === true) {
+        if (context.classDeclaration !== true) {
+            result.code += "function ";
+        }
+        return false;
+    }
+
+    return true;
+}
+
+function extractCodeVisitor_binaryExpression(node, level, options, context, result) {
+    if ("BinaryOperator" in node.children) {
+        visitChildrenInterleaved(node, "", "unaryExpression", "BinaryOperator", level + 1, options, context, result);
+        return false;
+    }
+
+    return true;
+}
+
+var extractCodeVisitor_specialHandlers = {
     fqnOrRefType: extractCodeVisitor_fqnOrRefType,
     argumentList: extractCodeVisitor_argumentList,
-    variableDeclaratorList: extractCodeVisitor_variableDeclaratorList
+    variableDeclaratorList: extractCodeVisitor_variableDeclaratorList,
+    result: extractCodeVisitor_result,
+    binaryExpression: extractCodeVisitor_binaryExpression,
+    basicForStatement: extractCodeVisitor_basicForStatement,
+    ifStatement: extractCodeVisitor_ifStatement
 };
 
 function extractCodeVisitor(node, level, options, context, result) {
-    if ("image" in node) // actual code is stored as node["image"]
-        {
-            extractCodeVisitor_image(node, level, options, context, result);
-            return true;
-        }
+    // actual code is stored as node["image"]
+
+    if ("image" in node) return extractCodeVisitor_image(node, level, options, context, result);
 
     if (!("name" in node)) return true;
 
-    if (node.name in extractCodeVisitor_handlers) {
-        extractCodeVisitor_handlers[node.name](node, level, options, context, result);
-        return false;
-    } else if (node.name === "result") {
-        // transform function result type depending on context
-        // - global:  void/int/... -> function
-        // - class: void/int/... -> ""
+    if (node.name in extractCodeVisitor_specialHandlers) return extractCodeVisitor_specialHandlers[node.name](node, level, options, context, result);
 
-        if (options.transform === true) {
-            if (context.classDeclaration !== true) {
-                result.code += "function ";
-            }
-            return false;
-        }
-    } else if (node.name === "binaryExpression" && "BinaryOperator" in node.children) {
-        visitChildrenInterleaved(node, "", "unaryExpression", "BinaryOperator", level + 1, options, context, result);
-        return false;
-    } else if (node.name === "basicForStatement") {
-        handle_basicForStatement(node, level, options, context, result);
-        return false;
-    } else if (node.name === "ifStatement") {
-        if ("Else" in node.children) {
-            handle_ifStatement(node, level, options, context, result);
-            return false;
-        }
-        return true;
-    } else if (node.name === "enhancedForStatement") {
+    if (node.name === "enhancedForStatement") {
         visitChildren(node, level + 1, extractCodeVisitor, options, _extends({}, context, { enhancedForStatement: true }), result);
         return false;
     } else if (node.name === "fieldDeclaration") {
