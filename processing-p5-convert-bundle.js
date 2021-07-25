@@ -25543,6 +25543,19 @@ function extractCodeVisitor_newExpression(node, level, options, context, result)
             // transform: ArrayList<ClassName> -> ArrayList
             result.code += "new ArrayList()";
             return false;
+        } else if (className.code.startsWith("SoundFile")) {
+            // transform: new SoundFile(this, "filename.wav") -> loadSound("filename.wav")
+
+            var filename = { code: "" };
+
+            var _start = node.children.unqualifiedClassInstanceCreationExpression[0].children.argumentList[0].children.expression[1];
+
+            visitNodesRecursive(_start, level + 1, extractCodeVisitor, {}, context, filename);
+
+            result.code += "loadSound(" + filename.code + ")";
+            context.isLoadFile = true;
+
+            return false;
         }
     }
 
@@ -25727,14 +25740,6 @@ function preprocessProcessing(code) {
     var regex_import = /import/g;
     wrapped = wrapped.replace(regex_import, '//$&');
 
-    // hack: add missing Processing loadSound()
-    // note: this is a quick-and-dirty fix, with the side-effect that the
-    // loadSound() call is moved to preload(); this fix will not work on 
-    // multi-line statements involving "new SoundFile()"
-
-    var regex_soundFile = /new.*SoundFile.*,/g;
-    wrapped = wrapped.replace(regex_soundFile, 'loadSound(');
-
     return wrapped;
 }
 
@@ -25749,14 +25754,11 @@ function unpreprocessProcessing(code) {
         return s.substring(1, s.length - 1);
     });
 
-    // expand loadSound(), add import if necessary
+    // add sound import if necessary
 
-    var regex_soundFile = /loadSound\(/;
+    var regex_soundFile = /SoundFile/;
     var matches = code.match(regex_soundFile);
-    if (matches) {
-        code = code.replace(regex_soundFile, 'new SoundFile(this, ');
-        code = "import processing.sound.*;\n" + code;
-    }
+    if (matches) code = "import processing.sound.*;\n" + code;
 
     return code;
 }

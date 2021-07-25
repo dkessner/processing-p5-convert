@@ -435,6 +435,23 @@ function extractCodeVisitor_newExpression(node, level, options, context, result)
             result.code += "new ArrayList()"; 
             return false;
         }
+        else if (className.code.startsWith("SoundFile"))
+        {
+            // transform: new SoundFile(this, "filename.wav") -> loadSound("filename.wav")
+
+            let filename = {code:""};
+
+            let start = node.children
+                .unqualifiedClassInstanceCreationExpression[0]
+                .children.argumentList[0].children.expression[1];
+
+            visitNodesRecursive(start, level+1, extractCodeVisitor, {}, context, filename);
+
+            result.code += "loadSound(" + filename.code + ")";
+            context.isLoadFile = true;
+
+            return false;
+        }
     }
 
     return true;
@@ -661,14 +678,6 @@ function preprocessProcessing(code)
     const regex_import = /import/g;
     wrapped = wrapped.replace(regex_import, '//$&');
 
-    // hack: add missing Processing loadSound()
-    // note: this is a quick-and-dirty fix, with the side-effect that the
-    // loadSound() call is moved to preload(); this fix will not work on 
-    // multi-line statements involving "new SoundFile()"
-
-    const regex_soundFile = /new.*SoundFile.*,/g;
-    wrapped = wrapped.replace(regex_soundFile, 'loadSound(');
-
     return wrapped;
 }
 
@@ -683,15 +692,12 @@ function unpreprocessProcessing(code)
     const regex_quoted_hex = /\"#[0-9A-Fa-f]{6}\"/g;
     code = code.replace(regex_quoted_hex, s => s.substring(1, s.length-1));
 
-    // expand loadSound(), add import if necessary
+    // add sound import if necessary
 
-    const regex_soundFile = /loadSound\(/;
+    const regex_soundFile = /SoundFile/;
     let matches = code.match(regex_soundFile);
     if (matches)
-    {
-        code = code.replace(regex_soundFile, 'new SoundFile(this, ');
         code = "import processing.sound.*;\n" + code;
-    }
 
     return code;
 }
