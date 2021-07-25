@@ -5,27 +5,44 @@
 
 # hello_font
 
-Processing has two font functions:
+Both Processing and p5.js allow the specification of fonts with either a
+.ttf/.otf filename or a font string.
+
+Processing
 ```java
-    createFont("Georgia", 32); // String may be filename .ttf or .otf
-    loadFont("LetterGothicStd-32.vlw"); // Processing format .vlw only
+    PFont pf;
+
+    pf = createFont("filename.otf", 32);    // create PFont object from .ttf/.otf filename
+    // or
+    pf = createFont("Courier", 32);         // create PFont object from font string
+
+    textFont(fontObject);                   // set current font (object only)
 ```
 
-p5.js has the font function:
+p5.js 
 ```javascript
-    loadFont('assets/inconsolata.otf');
-    loadFont('assets/inconsolata.otf', callback); // optional callback
+    let pf;
+
+    pf = loadFont('filename.otf');          // create object from .ttf/.otf file
+
+    textFont(pf);                           // set current font (object)
+    // or
+    textFont("Courier");                    // set current font (font string)
 ```
 
-In order for both the Processing and p5.js converted code to work in the same
-directory, we need to use standard .otf/.ttf font files loaded with
-`createFont()` in Processing.
+We can make Processing and p5.js converted code to work in the same directory,
+using fonts specified from font strings or .ttf/.otf font files.
 
 The conversion to p5.js does the following:
 - transforms `createFont()` to `loadFont()`
 - moves the function call to `preload()`
 - removes the 2nd argument: p5.js assumes this is a callback function,
     and the numeric argument throws an error
+- if the Processing `createFont()` call has a string with no filename extension,
+    we bind our variable (`pf` above) to a string, which is handled properly
+    by the p5.js `textFont()`
+
+[Gluk fonts](http://www.glukfonts.pl/)
 
 
 <main></main>

@@ -251,7 +251,7 @@ function extractCodeVisitor_fqnOrRefType(node, level, options, context, result)
             context.isLoadFile = true; 
         else if (temp.code === "createFont ")
         {
-            temp.code = "loadFont "; // transform println -> console.log
+            temp.code = "loadFont ";
             context.isLoadFile = true; 
             context.isCreateFont = true;
         }
@@ -482,11 +482,32 @@ function extractCodeVisitor_blockStatement(node, level, options, context, result
 
         if (context.isLoadFile === true)
         {
+            // hack for font string transformation:
+            //      courier = createFont("Courier", 24); ->
+            //      courier = "Courier"; 
+
+            let regex_isLoadFont = /loadFont/;
+            let regex_isFilename = /\".+\.[a-z]{3}\"/i;
+
+            let matchesLoadFont = temp.code.match(regex_isLoadFont);
+            let matchesFilename = temp.code.match(regex_isFilename);
+
+            if (matchesLoadFont && !matchesFilename)
+            {
+
+                temp.code = temp.code.replace(/loadFont.*\(/, "");
+                temp.code = temp.code.replace(")", "");
+            }
+
+            // save load*() statements to put in preload()
+
             context.preload += temp.code;
             context.isLoadFile = false;
         }
         else
         {
+            // default: leave statement in setup()
+
             result.code += temp.code;
         }
 
