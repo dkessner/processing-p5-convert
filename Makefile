@@ -3,7 +3,7 @@
 #
 
 
-all: processing-p5-convert-bundle.js tests 
+all: processing-p5-convert-bundle.js tests minimal
 
 processing-p5-convert-bundle.js: processing-p5-convert.js
 	browserify processing-p5-convert.js --standalone ppconvert -o processing-p5-convert-bundle.js
@@ -16,6 +16,10 @@ tests: \
     cat.test cat.langtest \
     hello_font.test hello_font.langtest \
     hello_sound.test hello_sound.langtest
+
+minimal: processing-p5-convert-bundle.js
+	cp processing-p5-convert-bundle.js minimal
+	cp p5/p5.min.js minimal
 
 %.test:
 	node ppconvert $*/*.pde | diff - $*/$*.js
@@ -44,7 +48,7 @@ uninstall-cli:
 clean:
 	rm -f processing-p5-convert-bundle.js*
 
-.PHONY: tests %.test %.langtest clean
+.PHONY: tests %.test %.langtest serve update install install-cli uninstall-cli clean minimal
 
 
 # $* stem of implicit rule match 
