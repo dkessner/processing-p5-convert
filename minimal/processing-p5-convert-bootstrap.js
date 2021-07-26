@@ -1,3 +1,6 @@
+//
+// processing-p5-convert-bootstrap.js
+//
 
 
 let code;
@@ -5,13 +8,13 @@ let code;
 
 function preload()
 {
-    code = loadStrings("cat.pde");
+    let filename = document.getElementById("ppconvert").getAttribute("src");
+    code = loadStrings(filename);
 }
 
 
 function setup()
 {
-//    createCanvas(400, 400);
     code = code.join('\n');
     console.log(code);
 
