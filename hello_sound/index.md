@@ -8,8 +8,10 @@
 
 
 Transformations:
-- comment out all `import` statements
-- `new SoundFile(this, filename)` -> `loadSound(filename)` (preload)
+- comment out all `import` statements (preprocessing before parsing --
+  java-parser doesn't like them)
+- `new SoundFile(this, filename)` -> `loadSound(filename)` (not sure why
+  Processing doesn't have this function)
 
 
 Web pages need to include p5.js sound library:
