@@ -17,8 +17,9 @@ tests: \
     hello_font.test hello_font.langtest \
     hello_sound.test hello_sound.langtest
 
-minimal: processing-p5-convert-bundle.js
+minimal: processing-p5-convert-bundle.js processing-p5-convert-bootstrap.js
 	cp processing-p5-convert-bundle.js minimal
+	cp processing-p5-convert-bootstrap.js minimal
 	cp p5/p5.min.js minimal
 
 %.test:
