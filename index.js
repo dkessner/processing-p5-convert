@@ -28,9 +28,6 @@ void draw()
 
 function handleConvertButton()
 {
-    //const codeInput = document.getElementById("processing-p5-convert-input").value;
-    //document.getElementById("processing-p5-convert-output").value = codeOutput;
-
     // convert Processing code
 
     const codeInput = inputCodeMirrorEditor.getValue();
@@ -40,8 +37,22 @@ function handleConvertButton()
     // run the p5.js code
 
     window.eval(codeOutput);
-    if (typeof preload === 'function') preload();
-    setup();
+
+    // p5.js does some magic to make sure preload() completes -- this
+    // doesn't quite work:
+    //
+    // if (typeof preload === 'function') preload();
+    // setup();
+
+    // This seems to work better: 
+    //  - remove existing p5 canvas
+    //  - (re)define preload/setup/draw
+    //  - call "new p5();"
+
+    let canvas = document.getElementById("defaultCanvas0");
+    if (canvas) canvas.remove();
+
+    new p5();
 }
 
 
