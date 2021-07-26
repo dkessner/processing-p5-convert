@@ -1,5 +1,4 @@
 ---
-layout: default
 ---
 
 # processing-p5-convert
