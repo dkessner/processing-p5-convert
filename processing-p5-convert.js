@@ -366,7 +366,7 @@ function extractCodeVisitor_unannType(node, level, options, context, result)
         // - global: int/float/... -> let
         // - class:  int/float/... -> ""
 
-        if (context.classDeclaration !== true)
+        if (context.classDeclaration !== true && context.formalParameterList !== true)
             result.code += "let ";
 
         return false;
@@ -549,6 +549,18 @@ function extractCodeVisitor_blockStatement(node, level, options, context, result
     return true;
 }
 
+function extractCodeVisitor_formalParameterList(node, level, options, context, result)
+{
+    let temp = {code:""};
+
+    visitChildrenInterleaved(node, "", "formalParameter","Comma",
+                             level+1, options, 
+                             {...context, formalParameterList:true}, temp); 
+
+    result.code += temp.code;
+
+    return false;
+}
 
 const extractCodeVisitor_specialHandlers = {
     fqnOrRefType: extractCodeVisitor_fqnOrRefType,
@@ -571,6 +583,7 @@ const extractCodeVisitor_specialHandlers = {
     methodDeclaration: extractCodeVisitor_methodDeclaration,
     methodDeclarator: extractCodeVisitor_methodDeclarator,
     blockStatement: extractCodeVisitor_blockStatement,
+    formalParameterList: extractCodeVisitor_formalParameterList,
 }
 
 function extractCodeVisitor(node, level, options, context, result)
