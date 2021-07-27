@@ -25555,28 +25555,31 @@ function extractCodeVisitor_simpleTypeName(node, level, options, context, result
 
 function extractCodeVisitor_newExpression(node, level, options, context, result) {
     if (options.transform === true) {
-        var ok = "unqualifiedClassInstanceCreationExpression" in node.children && "classOrInterfaceTypeToInstantiate" in node.children.unqualifiedClassInstanceCreationExpression[0].children;
+        if ("unqualifiedClassInstanceCreationExpression" in node.children && "classOrInterfaceTypeToInstantiate" in node.children.unqualifiedClassInstanceCreationExpression[0].children) {
+            var className = { code: "" };
+            var start = node.children.unqualifiedClassInstanceCreationExpression[0].children.classOrInterfaceTypeToInstantiate[0];
+            visitNodesRecursive(start, level + 1, extractCodeVisitor, options, context, className);
 
-        var className = { code: "" };
-        var start = node.children.unqualifiedClassInstanceCreationExpression[0].children.classOrInterfaceTypeToInstantiate[0];
-        visitNodesRecursive(start, level + 1, extractCodeVisitor, options, context, className);
+            if (className.code.startsWith("ArrayList")) {
+                // transform: ArrayList<ClassName> -> ArrayList
+                result.code += "new ArrayList()";
+                return false;
+            } else if (className.code.startsWith("SoundFile")) {
+                // transform: new SoundFile(this, "filename.wav") -> loadSound("filename.wav")
 
-        if (className.code.startsWith("ArrayList")) {
-            // transform: ArrayList<ClassName> -> ArrayList
-            result.code += "new ArrayList()";
-            return false;
-        } else if (className.code.startsWith("SoundFile")) {
-            // transform: new SoundFile(this, "filename.wav") -> loadSound("filename.wav")
+                var filename = { code: "" };
 
-            var filename = { code: "" };
+                var _start = node.children.unqualifiedClassInstanceCreationExpression[0].children.argumentList[0].children.expression[1];
 
-            var _start = node.children.unqualifiedClassInstanceCreationExpression[0].children.argumentList[0].children.expression[1];
+                visitNodesRecursive(_start, level + 1, extractCodeVisitor, {}, context, filename);
 
-            visitNodesRecursive(_start, level + 1, extractCodeVisitor, {}, context, filename);
+                result.code += "loadSound(" + filename.code + ")";
+                context.isLoadFile = true;
 
-            result.code += "loadSound(" + filename.code + ")";
-            context.isLoadFile = true;
-
+                return false;
+            }
+        } else if ("arrayCreationExpression" in node.children) {
+            result.code += "[]";
             return false;
         }
     }
