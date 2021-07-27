@@ -2,6 +2,7 @@
 
 <script src="{{ site.baseurl}}/p5/p5.min.js"></script>
 <script src="greenhouse_game.js"></script>
+{% include suppress_default_keypress.html %}
 
 # greenhouse_game
 

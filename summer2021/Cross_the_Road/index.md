@@ -2,6 +2,7 @@
 
 <script src="{{ site.baseurl }}/p5/p5.min.js"></script>
 <script src="Cross_the_Road.js"></script>
+{% include suppress_default_keypress.html %}
 
 # Cross_the_Road
 
