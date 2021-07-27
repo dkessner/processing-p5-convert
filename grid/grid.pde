@@ -9,6 +9,9 @@ void setup()
 }
 
 
+private final int n = 0x29a;
+
+
 int drawFace(int x, int y)
 {
    fill(255);

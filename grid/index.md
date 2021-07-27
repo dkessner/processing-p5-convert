@@ -9,7 +9,9 @@ Transformations:
 - `for (int i=0; i<5; i++)` -> `for (let i=0; i<5; i++)` 
 - `push/popMatrix()` -> `push/pop()`
 - remove casts: `(float) x` -> `x`
+- remove field modifiers `private final` -> ``
 
+<br>
 
 <main></main>
 

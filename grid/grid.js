@@ -1,6 +1,7 @@
  function setup() {
      createCanvas(400, 400);
  }
+ let n = 0x29a;
 
  function drawFace(x, y) {
      fill(255);

@@ -25483,6 +25483,11 @@ function extractCodeVisitor_fieldDeclaration(node, level, options, context, resu
     return false;
 }
 
+function extractCodeVisitor_fieldModifier(node, level, options, context, result) {
+    // transform: remove any field modifiers (e.g. public, final)
+    return false;
+}
+
 function extractCodeVisitor_unannType(node, level, options, context, result) {
     if (options.transform) {
         // transform field declarations depending on context:
@@ -25670,6 +25675,7 @@ var extractCodeVisitor_specialHandlers = {
     ifStatement: extractCodeVisitor_ifStatement,
     enhancedForStatement: extractCodeVisitor_enhancedForStatement,
     fieldDeclaration: extractCodeVisitor_fieldDeclaration,
+    fieldModifier: extractCodeVisitor_fieldModifier,
     unannType: extractCodeVisitor_unannType,
     variableDeclarator: extractCodeVisitor_variableDeclarator,
     classDeclaration: extractCodeVisitor_classDeclaration,
