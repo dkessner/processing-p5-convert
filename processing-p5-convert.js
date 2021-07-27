@@ -251,9 +251,13 @@ function extractCodeVisitor_fqnOrRefType(node, level, options, context, result)
 
     if (options.transform) {
         if (temp.code === "size ")
-            temp.code = "createCanvas "; // transform: size -> createCanvas
+            temp.code = "createCanvas ";
+        else if (temp.code === "pushMatrix ")
+            temp.code = "push ";
+        else if (temp.code === "popMatrix ")
+            temp.code = "pop ";
         else if (temp.code === "println ")
-            temp.code = "console.log "; // transform println -> console.log
+            temp.code = "console.log ";
         else if (temp.code === "UP ")
             temp.code = "UP_ARROW ";
         else if (temp.code === "DOWN ")

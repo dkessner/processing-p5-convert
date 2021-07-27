@@ -14,8 +14,17 @@ int drawFace(int x, int y)
    fill(255);
    ellipse(x, y, 100, 100);
    fill(0);
-   ellipse(x-25, y-10, 20, 20);
-   ellipse(x+25, y-10, 20, 20);
+
+   pushMatrix();
+     translate(-25, -10);
+     ellipse(x, y, 20, 20);
+   popMatrix();
+   
+   pushMatrix();
+     translate(25, -10);
+     ellipse(x, y, 20, 20);
+   popMatrix();
+
    ellipse(x, y+25, 40, 20);
    return 0;
 }
