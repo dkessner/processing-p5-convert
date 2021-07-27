@@ -566,6 +566,21 @@ function extractCodeVisitor_formalParameterList(node, level, options, context, r
     return false;
 }
 
+function extractCodeVisitor_primitiveCastExpression(node, level, options, context, result)
+{
+    if (options.transform === true && "unaryExpression" in node.children) 
+    {
+        // transform: "(float) x" -> "x"
+        visitNodesRecursive(node.children.unaryExpression[0], level+1, extractCodeVisitor, options, context, result);
+        return false;
+    }
+
+    return true;
+}
+
+
+// extractCodeVisitor special handler table
+
 const extractCodeVisitor_specialHandlers = {
     fqnOrRefType: extractCodeVisitor_fqnOrRefType,
     argumentList: extractCodeVisitor_argumentList,
@@ -588,7 +603,10 @@ const extractCodeVisitor_specialHandlers = {
     methodDeclarator: extractCodeVisitor_methodDeclarator,
     blockStatement: extractCodeVisitor_blockStatement,
     formalParameterList: extractCodeVisitor_formalParameterList,
+    primitiveCastExpression: extractCodeVisitor_primitiveCastExpression,
 }
+
+// primary extractCodeVisitor entry point
 
 function extractCodeVisitor(node, level, options, context, result)
 { 

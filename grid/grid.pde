@@ -12,7 +12,7 @@ void setup()
 int drawFace(int x, int y)
 {
    fill(255);
-   ellipse(x, y, 100, 100);
+   ellipse((float)x, y, 100, 100);
    fill(0);
 
    pushMatrix();

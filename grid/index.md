@@ -8,7 +8,7 @@
 Transformations:
 - `for (int i=0; i<5; i++)` -> `for (let i=0; i<5; i++)` 
 - `push/popMatrix()` -> `push/pop()`
- 
+- remove casts: `(float) x` -> `x`
 
 
 <main></main>

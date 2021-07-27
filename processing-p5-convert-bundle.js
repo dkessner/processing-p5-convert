@@ -25648,6 +25648,18 @@ function extractCodeVisitor_formalParameterList(node, level, options, context, r
     return false;
 }
 
+function extractCodeVisitor_primitiveCastExpression(node, level, options, context, result) {
+    if (options.transform === true && "unaryExpression" in node.children) {
+        // transform: "(float) x" -> "x"
+        visitNodesRecursive(node.children.unaryExpression[0], level + 1, extractCodeVisitor, options, context, result);
+        return false;
+    }
+
+    return true;
+}
+
+// extractCodeVisitor special handler table
+
 var extractCodeVisitor_specialHandlers = {
     fqnOrRefType: extractCodeVisitor_fqnOrRefType,
     argumentList: extractCodeVisitor_argumentList,
@@ -25669,10 +25681,12 @@ var extractCodeVisitor_specialHandlers = {
     methodDeclaration: extractCodeVisitor_methodDeclaration,
     methodDeclarator: extractCodeVisitor_methodDeclarator,
     blockStatement: extractCodeVisitor_blockStatement,
-    formalParameterList: extractCodeVisitor_formalParameterList
-};
+    formalParameterList: extractCodeVisitor_formalParameterList,
+    primitiveCastExpression: extractCodeVisitor_primitiveCastExpression
 
-function extractCodeVisitor(node, level, options, context, result) {
+    // primary extractCodeVisitor entry point
+
+};function extractCodeVisitor(node, level, options, context, result) {
     if ("image" in node) return extractCodeVisitor_image(node, level, options, context, result);
 
     if ("name" in node && node.name in extractCodeVisitor_specialHandlers) return extractCodeVisitor_specialHandlers[node.name](node, level, options, context, result);
