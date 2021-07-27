@@ -25484,8 +25484,12 @@ function extractCodeVisitor_fieldDeclaration(node, level, options, context, resu
 }
 
 function extractCodeVisitor_fieldModifier(node, level, options, context, result) {
-    // transform: remove any field modifiers (e.g. public, final)
-    return false;
+    if (options.transform === true) {
+        // transform: remove any field modifiers (e.g. public, final)
+        return false;
+    }
+
+    return true;
 }
 
 function extractCodeVisitor_unannType(node, level, options, context, result) {
@@ -25654,10 +25658,12 @@ function extractCodeVisitor_formalParameterList(node, level, options, context, r
 }
 
 function extractCodeVisitor_primitiveCastExpression(node, level, options, context, result) {
-    if (options.transform === true && "unaryExpression" in node.children) {
-        // transform: "(float) x" -> "x"
-        visitNodesRecursive(node.children.unaryExpression[0], level + 1, extractCodeVisitor, options, context, result);
-        return false;
+    if (options.transform === true) {
+        if ("unaryExpression" in node.children) {
+            // transform: "(float) x" -> "x"
+            visitNodesRecursive(node.children.unaryExpression[0], level + 1, extractCodeVisitor, options, context, result);
+            return false;
+        }
     }
 
     return true;

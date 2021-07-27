@@ -1,6 +1,7 @@
  void setup() {
      size(400, 400);
  }
+ private final int n = 0x29a;
  int drawFace(int x, int y) {
      fill(255);
      ellipse((float) x, y, 100, 100);
