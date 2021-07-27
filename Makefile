@@ -32,13 +32,13 @@ minimal: processing-p5-convert-bundle.js processing-p5-convert-bootstrap.js
 serve:
 	bundle exec jekyll serve --baseurl=''
 
+install-local:
+	npm install
+	bundle install
+
 update:
 	npm update
 	bundle update
-
-install:
-	npm install
-	bundle install
 
 install-cli:
 	npm install -g .
