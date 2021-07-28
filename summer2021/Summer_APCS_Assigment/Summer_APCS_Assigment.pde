@@ -26,25 +26,25 @@ void setup()
   size(600, 600);
   noCursor();
 
-  dance = new SoundFile(this, "dance.mp3");
+  dance = new SoundFile(this, "data/dance.mp3");
   dance.loop();
 
-  jump = new SoundFile(this, "jump.wav");
+  jump = new SoundFile(this, "data/jump.wav");
 
-  Sam = loadImage("sally.png");
+  Sam = loadImage("data/sally.png");
   Sam.resize(50, 75);
 
-  landscape = loadImage("lava.jpg");
+  landscape = loadImage("data/lava.jpg");
   landscape.resize(600, 600);
 
-  slide = loadImage("slide.png");
+  slide = loadImage("data/slide.png");
   slide.resize(100, 150);
 
   textSize(30);
   textAlign(CENTER);
 
-  game = createFont("game.otf", 15);
-  fancy = createFont("Snow.otf", 48);
+  game = createFont("data/game.otf", 15);
+  fancy = createFont("data/Snow.otf", 48);
 
 
   slides = new ArrayList<Slides>();

@@ -8,8 +8,8 @@ class ArrayList extends Array {
 }
 
  class Lava {
-     a; b; w; h; c; // TODO: multiple declarations
-     constructor(aIn, bIn, wIn, hIn, cIn) { // TODO: commas
+     a; b; w; h; c;
+     constructor(aIn, bIn, wIn, hIn, cIn) {
          this.a = aIn;
          this.b = bIn;
          this.w = wIn;
@@ -52,7 +52,7 @@ class ArrayList extends Array {
                  this.vy = 7;
              }
          }
-         this.collision(); // TODO
+         this.collision();
      }
  }
  class Slides {
@@ -92,7 +92,7 @@ class ArrayList extends Array {
      }
      display() {
          image(slide, this.a, this.b);
-         this.updatePosition(); // TODO: this for method calls too
+         this.updatePosition();
          this.checkEdges();
      }
  }
