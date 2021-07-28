@@ -18,4 +18,5 @@
     - or add to "things we don't handle" doc
 - pitfall: multiple constructors
     - log warning
-
+- inconsistency:
+    - p5.js does not reset imageMode(CORNER) at beginning of draw()

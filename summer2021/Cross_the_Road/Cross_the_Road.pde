@@ -163,6 +163,7 @@ void keyPressed() {
 }
 void drawStart() {
 
+  imageMode(CORNER);
   background(bg);
 
   //text
@@ -290,6 +291,7 @@ void drawGame3() {
 
 void drawWin() {
 
+  imageMode(CORNER);
   background(bg);
 
   fill(#28A03F);
@@ -299,6 +301,7 @@ void drawWin() {
 
 void drawLose() {
 
+  imageMode(CORNER);
   background(bg);
 
   fill(#FC2424);

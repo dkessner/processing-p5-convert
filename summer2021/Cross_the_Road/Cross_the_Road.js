@@ -1,12 +1,3 @@
-
-class ArrayList extends Array {
-    constructor() {super(...[]);}
-    size() {return this.length;}
-    add(x) {this.push(x);}
-    get(i) {return this[i];}
-    remove(i) {this.splice(i,1);}
-}
-
  let gameState = 0;
  let bg;
  let elephant1;
@@ -134,6 +125,7 @@ class ArrayList extends Array {
  }
 
  function drawStart() {
+     imageMode(CORNER);
      background(bg);
      textAlign(CENTER);
      textSize(45);
@@ -230,6 +222,7 @@ class ArrayList extends Array {
  }
 
  function drawWin() {
+     imageMode(CORNER);
      background(bg);
      fill("#28A03F");
      text("You Win!", width / 2, height / 2 - 50);
@@ -237,6 +230,7 @@ class ArrayList extends Array {
  }
 
  function drawLose() {
+     imageMode(CORNER);
      background(bg);
      fill("#FC2424");
      text("You Lost!", width / 2, height / 2 - 50);
