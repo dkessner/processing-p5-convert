@@ -1,5 +1,5 @@
  let explosionCount = 17;
- let explosion = [];
+ let explosion = new Array(explosionCount);
  let exploding = false;
  let explosionIndex = 0;
 
@@ -9,7 +9,7 @@
  }
 
  function preload() {
-     for (let i = 0; i < explosionCount; i++) explosion[i] = loadImage("data/explode" + i + ".png");
+     for (let i = 0; i < explosion.length; i++) explosion[i] = loadImage("data/explode" + i + ".png");
  }
 
  function draw() {

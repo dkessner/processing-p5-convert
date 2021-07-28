@@ -471,8 +471,9 @@ function extractCodeVisitor_newExpression(node, level, options, context, result)
                 let filename = {code:""};
 
                 let start = node.children
-                    .unqualifiedClassInstanceCreationExpression[0]
-                    .children.argumentList[0].children.expression[1];
+                    .unqualifiedClassInstanceCreationExpression[0].children
+                    .argumentList[0].children
+                    .expression[1];
 
                 visitNodesRecursive(start, level+1, extractCodeVisitor, {}, context, filename);
 
@@ -484,7 +485,17 @@ function extractCodeVisitor_newExpression(node, level, options, context, result)
         }
         else if ("arrayCreationExpression" in node.children)
         {
-            result.code += "[]"; 
+            let dimension = {code:""};
+            let start = node.children
+                .arrayCreationExpression[0].children
+                .arrayCreationDefaultInitSuffix[0];
+
+            visitNodesRecursive(start, level+1, extractCodeVisitor, {}, context, dimension);
+            let n = dimension.code.trim();
+            n = n.slice(1, n.length-1);
+
+            result.code += "new Array(" + n + ")";
+            //result.code += "[]"; 
             return false;
         }
     }

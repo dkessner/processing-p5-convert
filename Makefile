@@ -15,7 +15,8 @@ tests: \
     bounce_with_class.test bounce_with_class.langtest \
     cat.test cat.langtest \
     hello_font.test hello_font.langtest \
-    hello_sound.test hello_sound.langtest
+    hello_sound.test hello_sound.langtest \
+    explode.test explode.langtest
 
 minimal: js/processing-p5-convert-bundle.js js/processing-p5-convert-bootstrap.js
 	cp js/processing-p5-convert-bundle.js minimal

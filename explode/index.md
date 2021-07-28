@@ -4,8 +4,7 @@
 # explode
 
 Transformations:
-- array new: `PImage[] images = new PImage[17];` -> `let images = []`
-    - note: this does not pre-allocate the array in Javascript
+- array new: `PImage[] images = new PImage[17];` -> `let images = new Array(17)`
 
 <main></main>
 
