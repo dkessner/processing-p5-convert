@@ -11,6 +11,9 @@ Transformations:
 - remove casts: `(float) x` -> `x`
 - remove field modifiers `private final` -> ``
 
+This example also demonstrates that `while`, `do/while`, `switch` work
+unchanged.
+
 <br>
 
 <main></main>
