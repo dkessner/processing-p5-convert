@@ -1,5 +1,14 @@
 # todo
 
+## issues
+
+- on-the-fly conversion with preload() is inconsistent:
+    - two button presses works in processing-p5-convert local, but not hosted
+    - does not work currently with ProcessingExamples/explode
+    - workaround for now for examples with significant preload(): 
+        - convert .pde to .js file ahead of time, load js as normal p5 sketch
+        - don't do conversion on page load
+
 ## pitfalls / things we don't handle
 
 - pitfall: hiding API functions (hue)
