@@ -13,9 +13,9 @@ class ArrayList extends Array {
      vx;
      vy;
      c;
-     constructor() {
-         this.x = random(50, width - 50);
-         this.y = random(50, height - 50);
+     constructor(x, y) {
+         this.x = x;
+         this.y = y;
          this.vx = random(-3, 3);
          this.vy = random(-2, 2);
          this.c = color(random(255), random(255), random(255));
@@ -28,15 +28,26 @@ class ArrayList extends Array {
          if (this.x < 50 || this.x > width - 50) this.vx *= -1;
          if (this.y < 50 || this.y > height - 50) this.vy *= -1;
      }
+     test(x) {
+         x = 1;
+         this.x = 2;
+         this.y = 3;
+         this.y = 4;
+         return 0;
+     }
  }
  let ball;
  let balls;
 
  function setup() {
      createCanvas(400, 400);
-     ball = new Ball();
+     ball = new Ball(width / 2, height / 2);
      balls = new ArrayList();
-     for (let i = 0; i < 5; i++) balls.add(new Ball());
+     for (let i = 0; i < 5; i++) createBall();
+ }
+
+ function createBall() {
+     balls.add(new Ball(random(50, width - 50), random(50, height - 50)));
  }
 
  function draw() {
@@ -50,9 +61,9 @@ class ArrayList extends Array {
  }
 
  function keyPressed() {
-     if (key == 'a') balls.add(new Ball());
+     if (key == 'a') createBall();
      else if (key == 'r' && balls.size() > 1) balls.remove(0);
      else {
-         console.log("How's it going?");
+         console.log("We're here!");
      }
  }

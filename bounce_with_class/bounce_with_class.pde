@@ -11,10 +11,10 @@ class Ball
     float vy;
     int c;
 
-    Ball()
+    Ball(float x, float y)
     {
-        x = random(50, width-50);
-        y = random(50, height-50);
+        this.x = x;
+        this.y = y;
         vx = random(-3, 3);
         vy = random(-2, 2);
         c = color(random(255), random(255), random(255));
@@ -34,6 +34,15 @@ class Ball
         if (y < 50 || y > height-50)
             vy *= -1;
     }
+
+    int test(int x)
+    {
+        x = 1;
+        this.x = 2;
+        y = 3;
+        this.y = 4;
+        return 0;
+    }
 }
 
 
@@ -43,11 +52,17 @@ ArrayList<Ball> balls;
 void setup()
 {
     size(400, 400);
-    ball = new Ball();
+    ball = new Ball(width/2, height/2);
     balls = new ArrayList<Ball>();
 
     for (int i=0; i<5; i++)
-        balls.add(new Ball());
+        createBall();      
+}
+
+
+void createBall()
+{
+    balls.add(new Ball(random(50,width-50), random(50,height-50)));
 }
 
 
@@ -69,14 +84,14 @@ void draw()
 void keyPressed()
 {
     if (key == 'a')
-        balls.add(new Ball());
+        createBall();
 
     else if (key == 'r' && balls.size() > 1)
         balls.remove(0);
 
     else
     {
-      println("How's it going?");
+      println("We're here!");
     }
 }
 

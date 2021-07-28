@@ -215,12 +215,16 @@ function extractCodeVisitor_image(node, level, options, context, result)
     {
         // transform:  member variables in class method body x -> this.x
 
-        if (context.methodBody === true && 
-            "memberVariables" in context && 
-            context.memberVariables.includes(node.image))
+        if (context.methodBody === true && context.primaryPrefix === true)
         {
-            result.code += "this." + node.image + " ";
-            return;
+            let local = "parameterNames" in context && context.parameterNames.includes(node.image);
+            let member = "memberVariables" in context && context.memberVariables.includes(node.image);
+
+            if (member === true && local === false)
+            {
+                result.code += "this." + node.image + " ";
+                return;
+            }
         }
 
         // transform: for each loop : -> of
@@ -417,10 +421,10 @@ function extractCodeVisitor_classDeclaration(node, level, options, context, resu
     return false;
 }
 
-function extractCodeVisitor_constructorDeclarator(node, level, options, context, result)
+function extractCodeVisitor_constructorDeclaration(node, level, options, context, result)
 {
     visitChildren(node, level+1, extractCodeVisitor, 
-        options, {...context, constructorDeclarator:true}, result);
+        options, {...context, constructorDeclaration:true}, result);
     return false;
 }
 
@@ -438,7 +442,7 @@ function extractCodeVisitor_methodBody(node, level, options, context, result)
 
 function extractCodeVisitor_simpleTypeName(node, level, options, context, result)
 {
-    if (options.transform === true && context.constructorDeclarator === true)
+    if (options.transform === true && context.constructorDeclaration === true)
     {
         result.code += "constructor"; // transform: ClassName() -> constructor()
         return false;
@@ -588,6 +592,9 @@ function extractCodeVisitor_formalParameterList(node, level, options, context, r
                              level+1, options, 
                              {...context, formalParameterList:true}, temp); 
 
+    // save parameter names
+    context.parameterNames = temp.code.split(",").map(s => s.trim());
+
     result.code += temp.code;
 
     return false;
@@ -603,6 +610,18 @@ function extractCodeVisitor_primitiveCastExpression(node, level, options, contex
             visitNodesRecursive(node.children.unaryExpression[0], level+1, extractCodeVisitor, options, context, result);
             return false;
         }
+    }
+
+    return true;
+}
+
+function extractCodeVisitor_primaryPrefix(node, level, options, context, result)
+{
+    if (options.transform === true && context.methodBody === true)
+    {
+        visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, primaryPrefix:true}, result);
+        return false;
     }
 
     return true;
@@ -625,7 +644,7 @@ const extractCodeVisitor_specialHandlers = {
     unannType: extractCodeVisitor_unannType,
     variableDeclarator: extractCodeVisitor_variableDeclarator,
     classDeclaration: extractCodeVisitor_classDeclaration,
-    constructorDeclarator: extractCodeVisitor_constructorDeclarator,
+    constructorDeclaration: extractCodeVisitor_constructorDeclaration,
     methodBody: extractCodeVisitor_methodBody,
     constructorBody: extractCodeVisitor_methodBody, // same as methodBody
     simpleTypeName: extractCodeVisitor_simpleTypeName,
@@ -635,6 +654,7 @@ const extractCodeVisitor_specialHandlers = {
     blockStatement: extractCodeVisitor_blockStatement,
     formalParameterList: extractCodeVisitor_formalParameterList,
     primitiveCastExpression: extractCodeVisitor_primitiveCastExpression,
+    primaryPrefix: extractCodeVisitor_primaryPrefix,
 }
 
 // primary extractCodeVisitor entry point

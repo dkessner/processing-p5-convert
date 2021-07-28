@@ -9,8 +9,9 @@ Transformations:
 - class
     - member field declarations: `int x;` -> `x;`
     - `ClassName()` -> `constructor()`
-    - all member variable references: `x` -> `this.x`
     - `int methodName()` -> `methodName()`
+    - member variable references that are not local variables and
+      are not already prefixed: `x` -> `this.x`
 - for-each loop -> for-of loop
 - simple `ArrayList` implementation in Javascript (wrapper over Array)
     
