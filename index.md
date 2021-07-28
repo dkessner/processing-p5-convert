@@ -1,6 +1,6 @@
 <!-- index.md -->
 
-<script type="module" src="processing-p5-convert-bundle.js"></script>
+<script type="module" src="js/processing-p5-convert-bundle.js"></script>
 
 <!-- codemirror -->
 <link rel="stylesheet" href="codemirror/lib/codemirror.css">
@@ -50,7 +50,7 @@ function draw(){}
 
 <!-- initialization -->
 
-<script src="index.js"></script>
+<script src="js/index.js"></script>
 
 <script>
 

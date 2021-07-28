@@ -3,10 +3,10 @@
 #
 
 
-all: processing-p5-convert-bundle.js tests minimal
+all: js/processing-p5-convert-bundle.js tests minimal
 
-processing-p5-convert-bundle.js: processing-p5-convert.js
-	browserify processing-p5-convert.js --standalone ppconvert -o processing-p5-convert-bundle.js
+js/processing-p5-convert-bundle.js: js/processing-p5-convert.js
+	browserify js/processing-p5-convert.js --standalone ppconvert -o js/processing-p5-convert-bundle.js
 
 tests: \
     hello.test hello.langtest \
@@ -17,17 +17,17 @@ tests: \
     hello_font.test hello_font.langtest \
     hello_sound.test hello_sound.langtest
 
-minimal: processing-p5-convert-bundle.js processing-p5-convert-bootstrap.js
-	cp processing-p5-convert-bundle.js minimal
-	cp processing-p5-convert-bootstrap.js minimal
+minimal: js/processing-p5-convert-bundle.js js/processing-p5-convert-bootstrap.js
+	cp js/processing-p5-convert-bundle.js minimal
+	cp js/processing-p5-convert-bootstrap.js minimal
 	cp p5/p5.min.js minimal
 
 %.test:
-	node ppconvert $*/*.pde | diff - $*/$*.js
+	node js/ppconvert $*/*.pde | diff - $*/$*.js
 
 %.langtest:
-	node ppconvert --reconstruct $*/*.pde | diff - $*/$*.reconstruct
-	node ppconvert  $*/$*.reconstruct | diff - $*/$*.js
+	node js/ppconvert --reconstruct $*/*.pde | diff - $*/$*.reconstruct
+	node js/ppconvert  $*/$*.reconstruct | diff - $*/$*.js
 
 serve:
 	bundle exec jekyll serve --baseurl=''
