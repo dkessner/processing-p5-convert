@@ -1,7 +1,5 @@
 # todo
 
-- while, do/while, switch, ...
-
 ## pitfalls / things we don't handle
 
 - pitfall: hiding API functions (hue)
