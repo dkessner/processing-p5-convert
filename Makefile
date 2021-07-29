@@ -3,10 +3,13 @@
 #
 
 
-all: js/processing-p5-convert-bundle.js tests minimal
+all: js/processing-p5-convert-bundle.js node_modules tests minimal
 
 js/processing-p5-convert-bundle.js: js/processing-p5-convert.js
 	browserify js/processing-p5-convert.js --standalone ppconvert -o js/processing-p5-convert-bundle.js
+
+node_modules: package.json
+	npm install
 
 tests: \
     hello.test hello.langtest \
@@ -33,13 +36,8 @@ minimal: js/processing-p5-convert-bundle.js js/processing-p5-convert-bootstrap.j
 serve:
 	bundle exec jekyll serve --baseurl=''
 
-install-local:
-	npm install
+install-jekyll:
 	bundle install
-
-update:
-	npm update
-	bundle update
 
 install-cli:
 	npm install -g .
