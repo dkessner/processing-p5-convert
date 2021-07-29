@@ -2,9 +2,6 @@
 
 ## issues
 
-- member method calls:
-    - `update()` -> `this.update()`
-
 - multiple member variable declarations in class:
     - `int a,b,c;` -> `a; b; c;`
 
