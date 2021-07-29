@@ -57,7 +57,7 @@ function visitNodesRecursive(node, level, doSomething, options, context, data)
 
 // raw code extraction
 
-function cstPrintRawVisitor(node, level, options, data) {
+function cstPrintRawVisitor(node, level, options, context, data) {
     if ("name" in node)
         console.log(" ".repeat(level) + node.name);
     else if ("image" in node)
@@ -75,6 +75,74 @@ function printRawProcessing(code)
     cstPrintRaw(cst);
 }
 
+// member name extraction
+
+function cstExtractMemberNamesVisitor(node, level, options, context, result) 
+{
+    if ("image" in node)
+    {
+        if (context.fieldDeclaration === true &&
+            context.variableDeclarator === true)
+        {
+            result.fieldNames.push(node.image);
+        }
+        else if (context.methodDeclaration === true &&
+                 context.methodDeclarator === true)
+        {
+            if (node.tokenType.name === "Identifier")
+                result.methodNames.push(node.image);
+        }
+    }
+
+    if (!("name" in node)) return true;
+
+    if (node.name === "fieldDeclaration")
+    {
+        visitChildren(node, level+1, cstExtractMemberNamesVisitor, 
+            options, {...context, fieldDeclaration:true}, result);
+        return false;
+    }
+    else if (node.name === "variableDeclarator" && 
+             context.fieldDeclaration === true)
+    {
+        visitChildren(node, level+1, cstExtractMemberNamesVisitor, 
+            options, {...context, variableDeclarator:true}, result);
+        return false;
+    }
+    else if (node.name === "methodDeclaration")
+    {
+        visitChildren(node, level+1, cstExtractMemberNamesVisitor, 
+            options, {...context, methodDeclaration:true}, result);
+        return false;
+    }
+    else if (node.name === "methodDeclarator" && 
+             context.methodDeclaration === true)
+    {
+        visitChildren(node, level+1, cstExtractMemberNamesVisitor, 
+            options, {...context, methodDeclarator:true}, result);
+        return false;
+    }
+    else if (node.name === "formalParameterList")
+    {
+        return false;
+    }
+
+    return true;
+}
+
+function cstExtractMemberNames(cst)
+{
+    let result = 
+    {
+        fieldNames: [],
+        methodNames: []
+    };
+
+    visitNodesRecursive(cst, 0, cstExtractMemberNamesVisitor, 
+        null, {}, result);
+
+    return result;
+}
 
 
 // special node handlers for extractCodeVisitor()
@@ -411,6 +479,10 @@ function extractCodeVisitor_variableDeclarator(node, level, options, context, re
 
 function extractCodeVisitor_classDeclaration(node, level, options, context, result)
 {
+    let info = cstExtractMemberNames(node);
+    //console.log(info.fieldNames);
+    //console.log(info.methodNames);
+
     let newContext = {
         ...context, 
         classDeclaration: true,
