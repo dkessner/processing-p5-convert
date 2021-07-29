@@ -24,7 +24,11 @@ class Ball
     {
         fill(c);
         ellipse(x, y, 100, 100);
+        update();
+    }
 
+    void update()
+    {
         x += vx;
         y += vy;
 

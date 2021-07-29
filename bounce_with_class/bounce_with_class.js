@@ -23,6 +23,9 @@ class ArrayList extends Array {
      display() {
          fill(this.c);
          ellipse(this.x, this.y, 100, 100);
+         this.update();
+     }
+     update() {
          this.x += this.vx;
          this.y += this.vy;
          if (this.x < 50 || this.x > width - 50) this.vx *= -1;

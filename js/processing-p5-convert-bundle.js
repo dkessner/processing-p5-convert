@@ -232,9 +232,9 @@ function extractCodeVisitor_image(node, level, options, context, result) {
     if (options.transform === true) {
         // transform:  member variables in class method body x -> this.x
 
-        if (context.methodBody === true && context.primaryPrefix === true) {
+        if (context.methodBody === true && context.primaryPrefix === true && "fieldNames" in context && "methodNames" in context) {
             var local = "parameterNames" in context && context.parameterNames.includes(node.image);
-            var member = "fieldNames" in context && context.fieldNames.includes(node.image);
+            var member = context.fieldNames.includes(node.image) || context.methodNames.includes(node.image);
 
             if (member === true && local === false) {
                 result.code += "this." + node.image + " ";
