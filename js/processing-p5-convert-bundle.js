@@ -234,7 +234,7 @@ function extractCodeVisitor_image(node, level, options, context, result) {
 
         if (context.methodBody === true && context.primaryPrefix === true) {
             var local = "parameterNames" in context && context.parameterNames.includes(node.image);
-            var member = "memberVariables" in context && context.memberVariables.includes(node.image);
+            var member = "fieldNames" in context && context.fieldNames.includes(node.image);
 
             if (member === true && local === false) {
                 result.code += "this." + node.image + " ";
@@ -361,28 +361,15 @@ function extractCodeVisitor_unannType(node, level, options, context, result) {
     return true;
 }
 
-function extractCodeVisitor_variableDeclarator(node, level, options, context, result) {
-    // if we're declaring a variable in a class, save it to the memberVariables list
-
-    if (context.classDeclaration === true && context.fieldDeclaration === true) {
-        // look ahead...
-        var variableNameContainer = { code: "" };
-        visitChildren(node, level, extractCodeVisitor, options, context, variableNameContainer);
-        var variableName = variableNameContainer.code.split(' ')[0];
-        context.memberVariables.push(variableName);
-    }
-
-    return true; // ...but keep going      
-}
-
 function extractCodeVisitor_classDeclaration(node, level, options, context, result) {
-    var info = cstExtractMemberNames(node);
-    //console.log(info.fieldNames);
-    //console.log(info.methodNames);
+    var _cstExtractMemberName = cstExtractMemberNames(node),
+        fieldNames = _cstExtractMemberName.fieldNames,
+        methodNames = _cstExtractMemberName.methodNames;
 
     var newContext = _extends({}, context, {
-        classDeclaration: true,
-        memberVariables: []
+        fieldNames: fieldNames,
+        methodNames: methodNames,
+        classDeclaration: true
     });
 
     visitChildren(node, level + 1, extractCodeVisitor, options, newContext, result);
@@ -567,7 +554,6 @@ var extractCodeVisitor_specialHandlers = {
     fieldDeclaration: extractCodeVisitor_fieldDeclaration,
     fieldModifier: extractCodeVisitor_fieldModifier,
     unannType: extractCodeVisitor_unannType,
-    variableDeclarator: extractCodeVisitor_variableDeclarator,
     classDeclaration: extractCodeVisitor_classDeclaration,
     constructorDeclaration: extractCodeVisitor_constructorDeclaration,
     methodBody: extractCodeVisitor_methodBody,
