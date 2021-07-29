@@ -5,10 +5,8 @@
 
 class Ball
 {
-    float x;
-    float y;
-    float vx;
-    float vy;
+    float x, y;
+    float vx = 0, vy = 0;
     int c;
 
     Ball(float x, float y)

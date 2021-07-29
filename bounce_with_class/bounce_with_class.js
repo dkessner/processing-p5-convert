@@ -10,8 +10,8 @@ class ArrayList extends Array {
  class Ball {
      x;
      y;
-     vx;
-     vy;
+     vx = 0;
+     vy = 0;
      c;
      constructor(x, y) {
          this.x = x;

@@ -82,7 +82,7 @@ function cstExtractMemberNamesVisitor(node, level, options, context, result)
     if ("image" in node)
     {
         if (context.fieldDeclaration === true &&
-            context.variableDeclarator === true)
+            context.variableDeclaratorId === true)
         {
             result.fieldNames.push(node.image);
         }
@@ -102,11 +102,11 @@ function cstExtractMemberNamesVisitor(node, level, options, context, result)
             options, {...context, fieldDeclaration:true}, result);
         return false;
     }
-    else if (node.name === "variableDeclarator" && 
+    else if (node.name === "variableDeclaratorId" && 
              context.fieldDeclaration === true)
     {
         visitChildren(node, level+1, cstExtractMemberNamesVisitor, 
-            options, {...context, variableDeclarator:true}, result);
+            options, {...context, variableDeclaratorId:true}, result);
         return false;
     }
     else if (node.name === "methodDeclaration")
@@ -381,8 +381,18 @@ function extractCodeVisitor_argumentList(node, level, options, context, result)
 
 function extractCodeVisitor_variableDeclaratorList(node, level, options, context, result)
 {
+    let temp = {code:""};
+
     visitChildrenInterleaved(node, "", "variableDeclarator", "Comma",
-                             level+1, options, context, result); 
+                             level+1, options, context, temp); 
+
+    if (options.transform === true &&
+        context.classDeclaration === true)
+    {
+        temp.code = temp.code.replace(",", ";");
+    }
+
+    result.code += temp.code;
 
     return false;
 }

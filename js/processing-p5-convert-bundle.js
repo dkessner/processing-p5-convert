@@ -83,7 +83,7 @@ function printRawProcessing(code) {
 
 function cstExtractMemberNamesVisitor(node, level, options, context, result) {
     if ("image" in node) {
-        if (context.fieldDeclaration === true && context.variableDeclarator === true) {
+        if (context.fieldDeclaration === true && context.variableDeclaratorId === true) {
             result.fieldNames.push(node.image);
         } else if (context.methodDeclaration === true && context.methodDeclarator === true) {
             if (node.tokenType.name === "Identifier") result.methodNames.push(node.image);
@@ -95,8 +95,8 @@ function cstExtractMemberNamesVisitor(node, level, options, context, result) {
     if (node.name === "fieldDeclaration") {
         visitChildren(node, level + 1, cstExtractMemberNamesVisitor, options, _extends({}, context, { fieldDeclaration: true }), result);
         return false;
-    } else if (node.name === "variableDeclarator" && context.fieldDeclaration === true) {
-        visitChildren(node, level + 1, cstExtractMemberNamesVisitor, options, _extends({}, context, { variableDeclarator: true }), result);
+    } else if (node.name === "variableDeclaratorId" && context.fieldDeclaration === true) {
+        visitChildren(node, level + 1, cstExtractMemberNamesVisitor, options, _extends({}, context, { variableDeclaratorId: true }), result);
         return false;
     } else if (node.name === "methodDeclaration") {
         visitChildren(node, level + 1, cstExtractMemberNamesVisitor, options, _extends({}, context, { methodDeclaration: true }), result);
@@ -296,7 +296,15 @@ function extractCodeVisitor_argumentList(node, level, options, context, result) 
 }
 
 function extractCodeVisitor_variableDeclaratorList(node, level, options, context, result) {
-    visitChildrenInterleaved(node, "", "variableDeclarator", "Comma", level + 1, options, context, result);
+    var temp = { code: "" };
+
+    visitChildrenInterleaved(node, "", "variableDeclarator", "Comma", level + 1, options, context, temp);
+
+    if (options.transform === true && context.classDeclaration === true) {
+        temp.code = temp.code.replace(",", ";");
+    }
+
+    result.code += temp.code;
 
     return false;
 }
