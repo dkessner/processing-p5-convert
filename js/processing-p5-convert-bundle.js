@@ -263,7 +263,10 @@ function extractCodeVisitor_fqnOrRefType(node, level, options, context, result) 
     visitChildrenInterleaved(node, "fqnOrRefTypePartFirst", "Dot", "fqnOrRefTypePartRest", level + 1, options, context, temp);
 
     if (options.transform) {
-        if (temp.code === "size ") temp.code = "createCanvas ";else if (temp.code === "pushMatrix ") temp.code = "push ";else if (temp.code === "popMatrix ") temp.code = "pop ";else if (temp.code === "println ") temp.code = "console.log ";else if (temp.code === "UP ") temp.code = "UP_ARROW ";else if (temp.code === "DOWN ") temp.code = "DOWN_ARROW ";else if (temp.code === "RIGHT ") temp.code = "RIGHT_ARROW ";else if (temp.code === "LEFT ") temp.code = "LEFT_ARROW ";else if (context.insideSetup === true && temp.code.startsWith("load")) context.isLoadFile = true;else if (temp.code === "createFont ") {
+        if (temp.code === "size ") temp.code = "createCanvas ";else if (temp.code === "P3D ") {
+            temp.code = "WEBGL ";
+            context.webgl = true;
+        } else if (temp.code === "pushMatrix ") temp.code = "push ";else if (temp.code === "popMatrix ") temp.code = "pop ";else if (temp.code === "println ") temp.code = "console.log ";else if (temp.code === "UP ") temp.code = "UP_ARROW ";else if (temp.code === "DOWN ") temp.code = "DOWN_ARROW ";else if (temp.code === "RIGHT ") temp.code = "RIGHT_ARROW ";else if (temp.code === "LEFT ") temp.code = "LEFT_ARROW ";else if (context.insideSetup === true && temp.code.startsWith("load")) context.isLoadFile = true;else if (temp.code === "createFont ") {
             temp.code = "loadFont ";
             context.isLoadFile = true;
             context.isCreateFont = true;
@@ -461,8 +464,10 @@ function extractCodeVisitor_methodDeclaration(node, level, options, context, res
 
     visitChildren(node, level + 1, extractCodeVisitor, options, newContext, result);
 
-    if (options.transform === true && newContext.insideSetup === true && newContext.preload) {
-        result.code += "function preload() {" + newContext.preload + "}";
+    if (options.transform === true && newContext.insideSetup === true) {
+        if (newContext.preload) result.code += "function preload() {" + newContext.preload + "}";
+
+        if (newContext.webgl === true) context.webgl = true; // propagate to outer context
     }
 
     return false;
@@ -475,6 +480,8 @@ function extractCodeVisitor_methodDeclarator(node, level, options, context, resu
         if (methodName === "setup") {
             context.insideSetup = true; // add more context: inside setup()
             context.preload = "";
+        } else if (methodName === "draw" && context.webgl === true) {
+            context.insideDraw = true;
         }
     }
 
@@ -514,6 +521,14 @@ function extractCodeVisitor_blockStatement(node, level, options, context, result
         }
 
         return false;
+    }
+
+    return true;
+}
+
+function extractCodeVisitor_blockStatements(node, level, options, context, result) {
+    if (context.webgl === true && context.insideDraw === true) {
+        result.code += "translate(-width/2, -height/2); ";
     }
 
     return true;
@@ -578,6 +593,7 @@ var extractCodeVisitor_specialHandlers = {
     methodDeclaration: extractCodeVisitor_methodDeclaration,
     methodDeclarator: extractCodeVisitor_methodDeclarator,
     blockStatement: extractCodeVisitor_blockStatement,
+    blockStatements: extractCodeVisitor_blockStatements,
     formalParameterList: extractCodeVisitor_formalParameterList,
     primitiveCastExpression: extractCodeVisitor_primitiveCastExpression,
     primaryPrefix: extractCodeVisitor_primaryPrefix

@@ -20,7 +20,8 @@ tests: \
     hello_font.test hello_font.langtest \
     hello_sound.test hello_sound.langtest \
     explode.test explode.langtest \
-    bounce_vectors.test bounce_vectors.langtest
+    bounce_vectors.test bounce_vectors.langtest \
+    hello_3d.test hello_3d.langtest
 
 minimal: js/processing-p5-convert-bundle.js js/processing-p5-convert-bootstrap.js
 	cp js/processing-p5-convert-bundle.js minimal
