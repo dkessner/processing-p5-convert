@@ -418,6 +418,13 @@ function extractCodeVisitor_newExpression(node, level, options, context, result)
                 // transform: ArrayList<ClassName> -> ArrayList
                 result.code += "new ArrayList()";
                 return false;
+            } else if (className.code.startsWith("PVector")) {
+                // transform: new PVector -> new p5.Vector
+                var temp = { code: "" };
+                visitChildren(node, level + 1, extractCodeVisitor, options, context, temp);
+                temp.code = temp.code.replace("PVector", "p5.Vector");
+                result.code += temp.code;
+                return false;
             } else if (className.code.startsWith("SoundFile")) {
                 // transform: new SoundFile(this, "filename.wav") -> loadSound("filename.wav")
 
