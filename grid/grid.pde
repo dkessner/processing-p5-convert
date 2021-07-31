@@ -63,7 +63,9 @@ int drawFace(int x, int y)
    popMatrix();
 
    ellipse(x, y+25, 40, 20);
-   return 0;
+
+   final int result = 0;
+   return result;
 }
 
 

@@ -646,6 +646,7 @@ var extractCodeVisitor_specialHandlers = {
     enhancedForStatement: extractCodeVisitor_enhancedForStatement,
     fieldDeclaration: extractCodeVisitor_fieldDeclaration,
     fieldModifier: extractCodeVisitor_fieldModifier,
+    variableModifier: extractCodeVisitor_fieldModifier, // same as fieldModifier
     unannType: extractCodeVisitor_unannType,
     classDeclaration: extractCodeVisitor_classDeclaration,
     constructorDeclaration: extractCodeVisitor_constructorDeclaration,

@@ -46,7 +46,8 @@
      ellipse(x, y, 20, 20);
      pop();
      ellipse(x, y + 25, 40, 20);
-     return 0;
+     let result = 0;
+     return result;
  }
 
  function computeSum(numbers) {
