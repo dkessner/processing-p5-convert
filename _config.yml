@@ -13,3 +13,6 @@ defaults:
 #plugins:
 #- jekyll-remote-theme
 
+plugins:
+  - jekyll-seo-tag
+
