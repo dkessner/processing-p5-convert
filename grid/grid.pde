@@ -7,17 +7,42 @@
 private final int n = 0x29a;
 
 int[] dummy = {1, 2, 3, 4};
+int[] dummy2 = new int[5];
 
 int[][] numbers = { {1, 2, 3, 4}, 
                    {5, 6, 7, 8}, 
                    {9, 10, 11, 12}, 
                    {13, 14, 15, 16} };
 
+int[][] numbers2 = new int[2][3];
+
 void setup()
 {
     size(400, 400);
-    println("computeSum: " + computeSum(numbers));
-    println("computeSum2: " + computeSum2(numbers));
+
+    initializeArray(numbers2);
+    printArray(numbers2);
+    println("computeSum: " + computeSum(numbers2));
+    println("computeSum2: " + computeSum2(numbers2));
+}
+
+void initializeArray(int[][] values)
+{
+    int value = 1;
+    for (int i=0; i<values.length; i++)
+    for (int j=0; j<values[i].length; j++)
+        values[i][j] = value++;
+}
+
+
+void printArray(int[][] values)
+{
+    for (int[] row : values)
+    {
+        for (int value : row)
+            print(value + " ");
+        println();
+    }
 }
 
 

@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.reconstructProcessing = exports.transformProcessing = exports.printOutlineProcessing = exports.printRawProcessing = undefined;
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _javaParser = require('java-parser');
@@ -266,7 +268,7 @@ function extractCodeVisitor_fqnOrRefType(node, level, options, context, result) 
         if (temp.code === "size ") temp.code = "createCanvas ";else if (temp.code === "P3D ") {
             temp.code = "WEBGL ";
             context.webgl = true;
-        } else if (temp.code === "pushMatrix ") temp.code = "push ";else if (temp.code === "popMatrix ") temp.code = "pop ";else if (temp.code === "println ") temp.code = "console.log ";else if (temp.code === "UP ") temp.code = "UP_ARROW ";else if (temp.code === "DOWN ") temp.code = "DOWN_ARROW ";else if (temp.code === "RIGHT ") temp.code = "RIGHT_ARROW ";else if (temp.code === "LEFT ") temp.code = "LEFT_ARROW ";else if (context.insideSetup === true && temp.code.startsWith("load")) context.isLoadFile = true;else if (temp.code === "createFont ") {
+        } else if (temp.code === "pushMatrix ") temp.code = "push ";else if (temp.code === "popMatrix ") temp.code = "pop ";else if (temp.code === "println ") temp.code = "console.log ";else if (temp.code === "print ") temp.code = "console.log ";else if (temp.code === "UP ") temp.code = "UP_ARROW ";else if (temp.code === "DOWN ") temp.code = "DOWN_ARROW ";else if (temp.code === "RIGHT ") temp.code = "RIGHT_ARROW ";else if (temp.code === "LEFT ") temp.code = "LEFT_ARROW ";else if (context.insideSetup === true && temp.code.startsWith("load")) context.isLoadFile = true;else if (temp.code === "createFont ") {
             temp.code = "loadFont ";
             context.isLoadFile = true;
             context.isCreateFont = true;
@@ -448,15 +450,28 @@ function extractCodeVisitor_newExpression(node, level, options, context, result)
                 return false;
             }
         } else if ("arrayCreationExpression" in node.children) {
-            var dimension = { code: "" };
             var _start2 = node.children.arrayCreationExpression[0].children.arrayCreationDefaultInitSuffix[0];
 
-            visitNodesRecursive(_start2, level + 1, extractCodeVisitor, {}, context, dimension);
-            var n = dimension.code.trim();
-            n = n.slice(1, n.length - 1);
+            var newContext = _extends({}, context, {
+                arrayCreationExpression: true
+            });
 
-            result.code += "new Array(" + n + ")";
-            //result.code += "[]"; 
+            var _temp = { code: "", dimensions: [] };
+
+            visitNodesRecursive(_start2, level + 1, extractCodeVisitor, {}, newContext, _temp);
+
+            if (_temp.dimensions.length === 1) {
+                result.code += "new Array(" + _temp.dimensions[0] + ")";
+            } else if (_temp.dimensions.length === 2) {
+                var _temp$dimensions = _slicedToArray(_temp.dimensions, 2),
+                    m = _temp$dimensions[0],
+                    n = _temp$dimensions[1];
+
+                result.code += 'Array.from(new Array(' + m + '), ()=>new Array(' + n + '))';
+            } else {
+                console.log("[processing-p5-convert] newExpression array bad dimensions.length:" + dimensions.length);
+            }
+
             return false;
         }
     }
@@ -594,6 +609,17 @@ function extractCodeVisitor_dims(node, level, options, context, result) {
     return false;
 }
 
+function extractCodeVisitor_expression(node, level, options, context, result) {
+    if (context.arrayCreationExpression === true && "dimensions" in result) {
+        var temp = { code: "" };
+        visitChildren(node, level + 1, extractCodeVisitor, options, context, temp);
+        result.dimensions.push(temp.code.trim());
+        return false;
+    }
+
+    return true;
+}
+
 // extractCodeVisitor special handler table
 
 var extractCodeVisitor_specialHandlers = {
@@ -623,7 +649,8 @@ var extractCodeVisitor_specialHandlers = {
     primitiveCastExpression: extractCodeVisitor_primitiveCastExpression,
     primaryPrefix: extractCodeVisitor_primaryPrefix,
     arrayInitializer: extractCodeVisitor_arrayInitializer,
-    dims: extractCodeVisitor_dims
+    dims: extractCodeVisitor_dims,
+    expression: extractCodeVisitor_expression
 
     // primary extractCodeVisitor entry point
 

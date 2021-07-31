@@ -1,16 +1,33 @@
  let n = 0x29a;
  let dummy = [1, 2, 3, 4];
+ let dummy2 = new Array(5);
  let numbers = [
      [1, 2, 3, 4],
      [5, 6, 7, 8],
      [9, 10, 11, 12],
      [13, 14, 15, 16]
  ];
+ let numbers2 = Array.from(new Array(2), () => new Array(3));
 
  function setup() {
      createCanvas(400, 400);
-     console.log("computeSum: " + computeSum(numbers));
-     console.log("computeSum2: " + computeSum2(numbers));
+     initializeArray(numbers2);
+     printArray(numbers2);
+     console.log("computeSum: " + computeSum(numbers2));
+     console.log("computeSum2: " + computeSum2(numbers2));
+ }
+
+ function initializeArray(values) {
+     let value = 1;
+     for (let i = 0; i < values.length; i++)
+         for (let j = 0; j < values[i].length; j++) values[i][j] = value++;
+ }
+
+ function printArray(values) {
+     for (let row of values) {
+         for (let value of row) console.log(value + " ");
+         console.log();
+     }
  }
 
  function drawFace(x, y) {

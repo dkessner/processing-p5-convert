@@ -337,6 +337,8 @@ function extractCodeVisitor_fqnOrRefType(node, level, options, context, result)
             temp.code = "pop ";
         else if (temp.code === "println ")
             temp.code = "console.log ";
+        else if (temp.code === "print ")
+            temp.code = "console.log ";
         else if (temp.code === "UP ")
             temp.code = "UP_ARROW ";
         else if (temp.code === "DOWN ")
@@ -577,17 +579,34 @@ function extractCodeVisitor_newExpression(node, level, options, context, result)
         }
         else if ("arrayCreationExpression" in node.children)
         {
-            let dimension = {code:""};
             let start = node.children
                 .arrayCreationExpression[0].children
                 .arrayCreationDefaultInitSuffix[0];
 
-            visitNodesRecursive(start, level+1, extractCodeVisitor, {}, context, dimension);
-            let n = dimension.code.trim();
-            n = n.slice(1, n.length-1);
+            let newContext = {
+                ...context, 
+                arrayCreationExpression: true,
+            };
 
-            result.code += "new Array(" + n + ")";
-            //result.code += "[]"; 
+            let temp = {code:"", dimensions:[]};
+
+            visitNodesRecursive(start, level+1, extractCodeVisitor, {}, newContext, temp);
+
+            if (temp.dimensions.length === 1)
+            {
+                result.code += "new Array(" + temp.dimensions[0] + ")";
+            }
+            else if (temp.dimensions.length === 2)
+            {
+                let [m,n] = temp.dimensions;
+                result.code +=  
+                    `Array.from(new Array(${m}), ()=>new Array(${n}))`;
+            }
+            else
+            {
+                console.log("[processing-p5-convert] newExpression array bad dimensions.length:" + dimensions.length);
+            }
+
             return false;
         }
     }
@@ -757,6 +776,19 @@ function extractCodeVisitor_dims(node, level, options, context, result)
     return false;
 }
 
+function extractCodeVisitor_expression(node, level, options, context, result)
+{
+    if (context.arrayCreationExpression === true && "dimensions" in result)
+    {
+        let temp = {code:""};
+        visitChildren(node, level+1, extractCodeVisitor, options, context, temp);
+        result.dimensions.push(temp.code.trim());
+        return false;
+    }
+                           
+    return true;
+}
+
 
 // extractCodeVisitor special handler table
 
@@ -788,6 +820,7 @@ const extractCodeVisitor_specialHandlers = {
     primaryPrefix: extractCodeVisitor_primaryPrefix,
     arrayInitializer: extractCodeVisitor_arrayInitializer,
     dims: extractCodeVisitor_dims,
+    expression: extractCodeVisitor_expression,
 }
 
 // primary extractCodeVisitor entry point
