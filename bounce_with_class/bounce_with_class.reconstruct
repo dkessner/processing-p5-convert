@@ -1,3 +1,6 @@
+ //
+ // bounce_with_class.pde
+ //
  class Ball {
      float x, y;
      float vx = 0, vy = 0;

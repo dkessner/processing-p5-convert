@@ -11,7 +11,7 @@ void setup()
 void draw()
 {
     background(0);
-    fill(#00ff00);
+    fill(#00ff00); // Processing color literal
     ellipse(200, 200, 100, 100);
 }
 

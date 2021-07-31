@@ -1,4 +1,7 @@
-import processing.sound.*;
+ //
+ // hello_sound.pde
+ //
+ import processing.sound.*;
  SoundFile meow;
  void setup() {
      size(400, 400);

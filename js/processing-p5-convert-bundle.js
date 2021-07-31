@@ -48,13 +48,21 @@ var beautify = _jsBeautify2.default['js'];
 // recursion implementation
 
 function visitChildren(node, level, doSomething, options, context, data) {
+    if ("leadingComments" in node) for (var index in node.leadingComments) {
+        visitNodesRecursive(node.leadingComments[index], level, doSomething, options, _extends({}, context, { isComment: true }), data);
+    } //            data.code += node.leadingComments[index].image + "\n";
+
     for (var nodeName in node.children) {
         var childArray = node.children[nodeName];
 
-        for (var index in childArray) {
-            visitNodesRecursive(childArray[index], level, doSomething, options, context, data);
+        for (var _index in childArray) {
+            visitNodesRecursive(childArray[_index], level, doSomething, options, context, data);
         }
     }
+
+    if ("trailingComments" in node) for (var _index2 in node.trailingComments) {
+        visitNodesRecursive(node.trailingComments[_index2], level, doSomething, options, _extends({}, context, { isComment: true }), data);
+    } //data.code += node.trailingComments[index].image + "\n";
 }
 
 function visitNodesRecursive(node, level, doSomething, options, context, data) {
@@ -254,7 +262,9 @@ function extractCodeVisitor_image(node, level, options, context, result) {
 
     // default: actual code string is stored in node.image
 
-    result.code += node.image + " ";
+    result.code += node.image;
+
+    if (context.isComment === true) result.code += "\n";else result.code += " ";
 
     return true;
 }
@@ -744,7 +754,7 @@ function preprocessProcessing(code) {
     // comment out import statements
 
     var regex_import = /import/g;
-    wrapped = wrapped.replace(regex_import, '//$&');
+    wrapped = wrapped.replace(regex_import, '// [processing-p5-convert] $&');
 
     return wrapped;
 }
@@ -760,11 +770,11 @@ function unpreprocessProcessing(code) {
         return s.substring(1, s.length - 1);
     });
 
-    // add sound import if necessary
+    // uncomment imports
 
-    var regex_soundFile = /SoundFile/;
+    var regex_soundFile = /\/\/ \[processing-p5-convert\] import /g;
     var matches = code.match(regex_soundFile);
-    if (matches) code = "import processing.sound.*;\n" + code;
+    if (matches) code = code.replace(regex_soundFile, "import ");
 
     return code;
 }

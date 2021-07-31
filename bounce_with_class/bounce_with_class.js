@@ -7,6 +7,9 @@ class ArrayList extends Array {
     remove(i) {this.splice(i,1);}
 }
 
+ //
+ // bounce_with_class.pde
+ //
  class Ball {
      x;
      y;

@@ -1,3 +1,6 @@
+ //
+ // cat.pde
+ //
  PImage cat;
  PImage mouse;
  float mouse_x, mouse_y;

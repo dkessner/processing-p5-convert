@@ -1,3 +1,7 @@
+ //
+ // hello_sound.pde
+ //
+ // [processing-p5-convert] import processing.sound.*;
  let meow;
 
  function setup() {

@@ -1,3 +1,6 @@
+ //
+ // explode.pde
+ //
  final int explosionCount = 17;
  PImage[] explosion = new PImage[explosionCount];
  boolean exploding = false;
