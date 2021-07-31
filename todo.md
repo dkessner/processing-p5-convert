@@ -2,6 +2,18 @@
 
 ## issues
 
+- fix: remove public (public class, public method)
+
+- fix: float literal 0f -> 0
+
+- fix: v.x -> v.this.x in member function
+
+- fix: argument list , -> ; 
+
+- fix: possible problem with local variable declaration inside methods (dandelin?)
+
+- ternary operator
+
 - comment out multiple constructors
 
 - on-the-fly conversion with preload() is inconsistent:
