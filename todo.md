@@ -4,10 +4,6 @@
 
 - comment out multiple constructors
 
-- handle 2D arrays
-    - a = Array.from({length:5}, ()=>new Array(3))
-    - a = (new Array(5)).fill(0).map(()=> new Array(3))
-
 - on-the-fly conversion with preload() is inconsistent:
     - two button presses works in processing-p5-convert local, but not hosted
     - does not work currently with ProcessingExamples/explode
