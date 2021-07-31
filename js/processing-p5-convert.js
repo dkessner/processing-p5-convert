@@ -340,35 +340,37 @@ function extractCodeVisitor_fqnOrRefType(node, level, options, context, result)
                              "Dot","fqnOrRefTypePartRest",
                              level+1, options, context, temp); 
 
+    temp.code = temp.code.trim();
+
     if (options.transform) {
-        if (temp.code === "size ")
-            temp.code = "createCanvas ";
-        else if (temp.code === "P3D ")
+        if (temp.code === "size")
+            temp.code = "createCanvas";
+        else if (temp.code === "P3D")
         {
-            temp.code = "WEBGL ";
+            temp.code = "WEBGL";
             context.webgl = true;
         }
-        else if (temp.code === "pushMatrix ")
-            temp.code = "push ";
-        else if (temp.code === "popMatrix ")
-            temp.code = "pop ";
-        else if (temp.code === "println ")
-            temp.code = "console.log ";
-        else if (temp.code === "print ")
-            temp.code = "console.log ";
-        else if (temp.code === "UP ")
-            temp.code = "UP_ARROW ";
-        else if (temp.code === "DOWN ")
-            temp.code = "DOWN_ARROW ";
-        else if (temp.code === "RIGHT ")
-            temp.code = "RIGHT_ARROW ";
-        else if (temp.code === "LEFT ")
-            temp.code = "LEFT_ARROW ";
+        else if (temp.code === "pushMatrix")
+            temp.code = "push";
+        else if (temp.code === "popMatrix")
+            temp.code = "pop";
+        else if (temp.code === "println")
+            temp.code = "console.log";
+        else if (temp.code === "print")
+            temp.code = "console.log";
+        else if (temp.code === "UP")
+            temp.code = "UP_ARROW";
+        else if (temp.code === "DOWN")
+            temp.code = "DOWN_ARROW";
+        else if (temp.code === "RIGHT")
+            temp.code = "RIGHT_ARROW";
+        else if (temp.code === "LEFT")
+            temp.code = "LEFT_ARROW";
         else if (context.insideSetup === true && temp.code.startsWith("load"))
             context.isLoadFile = true; 
-        else if (temp.code === "createFont ")
+        else if (temp.code === "createFont")
         {
-            temp.code = "loadFont ";
+            temp.code = "loadFont";
             context.isLoadFile = true; 
             context.isCreateFont = true;
         }
