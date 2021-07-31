@@ -98,3 +98,11 @@ void keyPressed()
 }
 
 
+public class Dummy
+{
+    public void hello() 
+    {
+        println("Hello, world!");
+    }
+}
+

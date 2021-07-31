@@ -58,3 +58,8 @@
          println("We're here!");
      }
  }
+ public class Dummy {
+     public void hello() {
+         println("Hello, world!");
+     }
+ }

@@ -824,6 +824,8 @@ const extractCodeVisitor_specialHandlers = {
     fieldDeclaration: extractCodeVisitor_fieldDeclaration,
     fieldModifier: extractCodeVisitor_fieldModifier,
     variableModifier: extractCodeVisitor_fieldModifier, // same as fieldModifier
+    classModifier: extractCodeVisitor_fieldModifier, // same as fieldModifier
+    methodModifier: extractCodeVisitor_fieldModifier, // same as fieldModifier
     unannType: extractCodeVisitor_unannType,
     classDeclaration: extractCodeVisitor_classDeclaration,
     constructorDeclaration: extractCodeVisitor_constructorDeclaration,

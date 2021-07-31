@@ -73,3 +73,8 @@ class ArrayList extends Array {
          console.log("We're here!");
      }
  }
+ class Dummy {
+     hello() {
+         console.log("Hello, world!");
+     }
+ }
