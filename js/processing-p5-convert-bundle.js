@@ -818,6 +818,17 @@ function extractCodeVisitor_expression(node, level, options, context, result) {
     return true;
 }
 
+function extractCodeVisitor_floatingPointLiteral(node, level, options, context, result) {
+    if (options.transform === true) {
+        var number = node.children.FloatLiteral[0].image;
+        if (number.slice(-1) === "f") number = number.slice(0, -1); // remove the trailing 'f'
+        result.code += number;
+        return false;
+    }
+
+    return true;
+}
+
 // extractCodeVisitor special handler table
 
 var extractCodeVisitor_specialHandlers = {
@@ -851,7 +862,8 @@ var extractCodeVisitor_specialHandlers = {
     primaryPrefix: extractCodeVisitor_primaryPrefix,
     arrayInitializer: extractCodeVisitor_arrayInitializer,
     dims: extractCodeVisitor_dims,
-    expression: extractCodeVisitor_expression
+    expression: extractCodeVisitor_expression,
+    floatingPointLiteral: extractCodeVisitor_floatingPointLiteral
 
     // primary extractCodeVisitor entry point
 

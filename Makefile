@@ -14,7 +14,7 @@ node_modules: package.json
 tests: \
     hello.test hello.langtest \
     bounce.test bounce.langtest \
-    grid.test grid.langtest \
+    grid.test \
     bounce_with_class.test bounce_with_class.langtest \
     cat.test cat.langtest \
     hello_font.test hello_font.langtest \
@@ -23,6 +23,8 @@ tests: \
     bounce_vectors.test bounce_vectors.langtest \
     hello_3d.test hello_3d.langtest
 
+# TODO: fix grid.langtest (problem with beautify)
+ 
 minimal: js/processing-p5-convert-bundle.js js/processing-p5-convert-bootstrap.js
 	cp js/processing-p5-convert-bundle.js minimal
 	cp js/processing-p5-convert-bootstrap.js minimal

@@ -46,7 +46,7 @@ void printArray(int[][] values)
 }
 
 
-int drawFace(int x, int y)
+float drawFace(int x, int y)
 {
    fill(255);
    ellipse((float)x, y, 100, 100);
@@ -64,7 +64,7 @@ int drawFace(int x, int y)
 
    ellipse(x, y+25, 40, 20);
 
-   final int result = 0;
+   final float result = 0.0f;
    return result;
 }
 

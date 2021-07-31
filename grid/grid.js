@@ -46,7 +46,7 @@
      ellipse(x, y, 20, 20);
      pop();
      ellipse(x, y + 25, 40, 20);
-     let result = 0;
+     let result = 0.0;
      return result;
  }
 

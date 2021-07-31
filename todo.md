@@ -5,8 +5,6 @@
 
 ## issues
 
-- fix: float literal 0f -> 0
-
 - fix: v.x -> v.this.x in member function
 
 - fix: argument list , -> ; 
