@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 <!-- index.md -->
 
 <script type="module" src="js/processing-p5-convert-bundle.js"></script>

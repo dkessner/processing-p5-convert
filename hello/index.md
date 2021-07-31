@@ -1,3 +1,6 @@
+---
+layout: default
+---
 
 
 <script src="../p5/p5.min.js"></script>

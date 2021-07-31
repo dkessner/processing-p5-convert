@@ -67,7 +67,8 @@
      ellipse(x, y, 20, 20);
      popMatrix();
      ellipse(x, y + 25, 40, 20);
-     return 0;
+     final int result = 0;
+     return result;
  }
  int computeSum(int[][] numbers) {
      int total = 0;
