@@ -3,13 +3,22 @@
 //
 
 
+
+private final int n = 0x29a;
+
+int[] dummy = {1, 2, 3, 4};
+
+int[][] numbers = { {1, 2, 3, 4}, 
+                   {5, 6, 7, 8}, 
+                   {9, 10, 11, 12}, 
+                   {13, 14, 15, 16} };
+
 void setup()
 {
     size(400, 400);
+    println("computeSum: " + computeSum(numbers));
+    println("computeSum2: " + computeSum2(numbers));
 }
-
-
-private final int n = 0x29a;
 
 
 int drawFace(int x, int y)
@@ -33,9 +42,29 @@ int drawFace(int x, int y)
 }
 
 
+int computeSum(int[][] numbers)
+{
+    int total = 0;
+    for (int[] row : numbers)
+    for (int number : row)
+        total += number;
+    return total;
+}
+
+int computeSum2(int[][] numbers)
+{
+    int total = 0;
+    for (int i=0; i<numbers.length; i++)
+    for (int j=0; j<numbers[i].length; j++)
+        total += numbers[i][j];
+    return total;
+}
+
 void draw()
 {
     background(0);
+    textSize(20);
+    textAlign(CENTER, CENTER);
 
   	for (int i=0; i<4; i++)
     {
@@ -43,6 +72,8 @@ void draw()
         {
             fill( (i+j)%2 * 255 );
             rect(j*100, i*100, 100, 100);
+            fill( (i+j+1)%2 * 255 );
+            text(numbers[i][j], j*100+50, i*100+50);
         }
     }
 
@@ -77,7 +108,12 @@ void draw()
 
     } while (k-- > 0);
 
-     
+  	for (int i=0; i<4; i++)
+    for (int j=0; j<4; j++)
+    {
+        fill(255, 0, 0);
+        text(numbers[i][j], j*100+50, i*100+50);
+    }
 }
 
 

@@ -312,6 +312,11 @@ function extractCodeVisitor_variableDeclaratorList(node, level, options, context
     return false;
 }
 
+function extractCodeVisitor_variableInitializerList(node, level, options, context, result) {
+    visitChildrenInterleaved(node, "", "variableInitializer", "Comma", level + 1, options, context, result);
+    return false;
+}
+
 function extractCodeVisitor_result(node, level, options, context, result) {
     // transform function result type depending on context
     // - global:  void/int/... -> function
@@ -570,12 +575,32 @@ function extractCodeVisitor_primaryPrefix(node, level, options, context, result)
     return true;
 }
 
+function extractCodeVisitor_arrayInitializer(node, level, options, context, result) {
+    if (options.transform === true) {
+        // transform: array literal {1, 2, 3, 4} -> [1, 2, 3, 4]
+        var temp = { code: "" };
+        visitChildren(node, level + 1, extractCodeVisitor, options, context, temp);
+        temp.code = temp.code.replace("{", "[");
+        temp.code = temp.code.replace("}", "]");
+        result.code += temp.code;
+        return false;
+    }
+
+    return true;
+}
+
+function extractCodeVisitor_dims(node, level, options, context, result) {
+    visitChildrenInterleaved(node, "", "LSquare", "RSquare", level + 1, options, context, result);
+    return false;
+}
+
 // extractCodeVisitor special handler table
 
 var extractCodeVisitor_specialHandlers = {
     fqnOrRefType: extractCodeVisitor_fqnOrRefType,
     argumentList: extractCodeVisitor_argumentList,
     variableDeclaratorList: extractCodeVisitor_variableDeclaratorList,
+    variableInitializerList: extractCodeVisitor_variableInitializerList,
     result: extractCodeVisitor_result,
     binaryExpression: extractCodeVisitor_binaryExpression,
     basicForStatement: extractCodeVisitor_basicForStatement,
@@ -596,7 +621,9 @@ var extractCodeVisitor_specialHandlers = {
     blockStatements: extractCodeVisitor_blockStatements,
     formalParameterList: extractCodeVisitor_formalParameterList,
     primitiveCastExpression: extractCodeVisitor_primitiveCastExpression,
-    primaryPrefix: extractCodeVisitor_primaryPrefix
+    primaryPrefix: extractCodeVisitor_primaryPrefix,
+    arrayInitializer: extractCodeVisitor_arrayInitializer,
+    dims: extractCodeVisitor_dims
 
     // primary extractCodeVisitor entry point
 
