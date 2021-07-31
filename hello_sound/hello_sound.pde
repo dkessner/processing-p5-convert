@@ -1,5 +1,5 @@
 //
-// hello_sound.pde
+// hello_sound
 //
 	
 import processing.sound.*;

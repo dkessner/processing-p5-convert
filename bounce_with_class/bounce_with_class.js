@@ -8,7 +8,7 @@ class ArrayList extends Array {
 }
 
  //
- // bounce_with_class.pde
+ // bounce_with_class
  //
  class Ball {
      x;

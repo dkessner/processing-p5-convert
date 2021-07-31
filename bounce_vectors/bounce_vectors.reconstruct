@@ -1,5 +1,5 @@
  //
- // bounce_vectors.pde
+ // bounce_vectors
  //
  PVector position = new PVector(100, 100);
  PVector velocity = new PVector(5, 3);

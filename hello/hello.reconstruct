@@ -1,5 +1,5 @@
  //
- // hello.pde
+ // hello
  //
  void setup() {
      size(400, 400);

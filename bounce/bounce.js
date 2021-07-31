@@ -1,5 +1,5 @@
  //
- // bounce.pde
+ // bounce
  //
  let x = 100;
  let y = 100;

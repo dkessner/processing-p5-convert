@@ -1,5 +1,5 @@
  //
- // explode.pde
+ // explode
  //
  let explosionCount = 17;
  let explosion = new Array(explosionCount);

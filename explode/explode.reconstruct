@@ -1,5 +1,5 @@
  //
- // explode.pde
+ // explode
  //
  final int explosionCount = 17;
  PImage[] explosion = new PImage[explosionCount];

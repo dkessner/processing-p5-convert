@@ -1,5 +1,5 @@
  //
- // grid.pde
+ // grid
  //
  private final int n = 0x29a;
  int[] dummy = {

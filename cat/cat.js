@@ -1,5 +1,5 @@
  //
- // cat.pde
+ // cat
  //
  let cat;
  let mouse;

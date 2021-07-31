@@ -1,5 +1,5 @@
  //
- // grid.pde
+ // grid
  //
  let n = 0x29a;
  let dummy = [1, 2, 3, 4];

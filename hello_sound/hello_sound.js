@@ -1,5 +1,5 @@
  //
- // hello_sound.pde
+ // hello_sound
  //
  // [processing-p5-convert] import processing.sound.*;
  let meow;

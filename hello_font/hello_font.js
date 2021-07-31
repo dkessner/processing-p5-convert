@@ -1,5 +1,5 @@
  //
- // hello_font.pde
+ // hello_font
  //
  let sudegnak;
  let courier;
