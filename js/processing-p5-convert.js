@@ -26,10 +26,10 @@ export {
 };
 
 import { parse } from 'java-parser';
-
-import js from 'js-beautify';
-const beautify = js['js'];
-
+//import prettier from 'prettier';
+import prettier from "prettier/standalone.js";
+import parserBabel from 'prettier/parser-babel.js';
+import parserJava from 'prettier-plugin-java';
 
 // recursion implementation
 
@@ -39,7 +39,6 @@ function visitChildren(node, level, doSomething, options, context, data)
         for (const index in node.leadingComments)
             visitNodesRecursive(node.leadingComments[index], level, doSomething, 
                 options, {...context, isComment:true}, data);
-//            data.code += node.leadingComments[index].image + "\n";
 
     for (const nodeName in node.children)
     {
@@ -55,7 +54,6 @@ function visitChildren(node, level, doSomething, options, context, data)
         for (const index in node.trailingComments)
             visitNodesRecursive(node.trailingComments[index], level, doSomething, 
                 options, {...context, isComment:true}, data);
-            //data.code += node.trailingComments[index].image + "\n";
 }
 
 function visitNodesRecursive(node, level, doSomething, options, context, data)
@@ -909,14 +907,13 @@ function cstExtractCode(cst, options)
     if (options.ignoreOuterClass) 
         result.code = result.code.trim().slice(1,-1); // remove braces
 
-    let output = beautify(result.code);
-
     if (options.transform === true && 
         !context.noHeader && 
         result.arrayListReference === true)
-        output = arrayListDeclaration + output;
+        result.code = arrayListDeclaration + result.code;
 
-    return output;
+    return result.code;
+
 }
 
 
@@ -1017,7 +1014,15 @@ function transformProcessing(code)
         ignoreOuterClass: true
     };
 
-    return cstExtractCode(cst, options);
+    let output = cstExtractCode(cst, options);
+    let formatOptions = {
+        parser: "babel", 
+        tabWidth: 4,
+        plugins: [parserBabel]
+    };
+    output = prettier.format(output, formatOptions);
+
+    return output;
 }
 
 
@@ -1032,6 +1037,21 @@ function reconstructProcessing(code)
     };
 
     let output = cstExtractCode(cst, options);
+    let formatOptions = {
+        parser: "java", 
+        plugins: [parserJava],
+        tabWidth: 4, 
+        entrypoint: "classBody"
+    };
+
+    // TODO: merge the 2 wrapper hacks
+    const dummyPrefix = "{";
+    const dummySuffix = "}";
+    output = dummyPrefix + output + dummySuffix;
+    output = prettier.format(output, formatOptions);
+    output = output.slice(dummyPrefix.length, -dummySuffix.length);
+    output = output.replace(/^\s*/g, "");
+    output = output.replace(/\n    /g, "\n");
     
     return unpreprocessProcessing(output);
 }
