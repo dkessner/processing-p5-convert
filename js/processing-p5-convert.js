@@ -422,7 +422,7 @@ function extractCodeVisitor_variableDeclaratorList(node, level, options, context
     if (options.transform === true &&
         context.classDeclaration === true)
     {
-        temp.code = temp.code.replace(",", ";");
+        temp.code = temp.code.replace(/,/g, ";");
     }
 
     result.code += temp.code;

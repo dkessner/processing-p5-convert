@@ -74,6 +74,8 @@ void keyPressed() {
 
 public class Dummy {
 
+    int w, x, y, z;
+
     public Dummy() {} // public is optional/unnecessary in Processing
 
     public Dummy(int x) {} // multiple constructors not ok in Javascript
