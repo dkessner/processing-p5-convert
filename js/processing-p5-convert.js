@@ -540,9 +540,25 @@ function extractCodeVisitor_classDeclaration(node, level, options, context, resu
 
 function extractCodeVisitor_constructorDeclaration(node, level, options, context, result)
 {
-    visitChildren(node, level+1, extractCodeVisitor, 
-        options, {...context, constructorDeclaration:true}, result);
-    return false;
+    if (options.transform === true && context.hasConstructor === true)
+    {
+        // transform: comment out multiple constructors 
+
+        let temp = {code:""};
+
+        visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, constructorDeclaration:true}, temp);
+
+        result.code += "/*" + temp.code + "*/";
+        return false;
+    }
+    else
+    {
+        visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, constructorDeclaration:true}, result);
+        context.hasConstructor = true;
+        return false;
+    }
 }
 
 function extractCodeVisitor_methodBody(node, level, options, context, result)

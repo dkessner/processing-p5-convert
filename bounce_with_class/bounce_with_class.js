@@ -82,6 +82,8 @@ function keyPressed() {
     }
 }
 class Dummy {
+    constructor() {} // public is optional/unnecessary in Processing
+    /*constructor( x ) { } */ // multiple constructors not ok in Javascript
     hello() {
         console.log("Hello, world!");
     }

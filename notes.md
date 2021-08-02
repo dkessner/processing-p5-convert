@@ -25,8 +25,6 @@
 
 - ternary operator
 
-- comment out multiple constructors
-
 - on-the-fly conversion with preload() is inconsistent:
     - two button presses works in processing-p5-convert local, but not hosted
     - does not work currently with ProcessingExamples/explode

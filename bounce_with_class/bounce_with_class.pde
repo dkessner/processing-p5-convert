@@ -9,7 +9,7 @@ class Ball
     float vx = 0, vy = 0;
     int c;
 
-    public Ball(float x, float y)
+    Ball(float x, float y)
     {
         this.x = x;
         this.y = y;
@@ -34,8 +34,7 @@ class Ball
             vx *= -1;
 
         if (y < 50 || y > height-50)
-            vy *= -1;
-    }
+            vy *= -1; }
 
     int test(int x)
     {
@@ -103,6 +102,10 @@ void keyPressed()
 
 public class Dummy
 {
+    public Dummy() {} // public is optional/unnecessary in Processing
+
+    public Dummy(int x) {} // multiple constructors not ok in Javascript
+
     public void hello() 
     {
         println("Hello, world!");

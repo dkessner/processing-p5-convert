@@ -14,6 +14,8 @@ Transformations:
     - `int methodName()` -> `methodName()`
     - `x` -> `this.x`  (add `this.` prefix to unprefixed member references and
       method calls that are not local variables)
+    - ignore field, method, and class modifiers (e.g. public)
+    - comment out constructor declarations after the first
 - `for-each` loop -> `for-of` loop
 - simple `ArrayList` implementation in Javascript (wrapper over Array)
     
