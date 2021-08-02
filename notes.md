@@ -21,8 +21,6 @@
 
 ## todo
 
-- fix: argument list , -> ; 
-
 - ternary operator
 
 - on-the-fly conversion with preload() is inconsistent:
