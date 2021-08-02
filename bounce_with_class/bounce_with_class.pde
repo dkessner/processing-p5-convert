@@ -104,6 +104,8 @@ public class Dummy
 {
     int w, x, y, z;
 
+    int c = color(255, 0, 0);
+
     public Dummy() {} // public is optional/unnecessary in Processing
 
     public Dummy(int x) {} // multiple constructors not ok in Javascript
@@ -111,6 +113,7 @@ public class Dummy
     public void hello() 
     {
         println("Hello, world!");
+        int c = color(255, 0, 0);
     }
 }
 

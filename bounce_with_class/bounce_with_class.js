@@ -86,10 +86,12 @@ class Dummy {
     x;
     y;
     z;
+    c = color(255, 0, 0);
     constructor() {} // public is optional/unnecessary in Processing
     /*constructor( x ) { } */ // multiple constructors not ok in Javascript
     hello() {
         console.log("Hello, world!");
+        let c = color(255, 0, 0);
     }
 }
 

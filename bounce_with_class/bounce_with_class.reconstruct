@@ -75,6 +75,7 @@ void keyPressed() {
 public class Dummy {
 
     int w, x, y, z;
+    int c = color(255, 0, 0);
 
     public Dummy() {} // public is optional/unnecessary in Processing
 
@@ -82,6 +83,7 @@ public class Dummy {
 
     public void hello() {
         println("Hello, world!");
+        int c = color(255, 0, 0);
     }
 }
 

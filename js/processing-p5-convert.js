@@ -305,7 +305,7 @@ function extractCodeVisitor_image(node, level, options, context, result)
                 context.fqnOrRefTypePartRest !== true)
             {
                 result.code += "this." + node.image + " ";
-                return;
+                return false;
             }
         }
 
@@ -315,7 +315,19 @@ function extractCodeVisitor_image(node, level, options, context, result)
             node.image === ":")
         {
             result.code += "of ";  
-            return;
+            return false;
+        }
+
+        // transform variable declarator list inside class:
+        //   int a, b, c; ->  a; b; c;
+
+        else if (context.classDeclaration === true &&
+                 context.variableDeclaratorList === true &&
+                 context.variableDeclarator !== true &&
+                 node.image == ",")
+        {
+            result.code += ";";
+            return false;
         }
     }
 
@@ -414,19 +426,15 @@ function extractCodeVisitor_argumentList(node, level, options, context, result)
 
 function extractCodeVisitor_variableDeclaratorList(node, level, options, context, result)
 {
-    let temp = {code:""};
-
     visitChildrenInterleaved(node, "", "variableDeclarator", "Comma",
-                             level+1, options, context, temp); 
+                             level+1, options, {...context, variableDeclaratorList:true}, result); 
+    return false;
+}
 
-    if (options.transform === true &&
-        context.classDeclaration === true)
-    {
-        temp.code = temp.code.replace(/,/g, ";");
-    }
-
-    result.code += temp.code;
-
+function extractCodeVisitor_variableDeclarator(node, level, options, context, result)
+{
+    visitChildren(node, level+1, extractCodeVisitor, 
+        options, {...context, variableDeclarator:true}, result);
     return false;
 }
 
@@ -863,6 +871,7 @@ const extractCodeVisitor_specialHandlers = {
     fqnOrRefTypePartRest: extractCodeVisitor_fqnOrRefTypePartRest,
     argumentList: extractCodeVisitor_argumentList,
     variableDeclaratorList: extractCodeVisitor_variableDeclaratorList,
+    variableDeclarator: extractCodeVisitor_variableDeclarator,
     variableInitializerList: extractCodeVisitor_variableInitializerList,
     result: extractCodeVisitor_result,
     binaryExpression: extractCodeVisitor_binaryExpression,

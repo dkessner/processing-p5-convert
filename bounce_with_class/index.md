@@ -9,7 +9,7 @@
 Transformations:
 - class
     - member field declarations: `int x;` -> `x;`
-        - multiple declarators: `int x, y;` -> `x;  y;`
+        - multiple variable declarators: `int x, y;` -> `x;  y;`
     - `ClassName()` -> `constructor()`
     - `int methodName()` -> `methodName()`
     - `x` -> `this.x`  (add `this.` prefix to unprefixed member references and
