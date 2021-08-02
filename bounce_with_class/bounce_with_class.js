@@ -48,6 +48,9 @@ class Ball {
         this.x = 2;
         this.y = 3;
         this.y = 4;
+        let position = new p5.Vector();
+        position.x = 5;
+        position.y = 6;
         return 0;
     }
 }

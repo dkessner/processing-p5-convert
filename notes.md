@@ -21,11 +21,7 @@
 
 ## todo
 
-- fix: v.x -> v.this.x in member function
-
 - fix: argument list , -> ; 
-
-- fix: possible problem with local variable declaration inside methods (dandelin?)
 
 - ternary operator
 

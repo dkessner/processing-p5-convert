@@ -300,7 +300,8 @@ function extractCodeVisitor_image(node, level, options, context, result)
             let member = context.fieldNames.includes(node.image) ||
                          context.methodNames.includes(node.image);
 
-            if (member === true && local === false)
+            if (member === true && local === false &&
+                context.fqnOrRefTypePartRest !== true)
             {
                 result.code += "this." + node.image + " ";
                 return;
@@ -329,6 +330,13 @@ function extractCodeVisitor_image(node, level, options, context, result)
     return true;
 }
 
+function extractCodeVisitor_fqnOrRefTypePartRest(node, level, options, context, result)
+{
+    visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, fqnOrRefTypePartRest:true}, result);
+
+    return false;
+}
 
 function extractCodeVisitor_fqnOrRefType(node, level, options, context, result)
 {
@@ -476,6 +484,14 @@ function extractCodeVisitor_fieldDeclaration(node, level, options, context, resu
     return false;
 }
 
+function extractCodeVisitor_localVariableDeclaration(node, level, options, context, result)
+{
+    visitChildren(node, level+1, extractCodeVisitor, 
+            options, {...context, localVariableDeclaration:true}, result);
+
+    return false;
+}
+
 function extractCodeVisitor_fieldModifier(node, level, options, context, result)
 {
     if (options.transform === true)
@@ -495,7 +511,9 @@ function extractCodeVisitor_unannType(node, level, options, context, result)
         // - global: int/float/... -> let
         // - class:  int/float/... -> ""
 
-        if (context.classDeclaration !== true && context.formalParameterList !== true)
+        if ((context.classDeclaration !== true && 
+             context.formalParameterList !== true) ||
+            context.localVariableDeclaration === true)
             result.code += "let ";
 
         return false;
@@ -825,6 +843,7 @@ function extractCodeVisitor_floatingPointLiteral(node, level, options, context, 
 
 const extractCodeVisitor_specialHandlers = {
     fqnOrRefType: extractCodeVisitor_fqnOrRefType,
+    fqnOrRefTypePartRest: extractCodeVisitor_fqnOrRefTypePartRest,
     argumentList: extractCodeVisitor_argumentList,
     variableDeclaratorList: extractCodeVisitor_variableDeclaratorList,
     variableInitializerList: extractCodeVisitor_variableInitializerList,
@@ -834,6 +853,7 @@ const extractCodeVisitor_specialHandlers = {
     ifStatement: extractCodeVisitor_ifStatement,
     enhancedForStatement: extractCodeVisitor_enhancedForStatement,
     fieldDeclaration: extractCodeVisitor_fieldDeclaration,
+    localVariableDeclaration: extractCodeVisitor_localVariableDeclaration,
     fieldModifier: extractCodeVisitor_fieldModifier,
     variableModifier: extractCodeVisitor_fieldModifier, // same as fieldModifier
     classModifier: extractCodeVisitor_fieldModifier, // same as fieldModifier

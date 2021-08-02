@@ -33,6 +33,9 @@ class Ball {
         this.x = 2;
         y = 3;
         this.y = 4;
+        PVector position = new PVector();
+        position.x = 5;
+        position.y = 6;
         return 0;
     }
 }
