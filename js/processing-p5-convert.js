@@ -35,11 +35,6 @@ import parserJava from 'prettier-plugin-java';
 
 function visitChildren(node, level, doSomething, options, context, data)
 {
-    if ("leadingComments" in node)
-        for (const index in node.leadingComments)
-            visitNodesRecursive(node.leadingComments[index], level, doSomething, 
-                options, {...context, isComment:true}, data);
-
     for (const nodeName in node.children)
     {
         const childArray = node.children[nodeName];
@@ -50,18 +45,24 @@ function visitChildren(node, level, doSomething, options, context, data)
         }
     }
 
-    if ("trailingComments" in node)
-        for (const index in node.trailingComments)
-            visitNodesRecursive(node.trailingComments[index], level, doSomething, 
-                options, {...context, isComment:true}, data);
 }
 
 function visitNodesRecursive(node, level, doSomething, options, context, data)
 {
+    if ("leadingComments" in node)
+        for (const index in node.leadingComments)
+            visitNodesRecursive(node.leadingComments[index], level, doSomething, 
+                options, {...context, isComment:true}, data);
+
     const shouldRecurse = doSomething(node, level, options, context, data);
 
     if (shouldRecurse)
         visitChildren(node, level+1, doSomething, options, context, data);
+
+    if ("trailingComments" in node)
+        for (const index in node.trailingComments)
+            visitNodesRecursive(node.trailingComments[index], level, doSomething, 
+                options, {...context, isComment:true}, data);
 }
 
 
@@ -855,9 +856,10 @@ const extractCodeVisitor_specialHandlers = {
     fieldDeclaration: extractCodeVisitor_fieldDeclaration,
     localVariableDeclaration: extractCodeVisitor_localVariableDeclaration,
     fieldModifier: extractCodeVisitor_fieldModifier,
-    variableModifier: extractCodeVisitor_fieldModifier, // same as fieldModifier
-    classModifier: extractCodeVisitor_fieldModifier, // same as fieldModifier
-    methodModifier: extractCodeVisitor_fieldModifier, // same as fieldModifier
+    variableModifier: extractCodeVisitor_fieldModifier,     // same as fieldModifier
+    classModifier: extractCodeVisitor_fieldModifier,        // same as fieldModifier
+    methodModifier: extractCodeVisitor_fieldModifier,       // same as fieldModifier
+    constructorModifier: extractCodeVisitor_fieldModifier,  // same as fieldModifier
     unannType: extractCodeVisitor_unannType,
     classDeclaration: extractCodeVisitor_classDeclaration,
     constructorDeclaration: extractCodeVisitor_constructorDeclaration,
@@ -1035,12 +1037,23 @@ function transformProcessing(code)
     };
 
     let output = cstExtractCode(cst, options);
+
     let formatOptions = {
         parser: "babel", 
         tabWidth: 4,
         plugins: [parserBabel]
     };
-    output = prettier.format(output, formatOptions);
+
+    try {
+        output = prettier.format(output, formatOptions);
+    }
+    catch (e) 
+    {
+        console.log("[processing-p5-convert] Error during code formatting.");
+        console.log(e.stack);
+        console.log("---");
+        console.log("Returning unformatted code.");
+    }
 
     return output;
 }

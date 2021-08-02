@@ -9,7 +9,7 @@ class Ball
     float vx = 0, vy = 0;
     int c;
 
-    Ball(float x, float y)
+    public Ball(float x, float y)
     {
         this.x = x;
         this.y = y;
