@@ -40,15 +40,15 @@ function handleConvertButton()
     //
     // This seems to work: 
     //  - remove existing p5 canvas
-    //  - call "new p5();"
     //  - run user p5.js sketch
+    //  - call "new p5();"
 
     let canvas = document.getElementById("defaultCanvas0");
     if (canvas) canvas.remove();
 
-    new p5();
-
     window.eval(codeOutput);
+
+    new p5();
 }
 
 
