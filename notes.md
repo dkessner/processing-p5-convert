@@ -31,8 +31,6 @@
 
 ## todo
 
-- ternary operator
-
 - Java PApplet handling
 
 - static fields/methods

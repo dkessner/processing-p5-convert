@@ -475,6 +475,35 @@ function extractCodeVisitor_binaryExpression(node, level, options, context, resu
     return true;
 }
 
+function extractCodeVisitor_ternaryExpression(node, level, options, context, result)
+{
+    if ("QuestionMark" in node.children)
+    {
+        // handle ternary operator ( a ? b : c )
+
+        const ok = "binaryExpression" in node.children &&
+                   "Colon" in node.children &&
+                   "expression" in node.children &&
+                   node.children.expression.length === 2;
+
+        if (!ok)
+        {
+            console.log("[processing-p5-convert] handle_ternaryExpression not ok");
+            return true;
+        }
+
+        visitNodesRecursive(node.children.binaryExpression[0], level+1, extractCodeVisitor, options, context, result);
+        visitNodesRecursive(node.children.QuestionMark[0], level+1, extractCodeVisitor, options, context, result);
+        visitNodesRecursive(node.children.expression[0], level+1, extractCodeVisitor, options, context, result);
+        visitNodesRecursive(node.children.Colon[0], level+1, extractCodeVisitor, options, context, result);
+        visitNodesRecursive(node.children.expression[1], level+1, extractCodeVisitor, options, context, result);
+
+        return false;
+    }
+
+    return true;
+}
+
 function extractCodeVisitor_enhancedForStatement(node, level, options, context, result)
 {
     visitChildren(node, level+1, extractCodeVisitor, 
@@ -875,6 +904,7 @@ const extractCodeVisitor_specialHandlers = {
     variableInitializerList: extractCodeVisitor_variableInitializerList,
     result: extractCodeVisitor_result,
     binaryExpression: extractCodeVisitor_binaryExpression,
+    ternaryExpression: extractCodeVisitor_ternaryExpression,
     basicForStatement: extractCodeVisitor_basicForStatement,
     ifStatement: extractCodeVisitor_ifStatement,
     enhancedForStatement: extractCodeVisitor_enhancedForStatement,

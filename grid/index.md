@@ -19,8 +19,8 @@ Transformations:
       `let values = Array.from(new Array(3), () => new Array(4));` 
     - `for/for-each` loops work as expected with 2D arrays
 
-This example also demonstrates that `while`, `do/while`, `switch` work
-unchanged.
+This example also demonstrates that `while`, `do/while`, `switch`, and the
+ternary operator `a ? b : c` work unchanged.
 
 <br>
 

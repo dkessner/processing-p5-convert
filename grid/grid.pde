@@ -3,7 +3,6 @@
 //
 
 
-
 private final int n = 0x29a;
 
 int[] dummy = {1, 2, 3, 4};
@@ -97,9 +96,9 @@ void draw()
     {
         for (int j=0; j<4; j++)
         {
-            fill( (i+j)%2 * 255 );
+            fill( (i+j)%2==1 ? 255 : 0);
             rect(j*100, i*100, 100, 100);
-            fill( (i+j+1)%2 * 255 );
+            fill( (i+j)%2==0 ? 255 : 0);
             text(numbers[i][j], j*100+50, i*100+50);
         }
     }

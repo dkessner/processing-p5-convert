@@ -62,9 +62,9 @@ function draw() {
     textAlign(CENTER, CENTER);
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
-            fill(((i + j) % 2) * 255);
+            fill((i + j) % 2 == 1 ? 255 : 0);
             rect(j * 100, i * 100, 100, 100);
-            fill(((i + j + 1) % 2) * 255);
+            fill((i + j) % 2 == 0 ? 255 : 0);
             text(numbers[i][j], j * 100 + 50, i * 100 + 50);
         }
     }
