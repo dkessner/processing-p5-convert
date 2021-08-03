@@ -11,9 +11,12 @@
 - Processing resets to imageMode(CORNER) at beginning of draw(); p5.js does
   not.
 
-- Classes may have multiple constructors in Processing/Java, but not
-  p5.js/Javascript.  processing-p5-convert comments out all constructor
-  declarations after the first.
+- Classes may have multiple constructors in Java, but not Javascript.
+  processing-p5-convert comments out all constructor declarations after the
+  first.
+
+- Class member variables are automatically initialized to 0 in Java
+  but not in Javascript.
 
 - p5.js does not permit calling API functions before initialization (e.g.
   sqrt).  Recommendation: put all initialization in setup(), rather than in
