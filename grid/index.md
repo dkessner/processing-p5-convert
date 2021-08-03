@@ -11,6 +11,7 @@ Transformations:
 - `push/popMatrix()` -> `push/pop()`
 - remove casts: `(float) x` -> `x`
 - remove field modifiers `private final` -> ``
+- remove float literal suffix `1.0f` -> `1.0`
 - array initialization 
     - literals `{1, 2, 3, 4}` -> `[1, 2, 3, 4]`
     - 1D: `int[] values = new int[3]` -> `let values = new Array(3)` 
