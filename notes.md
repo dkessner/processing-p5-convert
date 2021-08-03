@@ -15,17 +15,19 @@
   p5.js/Javascript.  processing-p5-convert comments out all constructor
   declarations after the first.
 
+- p5.js does not permit calling API functions before initialization (e.g.
+  sqrt).  Recommendation: put all initialization in setup(), rather than in
+  global scope.
+
+- conversion of Processing sketches that load significant resources:
+    - processing-p5-convert moves `load*()` calls to `preload()`.  p5.js waits
+      until these load calls complete before calling `setup()`.
+    - this works for conversion of .pde files to .js on the command line
+    - this is inconsistent for loading/conversion of .pde files from webpage
+        - sometimes works on 2nd try?  
+<br/>  
 - Processing allows the user to override API functions (e.g. ellipse, hue,
   ...).  This causes problems (inconsistently) with p5.js.  
-
-- p5.js does not permit calling API functions before initialization (e.g.
-  sqrt).  Recommendation: put all initialization in setup().
-
-- on-the-fly conversion with preload() is inconsistent:
-    - issue with preloading multiple images (explode example)
-    - conversion works on 2nd try?
-    - workaround for now for examples with significant preload(): convert .pde
-      to .js file ahead of time via command line, load js as normal p5 sketch
 
 ## todo
 
