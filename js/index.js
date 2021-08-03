@@ -36,23 +36,19 @@ function handleConvertButton()
 
     // run the p5.js code
 
-    window.eval(codeOutput);
-
-    // p5.js does some magic to make sure preload() completes -- this
-    // doesn't quite work:
+    // p5.js does some magic to make sure preload() completes
     //
-    // if (typeof preload === 'function') preload();
-    // setup();
-
-    // This seems to work better: 
+    // This seems to work: 
     //  - remove existing p5 canvas
-    //  - (re)define preload/setup/draw
     //  - call "new p5();"
+    //  - run user p5.js sketch
 
     let canvas = document.getElementById("defaultCanvas0");
     if (canvas) canvas.remove();
 
     new p5();
+
+    window.eval(codeOutput);
 }
 
 
