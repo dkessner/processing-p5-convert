@@ -33,7 +33,7 @@
 
 - Java PApplet handling
 
-- static fields/methods
+- static methods (Java only?)
 
 - investigate: On-demand global new p5() at top of converted code, to allow
   p5.js functions to be called outside setup()
