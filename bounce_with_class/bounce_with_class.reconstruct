@@ -6,6 +6,7 @@ class Ball {
     float x, y;
     float vx = 0, vy = 0;
     int c;
+    static final int radius = 50; //static int getRadius() {return radius;} // not valid Processing
 
     Ball(float x, float y) {
         this.x = x;
@@ -17,15 +18,15 @@ class Ball {
 
     void display() {
         fill(c);
-        ellipse(x, y, 100, 100);
+        ellipse(x, y, radius * 2, radius * 2);
         update();
     }
 
     void update() {
         x += vx;
         y += vy;
-        if (x < 50 || x > width - 50) vx *= -1;
-        if (y < 50 || y > height - 50) vy *= -1;
+        if (x < radius || x > width - radius) vx *= -1;
+        if (y < radius || y > height - radius) vy *= -1;
     }
 
     int test(int x) {
@@ -45,6 +46,7 @@ ArrayList<Ball> balls;
 
 void setup() {
     size(400, 400);
+    println("Ball.radius: " + Ball.radius); //println("Ball.getRadius(): " + Ball.getRadius());
     ball = new Ball(width / 2, height / 2);
     balls = new ArrayList<Ball>();
     for (int i = 0; i < 5; i++) createBall();

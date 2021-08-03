@@ -86,16 +86,23 @@ function printRawProcessing(code)
     cstPrintRaw(cst);
 }
 
-// member name extraction
+// name extraction from a class
 
-function cstExtractMemberNamesVisitor(node, level, options, context, result) 
+function cstExtractClassNamesVisitor(node, level, options, context, result) 
 {
     if ("image" in node)
     {
+        if (context.typeIdentifier === true)
+        {
+            result.className = node.image;
+        }
         if (context.fieldDeclaration === true &&
             context.variableDeclaratorId === true)
         {
-            result.fieldNames.push(node.image);
+            if (context.isStatic === true)
+                result.staticFieldNames.push(node.image);
+            else
+                result.fieldNames.push(node.image);
         }
         else if (context.methodDeclaration === true &&
                  context.methodDeclarator === true)
@@ -103,33 +110,56 @@ function cstExtractMemberNamesVisitor(node, level, options, context, result)
             if (node.tokenType.name === "Identifier")
                 result.methodNames.push(node.image);
         }
+        else if (context.fieldModifier === true)
+        {
+            if (node.image === "static")
+                context.isStatic = true;
+        }
     }
 
     if (!("name" in node)) return true;
 
-    if (node.name === "fieldDeclaration")
+    if (node.name === "typeIdentifier")
     {
-        visitChildren(node, level+1, cstExtractMemberNamesVisitor, 
+        visitChildren(node, level+1, cstExtractClassNamesVisitor, 
+            options, {...context, typeIdentifier:true}, result);
+        return false;
+    }
+    else if (node.name === "fieldDeclaration")
+    {
+        visitChildren(node, level+1, cstExtractClassNamesVisitor, 
             options, {...context, fieldDeclaration:true}, result);
+        return false;
+    }
+    else if (node.name === "fieldModifier")
+    {
+        let newContext = {...context, fieldModifier:true};
+
+        visitChildren(node, level+1, cstExtractClassNamesVisitor, 
+            options, newContext, result);
+
+        if (newContext.isStatic === true)
+            context.isStatic = true;
+
         return false;
     }
     else if (node.name === "variableDeclaratorId" && 
              context.fieldDeclaration === true)
     {
-        visitChildren(node, level+1, cstExtractMemberNamesVisitor, 
+        visitChildren(node, level+1, cstExtractClassNamesVisitor, 
             options, {...context, variableDeclaratorId:true}, result);
         return false;
     }
     else if (node.name === "methodDeclaration")
     {
-        visitChildren(node, level+1, cstExtractMemberNamesVisitor, 
+        visitChildren(node, level+1, cstExtractClassNamesVisitor, 
             options, {...context, methodDeclaration:true}, result);
         return false;
     }
     else if (node.name === "methodDeclarator" && 
              context.methodDeclaration === true)
     {
-        visitChildren(node, level+1, cstExtractMemberNamesVisitor, 
+        visitChildren(node, level+1, cstExtractClassNamesVisitor, 
             options, {...context, methodDeclarator:true}, result);
         return false;
     }
@@ -141,15 +171,17 @@ function cstExtractMemberNamesVisitor(node, level, options, context, result)
     return true;
 }
 
-function cstExtractMemberNames(cst)
+function cstExtractClassNames(cst)
 {
     let result = 
     {
+        className: "Unknown",
         fieldNames: [],
+        staticFieldNames: [],
         methodNames: []
     };
 
-    visitNodesRecursive(cst, 0, cstExtractMemberNamesVisitor, 
+    visitNodesRecursive(cst, 0, cstExtractClassNamesVisitor, 
         null, {}, result);
 
     return result;
@@ -297,15 +329,26 @@ function extractCodeVisitor_image(node, level, options, context, result)
         if (context.methodBody === true && context.primaryPrefix === true &&
             "fieldNames" in context && "methodNames" in context)
         {
-            let local = "parameterNames" in context && context.parameterNames.includes(node.image);
-            let member = context.fieldNames.includes(node.image) ||
+            let isLocal = "parameterNames" in context && context.parameterNames.includes(node.image);
+
+            let isMember = context.fieldNames.includes(node.image) ||
                          context.methodNames.includes(node.image);
 
-            if (member === true && local === false &&
+            let isStatic = context.staticFieldNames.includes(node.image);
+
+            if (isLocal === false &&
                 context.fqnOrRefTypePartRest !== true)
             {
-                result.code += "this." + node.image + " ";
-                return false;
+                if (isMember === true)
+                {
+                    result.code += "this." + node.image + " ";
+                    return false;
+                }
+                else if (isStatic === true)
+                {
+                    result.code += context.className + "." + node.image + " ";
+                    return false;
+                }
             }
         }
 
@@ -534,7 +577,16 @@ function extractCodeVisitor_fieldModifier(node, level, options, context, result)
 {
     if (options.transform === true)
     {
-        // transform: remove any field modifiers (e.g. public, final)
+        // transform: remove any field modifiers (e.g. public, final) except
+        // static
+
+        let temp = {code:""};
+        visitChildren(node, level+1, extractCodeVisitor, options, options, temp);
+        let modifier = temp.code.trim();
+        
+        if (modifier === "static")
+            result.code += temp.code;
+
         return false;
     }
 
@@ -562,11 +614,14 @@ function extractCodeVisitor_unannType(node, level, options, context, result)
 
 function extractCodeVisitor_classDeclaration(node, level, options, context, result)
 {
-    let {fieldNames, methodNames} = cstExtractMemberNames(node);
+    let {className, fieldNames, staticFieldNames, methodNames} = 
+        cstExtractClassNames(node);
 
     let newContext = {
         ...context, 
+        className,
         fieldNames,
+        staticFieldNames,
         methodNames,
         classDeclaration: true,
     };

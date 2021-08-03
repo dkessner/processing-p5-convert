@@ -25,6 +25,7 @@ class Ball {
     vx = 0;
     vy = 0;
     c;
+    static radius = 50; //static int getRadius() {return radius;} // not valid Processing
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -34,14 +35,15 @@ class Ball {
     }
     display() {
         fill(this.c);
-        ellipse(this.x, this.y, 100, 100);
+        ellipse(this.x, this.y, Ball.radius * 2, Ball.radius * 2);
         this.update();
     }
     update() {
         this.x += this.vx;
         this.y += this.vy;
-        if (this.x < 50 || this.x > width - 50) this.vx *= -1;
-        if (this.y < 50 || this.y > height - 50) this.vy *= -1;
+        if (this.x < Ball.radius || this.x > width - Ball.radius) this.vx *= -1;
+        if (this.y < Ball.radius || this.y > height - Ball.radius)
+            this.vy *= -1;
     }
     test(x) {
         x = 1;
@@ -58,6 +60,7 @@ let ball;
 let balls;
 function setup() {
     createCanvas(400, 400);
+    console.log("Ball.radius: " + Ball.radius); //println("Ball.getRadius(): " + Ball.getRadius());
     ball = new Ball(width / 2, height / 2);
     balls = new ArrayList();
     for (let i = 0; i < 5; i++) createBall();
