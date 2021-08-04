@@ -3,13 +3,15 @@ title: Dandelin Spheres
 layout: default 
 ---
 
+The code for this demo is written in Processing.  This demonstrates live
+loading, conversion, and running of a sketch with multiple .pde files.
+
+<hr/>
 
 This is an interactive demo of [Dandelin
 spheres](https://en.wikipedia.org/wiki/Dandelin_spheres), showing that the
 cross section of a cone sliced by a plane is an ellipse.  Scroll down for a
 mathematical explanation of the demo.
-
-## Interact with the graph!
 
 Click on graph to activate keyboard control.
 
@@ -25,9 +27,9 @@ Click on graph to activate keyboard control.
                                  DandelinSpheres.pde"></canvas>
                                  -->
 
-<script src="/p5/p5.min.js"></script>
-<script src="/js/processing-p5-convert-bundle.js"></script>
-<script src="/js/processing-p5-convert-bootstrap.js"></script>
+<script src="{{ site.baseurl }}/p5/p5.min.js"></script>
+<script src="{{ site.baseurl }}/js/processing-p5-convert-bundle.js"></script>
+<script src="{{ site.baseurl }}/js/processing-p5-convert-bootstrap.js"></script>
 
 <main id="ppconvert" src="dandelin.pde 
                           Cone.pde 
