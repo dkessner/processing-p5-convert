@@ -18,17 +18,6 @@ layout: default
 <script src="p5/p5.min.js"></script>
 <script src="p5/p5.sound.min.js"></script>
 
-<script>
-function setup(){}
-function draw(){}
-</script>
-
-<!--
-<script src="hello/hello.js"></script>
--->
-
-
-<!-- content -->
 
 # Processing input
 
