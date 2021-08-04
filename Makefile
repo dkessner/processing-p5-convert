@@ -9,9 +9,13 @@ js/processing-p5-convert-bundle.js: js/processing-p5-convert.js
 	browserify js/processing-p5-convert.js --standalone ppconvert -o js/processing-p5-convert-bundle.js
 
 node_modules: package.json
+	@echo updating node_modules
 	npm install
 
-tests: \
+test.message:
+	@echo running tests
+
+tests: test.message \
     hello.test hello.langtest \
     bounce.test bounce.langtest \
     grid.test grid.langtest \
@@ -22,12 +26,13 @@ tests: \
     explode.test explode.langtest \
     bounce_vectors.test bounce_vectors.langtest \
     hello_3d.test hello_3d.langtest
+	@echo tests passed
  
 minimal: js/processing-p5-convert-bundle.js js/processing-p5-convert-bootstrap.js
-	cp js/processing-p5-convert-bundle.js minimal
-	cp js/processing-p5-convert-bootstrap.js minimal
-	cp p5/p5.min.js minimal
-
+	@echo updating minimal example
+	@cp js/processing-p5-convert-bundle.js minimal
+	@cp js/processing-p5-convert-bootstrap.js minimal
+	@cp p5/p5.min.js minimal
 
 zipfilename = processing-p5-convert-minimal.zip
 
@@ -37,11 +42,13 @@ minimal/$(zipfilename): minimal
 	cd minimal && zip $(zipfilename) *
 
 %.test:
-	node js/ppconvert $*/*.pde | diff - $*/$*.js
+	@echo test: $*
+	@node js/ppconvert $*/*.pde | diff - $*/$*.js
 
 %.langtest:
-	node js/ppconvert --reconstruct $*/*.pde | diff - $*/$*.reconstruct
-	node js/ppconvert  $*/$*.reconstruct | diff - $*/$*.js
+	@echo langtest: $*
+	@node js/ppconvert --reconstruct $*/*.pde | diff - $*/$*.reconstruct
+	@node js/ppconvert  $*/$*.reconstruct | diff - $*/$*.js
 
 serve: node_modules js/processing-p5-convert-bundle.js minimal
 	bundle exec jekyll serve --baseurl=''
@@ -49,7 +56,7 @@ serve: node_modules js/processing-p5-convert-bundle.js minimal
 install-jekyll:
 	bundle install
 
-install-cli:
+install-cli: all
 	npm install -g .
 
 uninstall-cli:
@@ -57,12 +64,13 @@ uninstall-cli:
 
 clean:
 	rm -f js/processing-p5-convert-bundle.js*
-	rm -f minimal/$(zipfilename)
+	rm -f minimal/$(zipfilename) minimal/*.js
+	rm -rf node_modules
 
-.PHONY: tests %.test %.langtest \
+.PHONY: test.message tests %.test %.langtest \
 	serve update install \
 	install-cli uninstall-cli \
-	clean minimal zip
+	clean zip
 
 
 # $* stem of implicit rule match 
