@@ -39,11 +39,12 @@ function main()
 
     if (args.length === 0)
     {
-        console.log("Usage: ppconvert [option] filename1.pde [...]");
+        console.log("Usage: ppconvert [option] filename1.pde [filename2.pde ...]");
         console.log("Options:");
-        console.log("  --reconstruct: print reconstructed Processing code");
-        console.log("  --raw: print syntax tree");
-        console.log("  --outline: print outline");
+        console.log("  [none]       : output converted p5.js code");
+        console.log("  --reconstruct: output reconstructed Processing code");
+        console.log("  --raw        : output syntax tree");
+        console.log("  --outline    : output outline");
         return;
     }
 
