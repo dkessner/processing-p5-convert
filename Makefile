@@ -30,16 +30,16 @@ tests: test.message \
  
 minimal: js/processing-p5-convert-bundle.js js/processing-p5-convert-bootstrap.js
 	@echo updating minimal example
-	@cp js/processing-p5-convert-bundle.js minimal
-	@cp js/processing-p5-convert-bootstrap.js minimal
-	@cp p5/p5.min.js minimal
+	@cp js/processing-p5-convert-bundle.js minimal_example/minimal
+	@cp js/processing-p5-convert-bootstrap.js minimal_example/minimal
+	@cp p5/p5.min.js minimal_example/minimal
 
 zipfilename = processing-p5-convert-minimal.zip
 
-zip: minimal/$(zipfilename)
+zip: minimal_example/$(zipfilename)
 
-minimal/$(zipfilename): minimal
-	cd minimal && zip $(zipfilename) *
+minimal_example/$(zipfilename): minimal
+	cd minimal_example && zip $(zipfilename) -j minimal/*
 
 %.test:
 	@echo test: $*
@@ -64,7 +64,7 @@ uninstall-cli:
 
 clean:
 	rm -f js/processing-p5-convert-bundle.js*
-	rm -f minimal/$(zipfilename) minimal/*.js
+	rm -f minimal_example/$(zipfilename) minimal_example/minimal/*.js
 	rm -rf node_modules
 
 .PHONY: test.message tests %.test %.langtest \
