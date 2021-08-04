@@ -28,6 +28,14 @@ minimal: js/processing-p5-convert-bundle.js js/processing-p5-convert-bootstrap.j
 	cp js/processing-p5-convert-bootstrap.js minimal
 	cp p5/p5.min.js minimal
 
+
+zipfilename = processing-p5-convert-minimal.zip
+
+zip: minimal/$(zipfilename)
+
+minimal/$(zipfilename): minimal
+	cd minimal && zip $(zipfilename) *
+
 %.test:
 	node js/ppconvert $*/*.pde | diff - $*/$*.js
 
@@ -48,9 +56,13 @@ uninstall-cli:
 	npm uninstall -g ppconvert processing-p5-convert
 
 clean:
-	rm -f processing-p5-convert-bundle.js*
+	rm -f js/processing-p5-convert-bundle.js*
+	rm -f minimal/$(zipfilename)
 
-.PHONY: tests %.test %.langtest serve update install install-cli uninstall-cli clean minimal
+.PHONY: tests %.test %.langtest \
+	serve update install \
+	install-cli uninstall-cli \
+	clean minimal zip
 
 
 # $* stem of implicit rule match 

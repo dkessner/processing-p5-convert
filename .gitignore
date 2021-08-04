@@ -2,3 +2,4 @@ node_modules
 _site
 .jekyll-cache
 *.swp
+minimal/processing-p5-convert-minimal.zip
