@@ -18,6 +18,8 @@ cd processing-p5-convert
 make install-cli
 ```
 
+## Usage
+
 Type `ppconvert` with no arguments for usage:
 ```
 Usage: ppconvert [option] filename1.pde [filename2.pde ...]

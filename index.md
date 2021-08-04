@@ -32,14 +32,8 @@ layout: default
 
 <textarea id="processing-p5-convert-output"></textarea>
 
-<!--
-<iframe id="editor"
-    title="p5.js web editor embed"
-    width="1000"
-    height="600"
-    src="https://editor.p5js.org/">
-</iframe>
--->
+Please [report any issues](https://github.com/dkessner/processing-p5-convert/issues)
+that you find!
 
 <!-- initialization -->
 

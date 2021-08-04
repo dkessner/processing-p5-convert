@@ -1,5 +1,5 @@
 ---
-title: minimal_example
+title: Minimal_example
 layout: default 
 ---
 
@@ -7,7 +7,7 @@ layout: default
 <script src="{{ site.baseurl }}/js/processing-p5-convert-bundle.js"></script>
 <script src="{{ site.baseurl }}/js/processing-p5-convert-bootstrap.js"></script>
 
-# minimal example
+# Minimal example
 
 
 Try it yourself!

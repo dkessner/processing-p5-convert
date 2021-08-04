@@ -23,6 +23,12 @@ classes, for-each vs. for-of loops, Java ArrayList vs. Javascript array).
 Other source code transformations handle specific differences between the
 Processing and p5.js APIs.
 
+## Issues
+
+Please [report any issues](https://github.com/dkessner/processing-p5-convert/issues)
+that you find!
+
+
 ## Why?
 
 I use Processing to [teach computer science](https://dkessner.github.io/).

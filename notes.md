@@ -1,9 +1,9 @@
 ---
 ---
 
-# notes
+# Notes
 
-## known issues / pitfalls
+## Known issues / pitfalls
 
 - Processing origin is always upper-left corner of window.  p5.js 2D origin is
   upper-left corner, and 3D origin is center of screen.  
@@ -32,11 +32,9 @@
 - Processing allows the user to override API functions (e.g. ellipse, hue,
   ...).  This causes problems (inconsistently) with p5.js.  
 
-## todo
+## TODO
 
-- error handling/reporting in bootstrap
-
-- minimal live conversion sample
+- error handling/reporting in bootstrap and home page
 
 - Java PApplet handling
 
