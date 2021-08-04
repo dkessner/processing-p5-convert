@@ -34,7 +34,9 @@
 
 ## TODO
 
-- error handling/reporting in bootstrap and home page
+- error handling/reporting during conversion
+    * bootstrap 
+    * home page
 
 - Java PApplet handling
 
