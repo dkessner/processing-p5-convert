@@ -3,7 +3,7 @@
 #
 
 
-all: js/processing-p5-convert-bundle.js node_modules tests minimal
+all: node_modules js/processing-p5-convert-bundle.js minimal tests 
 
 js/processing-p5-convert-bundle.js: js/processing-p5-convert.js
 	browserify js/processing-p5-convert.js --standalone ppconvert -o js/processing-p5-convert-bundle.js
@@ -35,7 +35,7 @@ minimal: js/processing-p5-convert-bundle.js js/processing-p5-convert-bootstrap.j
 	node js/ppconvert --reconstruct $*/*.pde | diff - $*/$*.reconstruct
 	node js/ppconvert  $*/$*.reconstruct | diff - $*/$*.js
 
-serve:
+serve: node_modules js/processing-p5-convert-bundle.js minimal
 	bundle exec jekyll serve --baseurl=''
 
 install-jekyll:
