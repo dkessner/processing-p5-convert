@@ -3,19 +3,29 @@
 //
 
 
-let code;
+let codeArrays = [];
 
 
 function preload()
 {
-    let filename = document.getElementById("ppconvert").getAttribute("src");
-    code = loadStrings(filename);
+    let filenames = document.getElementById("ppconvert").getAttribute("src").split(/[\ \n\t]+/);
+
+    console.log("[processing-p5-convert-bootstrap] Reading .pde files:");
+
+    for (let filename of filenames)
+    {
+        console.log(" " + filename);
+        let temp =  loadStrings(filename);
+        codeArrays.push(temp);
+    }
 }
 
 
 function setup()
 {
-    code = code.join('\n');
+    const mergedArrays = [].concat.apply([], codeArrays);
+    
+    const code = mergedArrays.join('\n');
     console.log(code);
 
     const codeOutput = ppconvert.transformProcessing(code);

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="dandelin-spheres-demo---implementation-notes">Dandelin Spheres Demo - Implementation Notes</h1>
+<p>Dr. Darren Kessner<br />
+Marlborough School<br />
+December 2017</p>
+<h2 id="overview">Overview</h2>
+<p>Dandelin spheres are a way of demonstrating that the intersection of a cone with a plane is an ellipse. The spheres are arranged in such way that each is tangent to both the cone and the plane. In this arrangement, to point where either sphere is tangent to the plane is a focus of the ellipse. The following are some notes on the mathematics behind the implementation of this demo.</p>
+<h2 id="coordinate-system-and-parameters">Coordinate system and parameters</h2>
+<p>Before we do anything we need to define a 3D coordinate system for placing the various objects (cone, spheres, etc.). I chose to use a right-handed, y-up coordinate system: positive x-axis to the right, positive y-axis up, and positive z-axis coming out of the screen toward the viewer. In addition, I scale the scene so that the y-axis range is [-100, 100].</p>
+<p>This choice has a couple of important consequences:</p>
+<ol type="1">
+<li><p>The scaling means that we can think about the mathematical model without worrying about the resolution of the screen we're viewing it on.</p></li>
+<li><p>Flipping the y-axis means that positive rotations are measured counter-clockwise, which is is standard in mathematics textbooks and also consistent with many VR applications (e.g. Processing Android VR). However, it is important to note that by default Processing uses a left-handed coordinate system, so in the Processing documentation, positive rotation angles are measured clockwise.</p></li>
+</ol>
+<p>Now for some notation (see figure &quot;Coordinate system and parameters&quot;). The cone is centered at the origin, opening up in the direction of the positive y-axis. We denote the cone slant angle by <span class="math inline">\(\theta_c\)</span>. We parametrize the plane by its slant angle with the x-axis <span class="math inline">\(\theta_p\)</span> and its y-intercept <span class="math inline">\(y_c\)</span>. The spheres are centered on the y-axis; we let <span class="math inline">\(y_1\)</span> and <span class="math inline">\(y_2\)</span> be the y-intercepts, and <span class="math inline">\(r_1\)</span> and <span class="math inline">\(r_2\)</span> be the radii, respectively.</p>
+<p>Here are a couple of initial observations. First, the plane slants up to the right, in the x direction with slope <span class="math inline">\(\tan\theta_p\)</span>, but doesn't have any slope in the z direction. So the equation for the plane is: <span class="math display">\[
+y = (\tan\theta_p) x + y_p
+\]</span></p>
+<p>Also, the slope of the cone is <span class="math inline">\(\tan \theta_c\)</span>, so the equation for the cone is: <span class="math display">\[
+    y = (\tan \theta_c) r
+\]</span> where <span class="math inline">\(r = \sqrt{x^2 + z^2}\)</span> is distance from the origin in the xz-plane.</p>
+<figure>
+<img src="dandelin0.svg" alt="Coordinate system and parameters" style="width:100.0%" /><figcaption>Coordinate system and parameters</figcaption>
+</figure>
+
+<h2 id="intersection-of-sphere-and-cone">Intersection of sphere and cone</h2>
+<p>Each sphere is sitting inside the cone; the sides of the cone are tangent to the sphere. The intersection of the sphere with the cone is a circle parallel to the xz-plane.</p>
+<p>Suppose we have a sphere inside the cone with y-intercept <span class="math inline">\(y\)</span> and radius <span class="math inline">\(r\)</span>. We observe that the relationship between <span class="math inline">\(y\)</span> and <span class="math inline">\(r\)</span> is given by the cone slant height <span class="math inline">\(\theta_c\)</span>: <span class="math display">\[
+    \cos \theta_c = \frac{r}{y}
+\]</span></p>
+<p>As a consequence, we can let either <span class="math inline">\(y\)</span> or <span class="math inline">\(r\)</span> be a user-defined parameter, and calculate the other based on the slant angle of the cone.</p>
+<figure>
+<img src="dandelin1.svg" alt="Relation between sphere height and radius" style="width:70.0%" /><figcaption>Relation between sphere height and radius</figcaption>
+</figure>
+
+<p>Using some more trigonometry we can calculate the intersection of the sphere with the cone, which is a circle with radius <span class="math inline">\(r\cos\theta_c\)</span>, in the plane parallel to the xz-plane at y-intercept <span class="math inline">\(y - r\sin\theta_c\)</span>,</p>
+<figure>
+<img src="dandelin2.svg" alt="Calculation of coordinates of upper and lower circles" style="width:70.0%" /><figcaption>Calculation of coordinates of upper and lower circles</figcaption>
+</figure>
+
+<h2 id="locating-the-plane">Locating the plane</h2>
+<p>Given two spheres, you can imagine putting a plane between them, and then tilting the plane until it just touches both spheres. There is only one way to do this (up to rotation around the axis between the spheres). In other words, the positions/sizes of the spheres determine the position of the plane.</p>
+<p>Mathematically, this means we can calculate the plane parameters <span class="math inline">\(\theta_p\)</span> and <span class="math inline">\(y_p\)</span> from the sphere parameters <span class="math inline">\(y_1, r_1, y_2, \text{ and } r_2\)</span>. From a user interface perspective, this means that we can give the user 3 free parameters: the cone slant height <span class="math inline">\(\theta_c\)</span>, and the sphere radii <span class="math inline">\(r_1\)</span> and <span class="math inline">\(r_2\)</span>. From these we can calculate <span class="math inline">\(y_1\)</span> and <span class="math inline">\(y_2\)</span> first, and then everything else, including the location of the plane and ellipse.</p>
+<p>Let <span class="math inline">\(d\)</span> be the distance between the plane intercept <span class="math inline">\(y_p\)</span> and the center of the lower sphere <span class="math inline">\(y_1\)</span>. By considering similar triangles, we have: <span class="math display">\[
+    \frac{d}{r_1} = \frac{(y_2-y_1)-d}{r_2}
+\]</span> and solving for <span class="math inline">\(d\)</span> gives: <span class="math display">\[
+    d = \frac{r_1 (y_2-y_1)}{r_1+r_2}
+\]</span> Now we can calculate the plane parameters: <span class="math display">\[
+    y_p = y_1 + d
+\]</span> <span class="math display">\[
+    \theta_p = \cos^{-1} \left( \frac{r_1}{d} \right)
+\]</span> Next, by considering the altitude on hypotenuse for each of the two similar triangles we can figure out where the foci of the ellipses are: <span class="math display">\[
+    (-r_1 \sin\theta_p, y_1 + r_2 \cos\theta_p)
+\]</span> <span class="math display">\[
+    (r_2 \sin\theta_p, y_2 - r_2 \cos\theta_p)
+\]</span> The vertices of the ellipse are the highest and lowest points (y values). We can find these by considering the xy-plane only. Let <span class="math inline">\(m_p = \tan\theta_p\)</span> be the slope of the plane, and <span class="math inline">\(m_c = \tan\theta_c\)</span> be the slope of the cone. We want to find the intersection of <span class="math inline">\(y = m_p x + y_p\)</span> with the cone boundary lines <span class="math inline">\(y = \pm m_c x\)</span>. The solutions are: <span class="math display">\[
+    (\frac{y_p}{m_c-m_p}, \frac{m_c y_p}{m_c-m_p})
+\]</span> <span class="math display">\[
+    (\frac{-y_p}{m_c+m_p}, \frac{m_c y_p}{m_c+m_p})
+\]</span> From the positions of the vertices and foci we can calculate the semi major axis length <span class="math inline">\(a\)</span> and semi focal distance <span class="math inline">\(c\)</span>, which gives us the semi minor axis length <span class="math inline">\(b\)</span> via the Pythagorean relation for ellipses <span class="math inline">\(c^2 = a^2 - b^2\)</span>. We can also calculate the center of the ellipse (midpoint between the foci, or the vertices). Given the center and axis lengths of the ellipse, we can draw it with the Processing <code>ellipse()</code> function after rotating by the plane slant angle.</p>
+<figure>
+<img src="dandelin3.svg" alt="Calculation of plane and ellipse coordinates" style="width:100.0%" /><figcaption>Calculation of plane and ellipse coordinates</figcaption>
+</figure>
+
+<h2 id="parametrization-of-ellipse-orbit">Parametrization of ellipse orbit</h2>
+<p>For the orbit around the ellipse, parametrizing the end points on the upper and lower circles is simple enough, using <span class="math display">\[
+    (x, y) = (r \cos t, r \sin t)
+\]</span> where <span class="math inline">\(t\)</span> represents the orbit angle from z axis, measured counter-clockwise in the xz-plane.</p>
+<p>However, it is not obvious how to calculate the coordinates of the the corresponding point on the ellipse. Observe that the point on the ellipse is the intersection of one of the cone's straight lines with the slanted plane. The plane is given by the equation: <span class="math display">\[
+    y = m_p x + y_p
+\]</span></p>
+<p>If we let <span class="math inline">\(r = \sqrt{x^2 + z^2}\)</span> be the distance to our point from the y axis, then we have <span class="math inline">\(z=r\cos t\)</span> and <span class="math inline">\(x = r\sin t\)</span> (and <span class="math inline">\(\tan t = \frac{x}{z}\)</span>). So we can parametrize the cone line with <span class="math inline">\(y\)</span> and <span class="math inline">\(z\)</span> as functions of <span class="math inline">\(x\)</span>: <span class="math display">\[
+    y = m_c r = \frac{m_c x}{\sin t}
+\]</span> <span class="math display">\[
+    z = \frac{x}{\tan t}
+\]</span></p>
+<p>We have two equations above for <span class="math inline">\(y\)</span> as a function of <span class="math inline">\(x\)</span>, and solving for <span class="math inline">\(x\)</span> gives us: <span class="math display">\[
+    x = \frac{y_p}{\frac{m_c}{\sin t} - m_p}
+\]</span></p>
+<p>To summarize, given orbit angle <span class="math inline">\(t\)</span>, we can first find <span class="math inline">\(x\)</span>, and then <span class="math inline">\(y\)</span> and <span class="math inline">\(z\)</span> for the point as it orbits around the ellipse.</p>
+<figure>
+<img src="dandelin4.svg" alt="Parametrization of ellipse orbit" style="width:100.0%" /><figcaption>Parametrization of ellipse orbit</figcaption>
+</figure>
+</body>
+</html>
