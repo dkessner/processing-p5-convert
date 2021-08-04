@@ -34,6 +34,8 @@
 
 ## todo
 
+- error handling/reporting in bootstrap
+
 - minimal live conversion sample
 
 - Java PApplet handling
