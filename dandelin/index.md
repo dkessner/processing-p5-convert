@@ -13,8 +13,6 @@ spheres](https://en.wikipedia.org/wiki/Dandelin_spheres), showing that the
 cross section of a cone sliced by a plane is an ellipse.  Scroll down for a
 mathematical explanation of the demo.
 
-Click on graph to activate keyboard control.
-
 * Camera navigation: mouse or arrow keys
 * Cone angle: a/q
 * Radius 1: s/w
@@ -35,6 +33,8 @@ Click on graph to activate keyboard control.
                           Cone.pde 
                           CylinderNavigator.pde 
                           DandelinSpheres.pde"></main>
+
+{% include suppress_default_keypress.html %}
 
 
 ## Mathematical Explanation
