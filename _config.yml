@@ -1,5 +1,5 @@
 title: processing-p5-convert
-description: 
+description: source code translator that converts Processing Java code to p5.js Javascript code
 baseurl: /processing-p5-convert
 
 defaults:
