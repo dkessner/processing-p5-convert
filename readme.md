@@ -46,7 +46,7 @@ This project relies on these open source projects:
 
 - [prettier](https://prettier.io/) (code formatting)
 
-- [Prettier Java](https://github.com/jhipster/prettier-java/tree/main) (code parsing and formatting)
-    - [java-parser](https://github.com/jhipster/prettier-java/tree/master/packages/java-parser)
-    - [prettier-java-plugin](https://github.com/jhipster/prettier-java/tree/main/packages/prettier-plugin-java)
+- [Prettier Java](https://github.com/jhipster/prettier-java/tree/main) 
+    - [java-parser](https://github.com/jhipster/prettier-java/tree/master/packages/java-parser) (code parsing) 
+    - [prettier-java-plugin](https://github.com/jhipster/prettier-java/tree/main/packages/prettier-plugin-java) (code formatting)
 
