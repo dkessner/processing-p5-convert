@@ -34,10 +34,6 @@
 
 ## TODO
 
-- error handling/reporting during conversion
-    * bootstrap 
-    * home page
-
 - Java PApplet handling
 
 - static methods (Java only?)
