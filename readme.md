@@ -38,16 +38,15 @@ which has now been retired.
 
 ## Links
 
-[Processing](https://processing.org/)  
+This project relies on these open source projects:
 
-[p5.js](https://p5js.org/)  
+- [Processing](https://processing.org/)  
 
-This project relies heavily on both sub-projects of the 
-[Prettier Java](https://github.com/jhipster/prettier-java/tree/main)
-project:
-- [java-parser](https://github.com/jhipster/prettier-java/tree/master/packages/java-parser):
-for parsing of the Processing/Java code into a Concrete Syntax Tree (CST).
-- [prettier-java-plugin](https://github.com/jhipster/prettier-java/tree/main/packages/prettier-plugin-java):
-for code formatting after extraction from the tree (both Javascript and Java)
+- [p5.js](https://p5js.org/)  
 
+- [prettier](https://prettier.io/) (code formatting)
+
+- [Prettier Java](https://github.com/jhipster/prettier-java/tree/main) (code parsing and formatting)
+    - [java-parser](https://github.com/jhipster/prettier-java/tree/master/packages/java-parser)
+    - [prettier-java-plugin](https://github.com/jhipster/prettier-java/tree/main/packages/prettier-plugin-java)
 
