@@ -81,17 +81,25 @@ function main()
 
     let outputCode;
 
-    if (reconstruct === true) {
-        outputCode = reconstructProcessing(inputCode);
+    try 
+    {
+        if (reconstruct === true) {
+            outputCode = reconstructProcessing(inputCode);
+        }
+        else if (raw === true) {
+            outputCode = printRawProcessing(inputCode);
+        }
+        else if (outline === true) {
+            outputCode = printOutlineProcessing(inputCode);
+        }
+        else {
+            outputCode = transformProcessing(inputCode);
+        }
     }
-    else if (raw === true) {
-        outputCode = printRawProcessing(inputCode);
-    }
-    else if (outline === true) {
-        outputCode = printOutlineProcessing(inputCode);
-    }
-    else {
-        outputCode = transformProcessing(inputCode);
+    catch (e)
+    {
+        let message = "[ppconvert] Caught " + e.name + "\n---\n" + e.message;
+        console.log(message);
     }
 
     if (outputCode) console.log(outputCode);
