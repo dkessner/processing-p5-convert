@@ -46,8 +46,19 @@ function handleConvertButton()
     // convert Processing code
 
     const codeInput = inputCodeMirrorEditor.getValue();
-    const codeOutput = ppconvert.transformProcessing(codeInput);
-    outputCodeMirrorEditor.setValue(codeOutput);
+    let codeOutput;
+
+    try 
+    {
+        codeOutput = ppconvert.transformProcessing(codeInput);
+        outputCodeMirrorEditor.setValue(codeOutput);
+    }
+    catch (e) 
+    {
+        draw = function(){background(255, 0, 0);}
+        let message = "Caught " +  e.name + "\n---\n" + e.message;
+        outputCodeMirrorEditor.setValue(message);
+    }
 
     // run the p5.js code
 
