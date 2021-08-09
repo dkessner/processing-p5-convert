@@ -17,12 +17,15 @@ function draw() {
     rotateY(frameCount * 0.01);
     box(70, 70, 70);
     pop();
-    push();
-    translate(300, 300, 0);
-    rotateZ(frameCount * 0.01);
-    rotateX(frameCount * 0.01);
-    rotateY(frameCount * 0.01);
-    sphere(70);
-    pop();
+    while (true) {
+        push();
+        translate(300, 300, 0);
+        rotateZ(frameCount * 0.01);
+        rotateX(frameCount * 0.01);
+        rotateY(frameCount * 0.01);
+        sphere(70);
+        pop();
+        break;
+    }
 }
 

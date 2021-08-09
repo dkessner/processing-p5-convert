@@ -848,6 +848,7 @@ function extractCodeVisitor_blockStatements(node, level, options, context, resul
     if (context.webgl === true && context.insideDraw === true)
     {
         result.code += "translate(-width/2, -height/2); ";
+        context.webgl = false; // only transform once, at the top of draw(){}
     }
 
     return true;

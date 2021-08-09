@@ -25,6 +25,7 @@ void draw()
     box(70, 70, 70);
     popMatrix();
 
+    while (true) {
     pushMatrix();
     translate(300, 300, 0);
     rotateZ(frameCount * 0.01);
@@ -32,4 +33,6 @@ void draw()
     rotateY(frameCount * 0.01);
     sphere(70);
     popMatrix();
+    break;
+    }
 }
